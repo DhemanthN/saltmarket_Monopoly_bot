@@ -40,6 +40,8 @@ ruff check .                          # lint
 pytest -q                             # all tests
 pytest -m smoke                       # under 30 seconds
 pytest --cov                          # coverage, run before each review gate
+python scripts/fuzz.py                # 10,000 random-bot games with invariants
+python scripts/landing_frequency.py   # simulation vs exact Markov chain, first chart
 python scripts/simulate.py            # tournament (from M4)
 python scripts/train.py               # PPO training (from M5)
 python scripts/evaluate.py            # held-out evaluation (from M5)

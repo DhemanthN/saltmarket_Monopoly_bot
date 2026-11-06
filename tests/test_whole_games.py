@@ -1,10 +1,10 @@
 import os
 
 import pytest
-from conftest import give, make_state
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
+from conftest import give, make_state
 from saltmarket.bots.random_bot import RandomBot
 from saltmarket.engine.config import GameConfig
 from saltmarket.engine.game import Game

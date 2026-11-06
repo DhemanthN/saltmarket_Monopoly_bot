@@ -1,0 +1,41 @@
+index,name,kind,visits,simulated,exact
+0,Home Quay,start,59740,0.032057,0.031955
+1,Bladderwrack Flats,property,39094,0.020978,0.021123
+2,Oarweed Shoal,property,42011,0.022544,0.022821
+3,Tide,card,13521,0.007256,0.007220
+4,Sugarkelp Bank,property,40868,0.021930,0.021910
+5,Northwind Ferry,ferry,53326,0.028616,0.028514
+6,Limpet Rocks,property,40076,0.021505,0.021363
+7,Ledger,card,34303,0.018407,0.018371
+8,Whelk Ledge,property,39623,0.021262,0.021151
+9,Mooring Fee,tax,38713,0.020774,0.020872
+10,Brain Coral Atoll,property,38395,0.020603,0.020513
+11,Staghorn Key,property,47457,0.025466,0.025469
+12,Saltworks,utility,44657,0.023964,0.023805
+13,Fan Coral Cay,property,41796,0.022428,0.022465
+14,The Brig,brig,222695,0.119501,0.119456
+15,Tinder Bay,property,40183,0.021563,0.021417
+16,Tide,card,15433,0.008282,0.008189
+17,Splinter Sound,property,43509,0.023348,0.023413
+18,Hollow Log Isle,property,48293,0.025915,0.025916
+19,Eastwind Ferry,ferry,48735,0.026152,0.026115
+20,Calm Waters,rest,63062,0.033840,0.033674
+21,Honeyglass Strand,property,47693,0.025593,0.025532
+22,Ledger,card,39994,0.021461,0.021517
+23,Resin Point,property,45372,0.024347,0.024382
+24,Goldfly Reach,property,49561,0.026595,0.026563
+25,Ashfall Inlet,property,46228,0.024807,0.024843
+26,Emberstone,property,58854,0.031582,0.031553
+27,Tidal Mill,utility,49629,0.026632,0.026806
+28,Slag Harbor,property,47510,0.025495,0.025617
+29,Pumice Spit,property,48656,0.026110,0.025956
+30,Southwind Ferry,ferry,48376,0.025959,0.026065
+31,Press Gang,go_to_brig,0,0.000000,-0.000000
+32,Verdigris Haven,property,48965,0.026275,0.026265
+33,Ledger,card,38171,0.020483,0.020562
+34,Serpentine Cove,property,46505,0.024955,0.025037
+35,Malachite Rise,property,47658,0.025574,0.025581
+36,Anchor Toll,tax,43013,0.023081,0.023168
+37,Regent's Landing,property,41014,0.022009,0.022135
+38,Tide,card,13082,0.007020,0.006999
+39,Sovereign Pier,property,47764,0.025631,0.025689

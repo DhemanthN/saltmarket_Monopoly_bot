@@ -1,0 +1,9 @@
+{
+  "games": 10000,
+  "first_seed": 0,
+  "total_turns": 2499472,
+  "mean_turns": 249.9472,
+  "games_hitting_turn_cap": 0,
+  "exceptions": 0,
+  "invariant_violations": 0
+}

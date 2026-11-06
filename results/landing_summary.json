@@ -1,0 +1,35 @@
+{
+  "games": 400,
+  "turns_per_game": 4000,
+  "seed": 0,
+  "rolls": 1863535,
+  "total_variation_distance": 0.001593815612589575,
+  "largest_gap": 0.0002773864354694046,
+  "top_spaces": [
+    {
+      "name": "The Brig",
+      "simulated": 0.11950137775786342,
+      "exact": 0.11945554330061742
+    },
+    {
+      "name": "Calm Waters",
+      "simulated": 0.03383998690660492,
+      "exact": 0.03367378400727039
+    },
+    {
+      "name": "Home Quay",
+      "simulated": 0.03205735336336586,
+      "exact": 0.031954739556701015
+    },
+    {
+      "name": "Emberstone",
+      "simulated": 0.03158191286989512,
+      "exact": 0.03155294826408225
+    },
+    {
+      "name": "Northwind Ferry",
+      "simulated": 0.028615507623951254,
+      "exact": 0.028513780965235838
+    }
+  ]
+}

@@ -47,6 +47,13 @@ def stage_at(fraction: float) -> Stage:
     return [stage for stage in CURRICULUM if stage.start <= fraction][-1]
 
 
+def resolve_device(requested: str) -> str:
+    """Return a usable device, refusing to fall back silently from CUDA to the CPU."""
+    if requested.startswith("cuda") and not torch.cuda.is_available():
+        raise RuntimeError("CUDA is not available. Pass --device cpu to train on the CPU.")
+    return requested
+
+
 @dataclass(frozen=True, slots=True)
 class TrainConfig:
     """Settings for one training run."""
@@ -60,7 +67,7 @@ class TrainConfig:
     max_snapshots: int = 5
     checkpoint_every: int = 10
     opponent_counts: tuple[int, ...] = OPPONENT_COUNTS
-    device: str = "cuda" if torch.cuda.is_available() else "cpu"
+    device: str = "cuda"
 
 
 def _win_rate(infos: list[dict], size: int | None = None) -> float:

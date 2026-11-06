@@ -90,6 +90,9 @@ Nothing running. Waiting at the M5 review gate. Run `main` is trained and evalua
 - **Ferry and utility rent** count mortgaged ones the owner holds.
 - **Simplification:** no auction for the last depots during a shortage. First to build
   gets them. Record this as a limitation in `RESULTS.md`.
+- **Dedicated GPU required by default.** `scripts/train.py --device` defaults to `cuda`,
+  which is the RTX 5070 Ti, and errors if CUDA is missing. Game simulation stays on the
+  CPU because it is branching Python, and batch-size-one inference gains nothing on a GPU.
 - **Group completion counts only when earned** by purchase, auction, or trade. Bankruptcy
   inheritance is excluded, because the winner inherits nearly everything as a game ends.
 - **Ratings use a Bradley-Terry fit** on the Elo scale rather than running Elo updates, so
@@ -136,4 +139,5 @@ Nothing running. Waiting at the M5 review gate. Run `main` is trained and evalua
 | Use an original game rather than recreating Monopoly | Done |
 | Keep the rules and report win rates with and without capped games | Done |
 | M5 option 2: train a 2-player specialist | In progress |
+| Run GPU work on the RTX 5070 Ti, not the integrated GPU, now and in future | Done |
 | Skip review gates through M5, M6, M7, and the resume update, log decisions here, and give one final summary. Stop only for a blocker, two failed attempts, or a Smart App Control block | Active |

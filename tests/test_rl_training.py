@@ -13,6 +13,7 @@ from saltmarket.rl.train import (
     CURRICULUM,
     TrainConfig,
     load_policy,
+    resolve_device,
     save_policy,
     stage_at,
     train,
@@ -47,6 +48,14 @@ def test_sample_opponents_gives_two_and_four_player_tables():
     rng = np.random.default_rng(0)
     sizes = Counter(len(sample_opponents(TableSpec(POOL), rng)) + 1 for _ in range(100))
     assert set(sizes) == {2, 4}
+
+
+@smoke
+def test_missing_cuda_is_an_error_not_a_silent_cpu_run(monkeypatch):
+    monkeypatch.setattr("torch.cuda.is_available", lambda: False)
+    with pytest.raises(RuntimeError):
+        resolve_device("cuda")
+    assert resolve_device("cpu") == "cpu"
 
 
 @smoke

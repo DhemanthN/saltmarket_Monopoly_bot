@@ -13,8 +13,10 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def main() -> None:
     """Parse arguments and run training."""
+    import torch
+
     from saltmarket.rl.ppo import PPOConfig
-    from saltmarket.rl.train import TrainConfig, save_policy, train
+    from saltmarket.rl.train import TrainConfig, resolve_device, save_policy, train
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--steps", type=int, required=True)
@@ -25,14 +27,19 @@ def main() -> None:
     parser.add_argument(
         "--opponents", type=int, nargs="+", default=[1, 3], help="Opponents per table."
     )
+    parser.add_argument("--device", default="cuda", help="cuda (default) or cpu.")
     args = parser.parse_args()
 
+    device = resolve_device(args.device)
+    name = torch.cuda.get_device_name(device) if device.startswith("cuda") else "CPU"
+    print(f"Network updates run on: {name}", flush=True)
     config = TrainConfig(
         args.steps,
         args.workers,
         seed=args.seed,
         shaping=args.shaping,
         opponent_counts=tuple(args.opponents),
+        device=device,
     )
     log_path = ROOT / "results" / f"training_log_{args.run}.csv"
     ppo = train(config, PPOConfig(), ROOT / "checkpoints" / args.run, log_path)

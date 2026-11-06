@@ -56,7 +56,11 @@ python scripts/analyze.py             # charts and tables (from M6)
   seed gives the identical game. No global random calls.
 - Never invent, estimate, or hard-code results. Every number in docs or charts comes
   from a script that was actually run and saved to `results/`.
-- Code must run on CPU as well as CUDA.
+- GPU work runs on the dedicated RTX 5070 Ti, never the integrated Radeon 890M (owner
+  instruction, 2026-11-06). PyTorch only sees the 5070 Ti, and `scripts/train.py` stops
+  with an error if CUDA is missing rather than falling back silently. The game engine and
+  rollouts are branching Python and NumPy, so they run on the CPU.
+- Code must still run on CPU when `--device cpu` is passed.
 - If something is ambiguous or seems wrong, ask the owner instead of guessing.
 - Data-driven rules: prefer JSON and config dataclasses over if/else chains and
   magic numbers.

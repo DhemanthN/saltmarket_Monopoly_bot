@@ -146,6 +146,17 @@ def stall_comparison(rows: pd.DataFrame) -> dict[str, dict[str, float]]:
     return comparison
 
 
+def peak_level_win_rates(rows: pd.DataFrame) -> pd.DataFrame:
+    """Return win rate by the highest building level a player reached.
+
+    This is an association: players who are already winning can afford to build.
+    """
+    records = []
+    for (size, level), frame in rows.groupby(["table_size", "peak_level"]):
+        records.append({"table_size": size, "peak_level": level, **_rate_columns(frame, "")})
+    return pd.DataFrame(records)
+
+
 def seat_win_rates(rows: pd.DataFrame) -> pd.DataFrame:
     """Return the win rate of each seat, as a check that rotation removed seat bias."""
     records = []

@@ -1,0 +1,38 @@
+{
+  "tide": [
+    {"id": "tide-home", "text": "Fair winds carry you to Home Quay.", "effect": "move_to", "target": 0},
+    {"id": "tide-pier", "text": "Summoned to Sovereign Pier.", "effect": "move_to", "target": 39},
+    {"id": "tide-ember", "text": "Sail to Emberstone.", "effect": "move_to", "target": 26},
+    {"id": "tide-staghorn", "text": "Sail to Staghorn Key.", "effect": "move_to", "target": 11},
+    {"id": "tide-northwind", "text": "Book passage on the Northwind Ferry.", "effect": "move_to", "target": 5},
+    {"id": "tide-ferry", "text": "Hail the nearest ferry. If owned, pay double fare.", "effect": "nearest", "space_kind": "ferry", "multiplier": 2},
+    {"id": "tide-utility", "text": "Drift to the nearest works. If owned, roll and pay 10 times the dice.", "effect": "nearest", "space_kind": "utility", "multiplier": 10},
+    {"id": "tide-back", "text": "A headwind pushes you back 3 spaces.", "effect": "move_relative", "steps": -3},
+    {"id": "tide-current", "text": "A strong current carries you forward 4 spaces.", "effect": "move_relative", "steps": 4},
+    {"id": "tide-pass", "text": "Friendly bosun: keep this pass to leave the Brig free.", "effect": "brig_pass"},
+    {"id": "tide-brig", "text": "Caught smuggling. Go directly to the Brig.", "effect": "go_to_brig"},
+    {"id": "tide-repairs", "text": "Storm damage: pay 30 per depot and 120 per port.", "effect": "repairs", "per_depot": 30, "per_port": 120},
+    {"id": "tide-salvage", "text": "Salvage rights pay out 60.", "effect": "gain", "amount": 60},
+    {"id": "tide-bounty", "text": "Bounty collected: receive 120.", "effect": "gain", "amount": 120},
+    {"id": "tide-fine", "text": "Fouled anchor: pay 20.", "effect": "pay", "amount": 20},
+    {"id": "tide-crew", "text": "Stand the fleet a round: pay each player 40.", "effect": "pay_each", "amount": 40}
+  ],
+  "ledger": [
+    {"id": "ledger-home", "text": "Return to Home Quay to settle accounts.", "effect": "move_to", "target": 0},
+    {"id": "ledger-calm", "text": "Lay up at Calm Waters.", "effect": "move_to", "target": 20},
+    {"id": "ledger-pass", "text": "Harbormaster's favor: keep this pass to leave the Brig free.", "effect": "brig_pass"},
+    {"id": "ledger-brig", "text": "Audit failed. Go directly to the Brig.", "effect": "go_to_brig"},
+    {"id": "ledger-cargo", "text": "Cargo sold at a premium: receive 180.", "effect": "gain", "amount": 180},
+    {"id": "ledger-dividend", "text": "Guild dividend: receive 110.", "effect": "gain", "amount": 110},
+    {"id": "ledger-rebate", "text": "Customs rebate: receive 90.", "effect": "gain", "amount": 90},
+    {"id": "ledger-interest", "text": "Interest earned: receive 40.", "effect": "gain", "amount": 40},
+    {"id": "ledger-found", "text": "Coins in the bilge: receive 15.", "effect": "gain", "amount": 15},
+    {"id": "ledger-hull", "text": "Hull scraping: pay 120.", "effect": "pay", "amount": 120},
+    {"id": "ledger-doctor", "text": "Ship's surgeon: pay 80.", "effect": "pay", "amount": 80},
+    {"id": "ledger-pilot", "text": "Pilot's wages: pay 60.", "effect": "pay", "amount": 60},
+    {"id": "ledger-rope", "text": "New rigging: pay 30.", "effect": "pay", "amount": 30},
+    {"id": "ledger-feast", "text": "Harvest feast: collect 15 from each player.", "effect": "collect_each", "amount": 15},
+    {"id": "ledger-launch", "text": "Launch day: collect 30 from each player.", "effect": "collect_each", "amount": 30},
+    {"id": "ledger-refit", "text": "Dock refit: pay 40 per depot and 130 per port.", "effect": "repairs", "per_depot": 40, "per_port": 130}
+  ]
+}

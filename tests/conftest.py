@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 
+from saltmarket.engine import bank
 from saltmarket.engine.board import default_board
 from saltmarket.engine.cards import default_cards
 from saltmarket.engine.config import GameConfig
@@ -20,6 +21,15 @@ def make_state(num_players: int = 2, **config) -> GameState:
 def give(state: GameState, player_id: int, *indices: int) -> None:
     for index in indices:
         state.owner[index] = player_id
+
+
+def set_cash(state: GameState, player_id: int, amount: int) -> None:
+    """Change a player's cash through the bank so the money invariant still holds."""
+    player = state.players[player_id]
+    if amount > player.cash:
+        bank.mint(state, player, amount - player.cash)
+    else:
+        bank.burn(state, player, player.cash - amount)
 
 
 @pytest.fixture

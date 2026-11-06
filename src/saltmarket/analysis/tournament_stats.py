@@ -122,6 +122,30 @@ def game_lengths(rows: pd.DataFrame) -> dict[str, float]:
     }
 
 
+def stall_comparison(rows: pd.DataFrame) -> dict[str, dict[str, float]]:
+    """Compare capped games with decided games on group completion and building.
+
+    Groups count only if earned by purchase, auction, or trade.
+    """
+    names = rows["groups_completed"].fillna("")
+    earned = names.map(lambda text: len(text.split("|")) if text else 0)
+    games = (
+        rows.assign(earned=earned)
+        .groupby("game_id")
+        .agg(earned=("earned", "sum"), peak=("peak_level", "max"), capped=("hit_cap", "max"))
+    )
+    comparison = {}
+    for label, frame in (("capped", games[games["capped"] == 1]),
+                         ("decided", games[games["capped"] == 0])):
+        comparison[label] = {
+            "games": len(frame),
+            "share_with_no_group_earned": float((frame["earned"] == 0).mean()),
+            "mean_groups_earned": float(frame["earned"].mean()),
+            "mean_peak_level": float(frame["peak"].mean()),
+        }
+    return comparison
+
+
 def seat_win_rates(rows: pd.DataFrame) -> pd.DataFrame:
     """Return the win rate of each seat, as a check that rotation removed seat bias."""
     records = []

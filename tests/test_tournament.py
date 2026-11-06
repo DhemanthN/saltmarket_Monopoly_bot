@@ -4,11 +4,13 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from conftest import give
+from conftest import give, set_cash
 from saltmarket.analysis import tournament_stats as stats
 from saltmarket.bots.base import Strategy
 from saltmarket.engine import bank
+from saltmarket.engine.config import GameConfig
 from saltmarket.engine.game import Game
+from saltmarket.engine.trade import TradeOffer
 from saltmarket.sim.tournament import (
     Matchup,
     play_matchup,
@@ -96,13 +98,65 @@ def test_build_tracks_spend_and_peak_level():
     assert state.peak_level == [1, 0]
 
 
-def test_first_completed_keeps_the_first_seat():
-    game = Game([Strategy(), Strategy()], seed=1)
+def test_inherited_group_does_not_count_as_completed():
+    game = Game(
+        [Strategy(), Strategy(), Strategy()], seed=1, config=GameConfig(turn_cap=1)
+    )
     state = game.state
-    give(state, 1, 6, 8)
-    game._track_completed_groups()
+    give(state, 0, 6)
+    give(state, 1, 8)
+    set_cash(state, 1, 0)
+    game.charge(state.players[1], 10_000, state.players[0])
+    assert state.owner[8] == 0
+    game.play()
+    assert state.first_completed == {}
+
+
+class Taker(Strategy):
+    def should_buy(self, state, index):
+        return True
+
+    def auction_bid(self, state, index):
+        return 100
+
+    def accept_trade(self, state, offer):
+        return True
+
+
+def test_buying_the_last_lot_counts_as_completed():
+    game = Game([Taker(), Strategy()], seed=1)
+    give(game.state, 0, 6)
+    game._offer_for_sale(game.state.players[0], 8)
+    assert game.state.first_completed == {"reef": 0}
+
+
+def test_winning_the_last_lot_at_auction_counts_as_completed():
+    game = Game([Strategy(), Taker()], seed=1)
+    give(game.state, 1, 6)
+    game.auction(8)
+    assert game.state.first_completed == {"reef": 1}
+
+
+def test_trading_for_the_last_lot_counts_as_completed():
+    class Proposer(Strategy):
+        def propose_trade(self, state):
+            return TradeOffer(self.me, 1, take_spaces=(8,)) if state.owner[8] == 1 else None
+
+    game = Game([Proposer(), Taker()], seed=1)
+    give(game.state, 0, 6)
+    give(game.state, 1, 8)
+    game._manage(game.state.players[0])
+    assert game.state.first_completed == {"reef": 0}
+
+
+def test_first_completed_keeps_the_first_seat():
+    game = Game([Taker(), Taker()], seed=1)
+    state = game.state
+    give(state, 1, 6)
+    game._offer_for_sale(state.players[1], 8)
     give(state, 0, 6, 8)
-    game._track_completed_groups()
+    state.owner[8] = None
+    game._offer_for_sale(state.players[0], 8)
     assert state.first_completed == {"reef": 1}
 
 
@@ -238,6 +292,18 @@ def test_group_value_compares_holders_with_others():
     assert table.loc["amber", "holder_win_rate"] == 1.0
     assert table.loc["amber", "other_win_rate"] == pytest.approx(2 / 6)
     assert table.loc["jade", "holder_games"] == 1
+
+
+def test_stall_comparison_splits_capped_and_decided_games():
+    rows = rows_for([("a", "b", 1, 1), ("a", "b", 1, 0), ("a", "b", 0, 0)])
+    rows["peak_level"] = [0, 0, 3, 1, 5, 2]
+    rows.loc[rows["game_id"] == 1, "groups_completed"] = ["amber|jade", "reef"]
+    comparison = stats.stall_comparison(rows)
+    assert comparison["capped"]["games"] == 1
+    assert comparison["capped"]["share_with_no_group_earned"] == 1.0
+    assert comparison["decided"]["share_with_no_group_earned"] == 0.5
+    assert comparison["decided"]["mean_groups_earned"] == 1.5
+    assert comparison["decided"]["mean_peak_level"] == 4.0
 
 
 def test_seat_win_rates_sum_to_one_in_two_player_games():

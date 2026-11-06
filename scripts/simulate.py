@@ -46,6 +46,7 @@ def summarize(name: str, directory: Path) -> dict:
     decided_widths = (rates["decided_ci_high"] - rates["decided_ci_low"]) / 2
     return {
         **stats.game_lengths(rows),
+        "stall_comparison": stats.stall_comparison(rows),
         "min_games_per_bot": int(rates["games"].min()),
         "max_ci_half_width": float(half_widths.max()),
         "max_decided_ci_half_width": float(decided_widths.max()),

@@ -82,7 +82,6 @@ class Game:
         while not self.over and state.turn < state.config.turn_cap:
             self.take_turn(state.players[state.current])
             state.turn += 1
-            self._track_completed_groups()
             if self.debug:
                 check_invariants(state)
             self._advance_seat()
@@ -93,17 +92,21 @@ class Game:
         """Return True once at most one player is solvent."""
         return sum(not p.bankrupt for p in self.state.players) <= 1
 
-    def _track_completed_groups(self) -> None:
-        """Note the first seat to hold each whole group, checked at the end of each turn."""
+    def _note_completed_group(self, player_id: int, index: int) -> None:
+        """Record the first seat to earn a whole group.
+
+        This runs only on purchases, auctions, and trades. Spaces inherited in a
+        bankruptcy do not count, because the winner of a game inherits nearly everything
+        at the moment it ends, which would make every group look decisive.
+        """
         state = self.state
-        for group, lots in state.board.groups.items():
-            owner = state.owner[lots[0]]
-            if (
-                owner is not None
-                and group not in state.first_completed
-                and all(state.owner[i] == owner for i in lots)
-            ):
-                state.first_completed[group] = owner
+        group = state.board[index].group
+        if (
+            group is not None
+            and group not in state.first_completed
+            and rules.owns_group(state, player_id, group)
+        ):
+            state.first_completed[group] = player_id
 
     def _record(self, *event: object) -> None:
         if self.log is not None:
@@ -153,6 +156,10 @@ class Game:
             self._record("trade", offer, accepted)
             if accepted:
                 execute_trade(state, offer)
+                for index in offer.give_spaces:
+                    self._note_completed_group(offer.responder, index)
+                for index in offer.take_spaces:
+                    self._note_completed_group(offer.proposer, index)
         for action in strategy.choose_liquidations(state):
             self._liquidate(player.id, action)
         for index in strategy.choose_unmortgages(state):
@@ -286,6 +293,7 @@ class Game:
             bank.burn(state, player, price)
             state.owner[index] = player.id
             state.spent[index] += price
+            self._note_completed_group(player.id, index)
             self._record("buy", player.id, index)
         else:
             self.auction(index)
@@ -320,6 +328,7 @@ class Game:
         bank.burn(state, state.players[winner], price)
         state.owner[index] = winner
         state.spent[index] += price
+        self._note_completed_group(winner, index)
         self._record("auction", index, winner, price)
 
     def apply_card(self, player: PlayerState, card: Card, dice_total: int) -> None:

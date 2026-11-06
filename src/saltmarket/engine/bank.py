@@ -32,7 +32,9 @@ def build(state: GameState, player_id: int, index: int) -> None:
     if not rules.can_build(state, player_id, index):
         raise IllegalMoveError(f"Player {player_id} cannot build on space {index}")
     burn(state, state.players[player_id], state.board[index].build_cost)
+    state.spent[index] += state.board[index].build_cost
     state.level[index] += 1
+    state.peak_level[player_id] = max(state.peak_level[player_id], state.level[index])
     if state.level[index] == PORT_LEVEL:
         state.ports_left -= 1
         state.depots_left += state.config.depots_per_port

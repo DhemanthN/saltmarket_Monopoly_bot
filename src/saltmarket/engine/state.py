@@ -53,6 +53,11 @@ class GameState:
         self.current = 0
         self.turn = 0
         self.visits = [0] * board.size
+        self.rent_earned = [0] * board.size
+        self.spent = [0] * board.size
+        self.peak_level = [0] * num_players
+        self.first_completed: dict[str, int] = {}
+        self.bankruptcies: list[tuple[int, int | None]] = []
 
     @property
     def alive(self) -> list[PlayerState]:

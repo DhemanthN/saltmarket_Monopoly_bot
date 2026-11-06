@@ -8,8 +8,8 @@ Living progress file. A fresh session should read `CLAUDE.md`, then this file.
 | --- | --- | --- |
 | M1 | Project scaffold | Done |
 | M2 | Rules engine | Done |
-| M3 | Strategy bots (20+) | Done, awaiting owner review |
-| M4 | Monte Carlo tournament | Not started |
+| M3 | Strategy bots (20+) | Done |
+| M4 | Monte Carlo tournament | In progress |
 | M5 | RL agent (PPO) | Not started |
 | M6 | Data analysis and charts | Not started |
 | M7 | Documentation and polish | Not started |
@@ -90,7 +90,9 @@ Nothing. Waiting at the M3 review gate.
 
 ## Known bugs and open questions
 
-- **Stalemates (needs owner decision).** Heuristic tables often stall until the turn cap.
+- **Stalemates (owner decided: keep the rules, report both).** Every win rate is reported
+  over all games and over decided games only, with the cap rate per bot. Heuristic tables
+  often stall until the turn cap.
   An exploratory 3,000-game probe with random tables (not saved to `results/`, so do not
   quote it in docs) gave cap rates of 3.7%, 16.3%, and 28.8% at 2, 3, and 4 players. Of
   capped games, 71.3% had no completed group, and they averaged 4.2 building levels against
@@ -111,3 +113,4 @@ Nothing. Waiting at the M3 review gate.
 | Request | Status |
 | --- | --- |
 | Use an original game rather than recreating Monopoly | Done |
+| Keep the rules and report win rates with and without capped games | In progress (M4) |

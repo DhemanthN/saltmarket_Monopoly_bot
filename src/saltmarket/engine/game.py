@@ -82,6 +82,7 @@ class Game:
         while not self.over and state.turn < state.config.turn_cap:
             self.take_turn(state.players[state.current])
             state.turn += 1
+            self._track_completed_groups()
             if self.debug:
                 check_invariants(state)
             self._advance_seat()
@@ -91,6 +92,18 @@ class Game:
     def over(self) -> bool:
         """Return True once at most one player is solvent."""
         return sum(not p.bankrupt for p in self.state.players) <= 1
+
+    def _track_completed_groups(self) -> None:
+        """Note the first seat to hold each whole group, checked at the end of each turn."""
+        state = self.state
+        for group, lots in state.board.groups.items():
+            owner = state.owner[lots[0]]
+            if (
+                owner is not None
+                and group not in state.first_completed
+                and all(state.owner[i] == owner for i in lots)
+            ):
+                state.first_completed[group] = owner
 
     def _record(self, *event: object) -> None:
         if self.log is not None:
@@ -262,7 +275,9 @@ class Game:
         if owner is None:
             self._offer_for_sale(player, index)
         elif owner != player.id:
-            self.charge(player, rent_due(), state.players[owner])
+            due = rent_due()
+            if self.charge(player, due, state.players[owner]):
+                state.rent_earned[index] += due
 
     def _offer_for_sale(self, player: PlayerState, index: int) -> None:
         state = self.state
@@ -270,6 +285,7 @@ class Game:
         if player.cash >= price and self.strategies[player.id].should_buy(state, index):
             bank.burn(state, player, price)
             state.owner[index] = player.id
+            state.spent[index] += price
             self._record("buy", player.id, index)
         else:
             self.auction(index)
@@ -303,6 +319,7 @@ class Game:
         price = min(top_bid, max(config.auction_min_bid, runner_up))
         bank.burn(state, state.players[winner], price)
         state.owner[index] = winner
+        state.spent[index] += price
         self._record("auction", index, winner, price)
 
     def apply_card(self, player: PlayerState, card: Card, dice_total: int) -> None:
@@ -417,7 +434,9 @@ class Game:
     def _bankrupt(self, player: PlayerState, creditor: PlayerState | None) -> None:
         """Remove a player. Assets go to the creditor, or to auction if the bank is owed."""
         state = self.state
-        self._record("bankrupt", player.id, None if creditor is None else creditor.id)
+        creditor_id = None if creditor is None else creditor.id
+        state.bankruptcies.append((player.id, creditor_id))
+        self._record("bankrupt", player.id, creditor_id)
         for group, lots in state.board.groups.items():
             if state.owner[lots[0]] == player.id and any(state.level[i] for i in lots):
                 bank.sell_group(state, player.id, group)

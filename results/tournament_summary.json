@@ -1,0 +1,28 @@
+{
+  "bots": 26,
+  "games_per_pair": 8,
+  "tables": 150,
+  "this_run_seconds": 22.80774190000011,
+  "two_player": {
+    "games": 2600,
+    "cap_rate": 0.04115384615384615,
+    "mean_turns": 217.58384615384617,
+    "median_turns": 124.0,
+    "decided_mean_turns": 141.08223024468512,
+    "decided_median_turns": 122.0,
+    "min_games_per_bot": 200,
+    "max_ci_half_width": 0.06863577303283883,
+    "max_decided_ci_half_width": 0.07041072631622436
+  },
+  "four_player": {
+    "games": 600,
+    "cap_rate": 0.26,
+    "mean_turns": 705.1583333333333,
+    "median_turns": 243.0,
+    "decided_mean_turns": 250.21396396396398,
+    "decided_median_turns": 199.0,
+    "min_games_per_bot": 56,
+    "max_ci_half_width": 0.11318625255326714,
+    "max_decided_ci_half_width": 0.13881925915330479
+  }
+}

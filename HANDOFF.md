@@ -9,8 +9,8 @@ Living progress file. A fresh session should read `CLAUDE.md`, then this file.
 | M1 | Project scaffold | Done |
 | M2 | Rules engine | Done |
 | M3 | Strategy bots (20+) | Done |
-| M4 | Monte Carlo tournament | Done, awaiting owner review |
-| M5 | RL agent (PPO) | Not started |
+| M4 | Monte Carlo tournament | Done |
+| M5 | RL agent (PPO) | In progress |
 | M6 | Data analysis and charts | Not started |
 | M7 | Documentation and polish | Not started |
 | Final | `docs/RESUME_UPDATE.md` | Not started |
@@ -45,17 +45,20 @@ Living progress file. A fresh session should read `CLAUDE.md`, then this file.
 
 ## In progress
 
-Nothing. Waiting at the M4 review gate.
+M5: code is committed and CartPole passes. First training run is `python scripts/train.py
+--steps 20000000 --run main` (about 23 minutes at 14,600 steps per second). It resumes
+from `checkpoints/main/latest.pt` if stopped, and logs to
+`results/training_log_main.csv`. Final weights go to `models/main.npz`.
 
 ## Next steps
 
-1. Get owner feedback on M4.
-2. M5: read `docs/rl.md` requirements in the build prompt section M5. Build PPO in
-   `src/saltmarket/rl/` and verify it on CartPole first, as a test.
-3. M5: decide how the env pauses the synchronous `Game` loop (see Decisions).
-4. M5: benchmark against the strongest bots per table size from
-   `results/two_player_win_rates.csv` and `results/four_player_win_rates.csv`, not
-   against `expert` by assumption. Report results over all games and decided games.
+1. When training ends, inspect `results/training_log_main.csv`, then run
+   `python scripts/evaluate.py --run main` (10,400 two-player and 10,000 four-player games).
+2. If it is not learning, diagnose reward shaping, masks, learning rate, and observation
+   scaling, and explain the options to the owner before spending much more compute.
+3. Bring `pytest -m smoke` back under 30 seconds (it took 36 seconds with 307 tests). Time it
+   when training is not running.
+4. Stop at the M5 review gate with real numbers from `results/rl_eval_summary_main.json`.
 
 ## Machine facts (checked 2026-11-06)
 
@@ -97,8 +100,10 @@ Nothing. Waiting at the M4 review gate.
   smoothing term and should be read as "lowest", not as an exact number.
 - **CSV instead of Parquet** for raw games: `pyarrow` is not installed, and adding a
   compiled package risks more Smart App Control blocks.
-- **RL integration (for M5):** `Game` calls strategy hooks synchronously, so the Gym env
-  will need to run the game in a worker thread or restructure the loop. Decide in M5.
+- **RL integration:** `Game` calls strategy hooks synchronously, so `SaltmarketEnv` runs
+  each game on a worker thread and hands off at each decision. See `docs/rl.md`.
+- **Owner approval for M5:** after the M4 gate the owner wrote "continue when the
+  tournament finishes". The tournament had finished, so this was taken as go-ahead.
 
 ## Known bugs and open questions
 

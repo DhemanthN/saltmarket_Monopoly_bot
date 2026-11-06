@@ -14,7 +14,7 @@ from saltmarket.rl import encoding as enc
 from saltmarket.rl.policy import PolicyWeights
 from saltmarket.rl.ppo import PPO, PPOConfig
 from saltmarket.rl.rollout import Rollout, merge_batches
-from saltmarket.rl.workers import RolloutRequest, TableSpec, worker_main
+from saltmarket.rl.workers import OPPONENT_COUNTS, RolloutRequest, TableSpec, worker_main
 
 LOG_FIELDS = (
     "update", "steps", "stage", "episodes", "win_rate", "win_rate_2p", "win_rate_4p",
@@ -59,6 +59,7 @@ class TrainConfig:
     snapshot_every: int = 25
     max_snapshots: int = 5
     checkpoint_every: int = 10
+    opponent_counts: tuple[int, ...] = OPPONENT_COUNTS
     device: str = "cuda" if torch.cuda.is_available() else "cpu"
 
 
@@ -167,7 +168,9 @@ def train(config: TrainConfig, ppo_config: PPOConfig, out_dir: Path, log_path: P
     try:
         while steps < config.total_steps:
             stage = stage_at(steps / config.total_steps)
-            spec = TableSpec(list(stage.pool), snapshots, stage.snapshot_share)
+            spec = TableSpec(
+                list(stage.pool), snapshots, stage.snapshot_share, config.opponent_counts
+            )
             weights = ppo.model.numpy_weights()
             request = RolloutRequest(
                 weights, spec, config.steps_per_worker, ppo_config.gamma, ppo_config.gae_lambda

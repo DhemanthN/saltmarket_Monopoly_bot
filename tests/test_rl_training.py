@@ -50,6 +50,22 @@ def test_sample_opponents_gives_two_and_four_player_tables():
 
 
 @smoke
+def test_table_size_can_be_restricted_to_two_players():
+    rng = np.random.default_rng(0)
+    spec = TableSpec(POOL, opponent_counts=(1,))
+    assert {len(sample_opponents(spec, rng)) for _ in range(50)} == {1}
+
+
+@smoke
+def test_fresh_seeds_never_overlap_comparison_seeds():
+    usual = ev.two_player_schedule(POOL, 3) + ev.four_player_schedule(POOL, 3)
+    fresh = ev.two_player_schedule(POOL, 3, ev.FRESH_SEED_OFFSET)
+    fresh += ev.four_player_schedule(POOL, 3, ev.FRESH_SEED_OFFSET)
+    assert not {g.seed for g in usual} & {g.seed for g in fresh}
+    assert [g.seats for g in usual] != [] and len(fresh) == len(usual)
+
+
+@smoke
 def test_snapshots_are_used_only_when_available():
     rng = np.random.default_rng(0)
     spec = TableSpec(["random"], [weights()], 1.0)

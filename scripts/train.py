@@ -22,9 +22,18 @@ def main() -> None:
     parser.add_argument("--workers", type=int, default=20)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--shaping", type=float, default=0.2)
+    parser.add_argument(
+        "--opponents", type=int, nargs="+", default=[1, 3], help="Opponents per table."
+    )
     args = parser.parse_args()
 
-    config = TrainConfig(args.steps, args.workers, seed=args.seed, shaping=args.shaping)
+    config = TrainConfig(
+        args.steps,
+        args.workers,
+        seed=args.seed,
+        shaping=args.shaping,
+        opponent_counts=tuple(args.opponents),
+    )
     log_path = ROOT / "results" / f"training_log_{args.run}.csv"
     ppo = train(config, PPOConfig(), ROOT / "checkpoints" / args.run, log_path)
     (ROOT / "models").mkdir(exist_ok=True)

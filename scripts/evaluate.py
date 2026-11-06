@@ -33,6 +33,9 @@ def main() -> None:
     parser.add_argument("--games-per-bot", type=int, default=400)
     parser.add_argument("--tables", type=int, default=2500)
     parser.add_argument("--sample", action="store_true", help="Sample instead of greedy.")
+    parser.add_argument(
+        "--fresh-seeds", action="store_true", help="Use seeds not used to compare runs."
+    )
     args = parser.parse_args()
 
     bots = sorted(BOTS)
@@ -40,11 +43,13 @@ def main() -> None:
     workers = os.cpu_count() or 1
     greedy = not args.sample
     suffix = f"{args.run}_sampled" if args.sample else args.run
+    offset = ev.FRESH_SEED_OFFSET if args.fresh_seeds else 0
+    suffix = f"{suffix}_fresh" if args.fresh_seeds else suffix
     schedules = {
-        "two_player": ev.two_player_schedule(bots, args.games_per_bot),
-        "four_player": ev.four_player_schedule(bots, args.tables),
+        "two_player": ev.two_player_schedule(bots, args.games_per_bot, offset),
+        "four_player": ev.four_player_schedule(bots, args.tables, offset),
     }
-    summary: dict = {"run": args.run, "greedy": greedy}
+    summary: dict = {"run": args.run, "greedy": greedy, "fresh_seeds": args.fresh_seeds}
     for name, schedule in schedules.items():
         frame = ev.run_evaluation(schedule, weights, workers, greedy)
         table = ev.per_opponent(frame)

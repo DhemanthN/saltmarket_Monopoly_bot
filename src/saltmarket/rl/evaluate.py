@@ -22,6 +22,7 @@ from saltmarket.rl.agent import AgentStrategy
 from saltmarket.rl.policy import NumpyPolicy, PolicyWeights
 
 EVAL_SEED_BASE = 9_000_000_000
+FRESH_SEED_OFFSET = 100_000_000
 AGENT = "ppo"
 CHUNK_SIZE = 100
 
@@ -35,21 +36,24 @@ class EvalGame:
     seed: int
 
 
-def two_player_schedule(bots: list[str], games_per_bot: int) -> list[EvalGame]:
+def two_player_schedule(
+    bots: list[str], games_per_bot: int, seed_offset: int = 0
+) -> list[EvalGame]:
     """Play each bot ``games_per_bot`` times, alternating seats."""
     games = []
+    base = EVAL_SEED_BASE + seed_offset
     for repeat in range(games_per_bot):
         for bot in sorted(bots):
             seats = (AGENT, bot) if repeat % 2 == 0 else (bot, AGENT)
-            games.append(EvalGame(len(games), seats, EVAL_SEED_BASE + len(games)))
+            games.append(EvalGame(len(games), seats, base + len(games)))
     return games
 
 
-def four_player_schedule(bots: list[str], tables: int) -> list[EvalGame]:
+def four_player_schedule(bots: list[str], tables: int, seed_offset: int = 0) -> list[EvalGame]:
     """Seat the agent with three distinct bots, playing all four rotations of each table."""
     pool = sorted(bots)
     games = []
-    base = EVAL_SEED_BASE + 1_000_000
+    base = EVAL_SEED_BASE + 1_000_000 + seed_offset
     for table in range(tables):
         rng = np.random.default_rng([base, table])
         drawn = [AGENT, *(str(name) for name in rng.choice(pool, size=3, replace=False))]

@@ -23,6 +23,7 @@ class TableSpec:
     pool: list[str] = field(default_factory=lambda: ["random"])
     snapshots: list[PolicyWeights] = field(default_factory=list)
     snapshot_share: float = 0.0
+    opponent_counts: tuple[int, ...] = OPPONENT_COUNTS
 
 
 @dataclass(frozen=True, slots=True)
@@ -43,9 +44,9 @@ def snapshot_bot(weights: PolicyWeights, rng: np.random.Generator) -> AgentStrat
 
 
 def sample_opponents(spec: TableSpec, rng: np.random.Generator) -> list[Strategy]:
-    """Draw a 2-player or 4-player table from the stage's opponents."""
+    """Draw a table of the allowed sizes from the stage's opponents."""
     opponents: list[Strategy] = []
-    for _ in range(int(rng.choice(OPPONENT_COUNTS))):
+    for _ in range(int(rng.choice(spec.opponent_counts))):
         if spec.snapshots and rng.random() < spec.snapshot_share:
             weights = spec.snapshots[int(rng.integers(len(spec.snapshots)))]
             opponents.append(snapshot_bot(weights, rng))
@@ -65,6 +66,7 @@ def worker_main(connection: Connection, seed: int, shaping: float, gamma: float)
         current.pool = request.spec.pool
         current.snapshots = request.spec.snapshots
         current.snapshot_share = request.spec.snapshot_share
+        current.opponent_counts = request.spec.opponent_counts
         rollout = collector.collect(
             NumpyPolicy(request.weights), request.steps, request.gamma, request.gae_lambda
         )

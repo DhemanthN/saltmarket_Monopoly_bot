@@ -51,7 +51,8 @@ Nothing running. Waiting at the M5 review gate. Run `main` is trained and evalua
 
 ## Next steps
 
-1. Get the owner's choice on how to continue M5 (options are in the M5 gate summary below).
+1. Finish run `two_player` (`python scripts/train.py --steps 20000000 --run two_player
+   --opponents 1`), then evaluate it on the comparison seeds and with `--fresh-seeds`.
 2. Any new run needs a new `--run` name so run `main` stays intact for comparison.
 3. Then M6: charts and `RESULTS.md`. Save a measured version of the `auction_sniper` price
    finding first.
@@ -134,3 +135,5 @@ Nothing running. Waiting at the M5 review gate. Run `main` is trained and evalua
 | --- | --- |
 | Use an original game rather than recreating Monopoly | Done |
 | Keep the rules and report win rates with and without capped games | Done |
+| M5 option 2: train a 2-player specialist | In progress |
+| Skip review gates through M5, M6, M7, and the resume update, log decisions here, and give one final summary. Stop only for a blocker, two failed attempts, or a Smart App Control block | Active |

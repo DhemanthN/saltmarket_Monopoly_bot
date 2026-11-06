@@ -91,12 +91,14 @@ engineer.
 - If the conversation gets long, context is compacted, or usage runs low: stop new
   work, update `HANDOFF.md` in detail, commit, push, and tell the owner to start a
   new session.
-- At each review gate: stop, summarize in plain language, show test results and sample
-  output, list decisions, explain key concepts simply (the owner is a freshman with
-  basic Python and little ML experience), then wait for feedback.
+- **Review gates are off (owner instruction, 2026-11-06).** Do not stop at gates or wait
+  for approval through M5, M6, M7, and `docs/RESUME_UPDATE.md`, including runs over 30
+  minutes. Log each decision in `HANDOFF.md` and give one summary at the end. Stop only
+  for something blocked, a failed approach after two attempts, or a Smart App Control
+  block. The final summary explains key concepts simply (the owner is a freshman with
+  basic Python and little ML experience).
 - Owner feedback is top priority. Log it in `HANDOFF.md`.
 - If an approach fails after two genuine attempts, record it in `HANDOFF.md` and ask.
-- Give the expected runtime before starting anything over about 30 minutes. Training
-  must be resumable from checkpoints.
+- Training must be resumable from checkpoints.
 - Final deliverable `docs/RESUME_UPDATE.md` reports real measured numbers only. The
   resume must never claim anything the repo does not back up.

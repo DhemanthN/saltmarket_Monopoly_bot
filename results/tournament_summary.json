@@ -2,7 +2,7 @@
   "bots": 26,
   "games_per_pair": 400,
   "tables": 12500,
-  "this_run_seconds": 386.5024185000002,
+  "this_run_seconds": 363.41178290000244,
   "two_player": {
     "games": 130000,
     "cap_rate": 0.042484615384615385,
@@ -10,6 +10,20 @@
     "median_turns": 124.0,
     "decided_mean_turns": 138.899451304257,
     "decided_median_turns": 121.0,
+    "stall_comparison": {
+      "capped": {
+        "games": 5523,
+        "share_with_no_group_earned": 0.46387832699619774,
+        "mean_groups_earned": 0.8296215824732935,
+        "mean_peak_level": 2.592793771500996
+      },
+      "decided": {
+        "games": 124477,
+        "share_with_no_group_earned": 0.00028117644223430837,
+        "mean_groups_earned": 4.017473107481703,
+        "mean_peak_level": 4.662475798741936
+      }
+    },
     "min_games_per_bot": 10000,
     "max_ci_half_width": 0.009797345619040998,
     "max_decided_ci_half_width": 0.010107164748027087
@@ -21,6 +35,20 @@
     "median_turns": 252.0,
     "decided_mean_turns": 267.31548167000597,
     "decided_median_turns": 203.0,
+    "stall_comparison": {
+      "capped": {
+        "games": 13066,
+        "share_with_no_group_earned": 0.7058778509107607,
+        "mean_groups_earned": 0.35420174498698914,
+        "mean_peak_level": 1.4419103015459973
+      },
+      "decided": {
+        "games": 36934,
+        "share_with_no_group_earned": 0.001597444089456869,
+        "mean_groups_earned": 2.8934044511831916,
+        "mean_peak_level": 4.930849623653002
+      }
+    },
     "min_games_per_bot": 7380,
     "max_ci_half_width": 0.01104859676691028,
     "max_decided_ci_half_width": 0.013780858707671984

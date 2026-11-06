@@ -9,7 +9,7 @@ Living progress file. A fresh session should read `CLAUDE.md`, then this file.
 | M1 | Project scaffold | Done |
 | M2 | Rules engine | Done |
 | M3 | Strategy bots (20+) | Done |
-| M4 | Monte Carlo tournament | In progress |
+| M4 | Monte Carlo tournament | Done, awaiting owner review |
 | M5 | RL agent (PPO) | Not started |
 | M6 | Data analysis and charts | Not started |
 | M7 | Documentation and polish | Not started |
@@ -33,24 +33,29 @@ Living progress file. A fresh session should read `CLAUDE.md`, then this file.
   `heuristic.py` (`HeuristicBot`, configurable base), `values.py` (board evaluation),
   `catalog.py` (26 named bots, `BOTS`, `make_bot`).
 - `docs/strategies.md`: one paragraph per bot, enforced by a test.
-- `src/saltmarket/sim/`: `fuzz.py` and `landing.py`, both parallel with spawn.
-- `src/saltmarket/analysis/style.py`: shared chart style.
-- `scripts/fuzz.py`, `scripts/fuzz_bots.py`, `scripts/landing_frequency.py`: write to
-  `results/`.
-- Tests: 242 passed, 99% coverage. `pytest -m smoke` runs 236 tests in about 19 seconds.
+- `src/saltmarket/sim/`: `fuzz.py`, `landing.py`, and `tournament.py` (schedules, parallel
+  play, resumable chunks in `results/raw/`), all using spawn.
+- `src/saltmarket/analysis/`: `style.py` (chart style), `tournament_stats.py` (Wilson
+  intervals, win rates, head-to-head, Bradley-Terry ratings, group value).
+- `scripts/fuzz.py`, `scripts/fuzz_bots.py`, `scripts/landing_frequency.py`,
+  `scripts/simulate.py`: write to `results/`. `simulate.py` runs 130,000 two-player and
+  50,000 four-player games in about 6 minutes.
+- Tests: see the latest review gate in the log below.
 - See `git log` for the latest commit.
 
 ## In progress
 
-Nothing. Waiting at the M3 review gate.
+Nothing. Waiting at the M4 review gate.
 
 ## Next steps
 
-1. Get owner feedback on M3, including the stalemate question below.
-2. M4: build `src/saltmarket/sim/tournament.py` and `scripts/simulate.py`: round-robin and
-   random-table tournaments at 2 and 4 players, rotating seats, parallel, resumable.
-3. M4: record per-game results including whether the game hit the cap, and report win
-   rates with and without capped games.
+1. Get owner feedback on M4.
+2. M5: read `docs/rl.md` requirements in the build prompt section M5. Build PPO in
+   `src/saltmarket/rl/` and verify it on CartPole first, as a test.
+3. M5: decide how the env pauses the synchronous `Game` loop (see Decisions).
+4. M5: benchmark against the strongest bots per table size from
+   `results/two_player_win_rates.csv` and `results/four_player_win_rates.csv`, not
+   against `expert` by assumption. Report results over all games and decided games.
 
 ## Machine facts (checked 2026-11-06)
 
@@ -85,21 +90,28 @@ Nothing. Waiting at the M3 review gate.
 - **Ferry and utility rent** count mortgaged ones the owner holds.
 - **Simplification:** no auction for the last depots during a shortage. First to build
   gets them. Record this as a limitation in `RESULTS.md`.
+- **Group completion counts only when earned** by purchase, auction, or trade. Bankruptcy
+  inheritance is excluded, because the winner inherits nearly everything as a game ends.
+- **Ratings use a Bradley-Terry fit** on the Elo scale rather than running Elo updates, so
+  they do not depend on game order. `never_buy` has no wins, so its rating depends on the
+  smoothing term and should be read as "lowest", not as an exact number.
+- **CSV instead of Parquet** for raw games: `pyarrow` is not installed, and adding a
+  compiled package risks more Smart App Control blocks.
 - **RL integration (for M5):** `Game` calls strategy hooks synchronously, so the Gym env
   will need to run the game in a worker thread or restructure the loop. Decide in M5.
 
 ## Known bugs and open questions
 
 - **Stalemates (owner decided: keep the rules, report both).** Every win rate is reported
-  over all games and over decided games only, with the cap rate per bot. Heuristic tables
-  often stall until the turn cap.
-  An exploratory 3,000-game probe with random tables (not saved to `results/`, so do not
-  quote it in docs) gave cap rates of 3.7%, 16.3%, and 28.8% at 2, 3, and 4 players. Of
-  capped games, 71.3% had no completed group, and they averaged 4.2 building levels against
-  30.3 in finished games. Spaces get split between players and few bots trade. M4 must
-  measure this properly. Capped games are decided by net worth.
-- `expert` is not the top bot in the mixed-table fuzz sample. That sample is not a ranking.
-  Do not tune `expert` against it. Wait for the M4 tournament.
+  over all games and over decided games only, with the cap rate per bot. Measured figures
+  are in `results/tournament_summary.json`. These replace the earlier exploratory probe.
+- **`auction_sniper` is strong at 2 players and weak at 4.** A probe (not saved to
+  `results/`) showed it pays about 20-26% of list price at 2 players because opponents
+  spend down to their cash floor and cannot bid. This is a real effect of the auction
+  rules, not a bug. Save a measured version in M6 before quoting it in `RESULTS.md`.
+- **Reef looks overpowered:** highest rent per coin spent at both table sizes. This is a
+  game balance property of the board, and worth noting in `RESULTS.md`.
+- **`expert` is not the best heuristic.** Do not tune it to change this.
 - **Smart App Control** blocked two pandas files once each on 2026-11-06:
   `tslib.cp314-win_amd64.pyd` and `window\indexers.cp314-win_amd64.pyd`. Both loaded on
   later runs, with no new blocks since. Cause not confirmed. Do not disable it or work
@@ -113,4 +125,4 @@ Nothing. Waiting at the M3 review gate.
 | Request | Status |
 | --- | --- |
 | Use an original game rather than recreating Monopoly | Done |
-| Keep the rules and report win rates with and without capped games | In progress (M4) |
+| Keep the rules and report win rates with and without capped games | Done |

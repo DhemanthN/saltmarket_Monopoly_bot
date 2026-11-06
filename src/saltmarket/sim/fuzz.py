@@ -4,8 +4,12 @@ import multiprocessing
 from collections.abc import Callable, Iterable
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
+from functools import partial
+
+import numpy as np
 
 from saltmarket.bots.base import Strategy
+from saltmarket.bots.catalog import BOTS, make_bot
 from saltmarket.bots.random_bot import RandomBot
 from saltmarket.engine.game import Game
 
@@ -50,3 +54,61 @@ def run_fuzz(games: int, workers: int, first_seed: int = 0) -> FuzzSummary:
         for part in pool.map(fuzz_seeds, chunks):
             summary += part
     return summary
+
+
+@dataclass(frozen=True, slots=True)
+class BotFuzzSummary:
+    """Totals for one bot played at mixed tables."""
+
+    name: str
+    games: int
+    turns: int
+    hit_cap: int
+    wins: int
+
+
+def fuzz_bot_seeds(name: str, seeds: Iterable[int]) -> BotFuzzSummary:
+    """Play ``name`` against random opponents from the pool, in a seed-chosen seat.
+
+    Mixed tables reach far more of a bot's code than games against copies of itself.
+    Any illegal move or broken invariant raises and stops the run.
+    """
+    pool = sorted(BOTS)
+    games = turns = hit_cap = wins = 0
+    for seed in seeds:
+        rng = np.random.default_rng(seed)
+        players = 2 + seed % 3
+        names = [str(n) for n in rng.choice(pool, size=players - 1)]
+        seat = int(rng.integers(players))
+        names.insert(seat, name)
+        result = Game([make_bot(n) for n in names], seed=seed, debug=True).play()
+        games += 1
+        turns += result.turns
+        hit_cap += int(result.hit_cap)
+        wins += int(result.winner == seat)
+    return BotFuzzSummary(name, games, turns, hit_cap, wins)
+
+
+def run_bot_fuzz(games_per_bot: int, workers: int, first_seed: int = 0) -> list[BotFuzzSummary]:
+    """Fuzz every registered bot across worker processes."""
+    seeds = range(first_seed, first_seed + games_per_bot)
+    chunks = [seeds[i : i + CHUNK_SIZE] for i in range(0, games_per_bot, CHUNK_SIZE)]
+    context = multiprocessing.get_context("spawn")
+    with ProcessPoolExecutor(max_workers=workers, mp_context=context) as pool:
+        futures = {
+            name: [pool.submit(partial(fuzz_bot_seeds, name), chunk) for chunk in chunks]
+            for name in BOTS
+        }
+        summaries = []
+        for name, parts in futures.items():
+            results = [part.result() for part in parts]
+            summaries.append(
+                BotFuzzSummary(
+                    name,
+                    sum(r.games for r in results),
+                    sum(r.turns for r in results),
+                    sum(r.hit_cap for r in results),
+                    sum(r.wins for r in results),
+                )
+            )
+    return summaries

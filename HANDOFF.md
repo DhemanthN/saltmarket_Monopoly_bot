@@ -7,8 +7,8 @@ Living progress file. A fresh session should read `CLAUDE.md`, then this file.
 | Milestone | Description | Status |
 | --- | --- | --- |
 | M1 | Project scaffold | Done |
-| M2 | Rules engine | Done, awaiting owner review |
-| M3 | Strategy bots (20+) | Not started |
+| M2 | Rules engine | Done |
+| M3 | Strategy bots (20+) | Done, awaiting owner review |
 | M4 | Monte Carlo tournament | Not started |
 | M5 | RL agent (PPO) | Not started |
 | M6 | Data analysis and charts | Not started |
@@ -29,24 +29,28 @@ Living progress file. A fresh session should read `CLAUDE.md`, then this file.
   - `game.py`: `Game` loop, cards, debts, auctions, bankruptcy.
   - `invariants.py`: `check_invariants`, run every turn when `debug=True`.
   - `markov.py`: exact landing probabilities, independent of `game.py`.
-- `src/saltmarket/bots/`: `base.py` (`Strategy`, passive by default), `random_bot.py`.
+- `src/saltmarket/bots/`: `base.py` (`Strategy`, passive by default), `random_bot.py`,
+  `heuristic.py` (`HeuristicBot`, configurable base), `values.py` (board evaluation),
+  `catalog.py` (26 named bots, `BOTS`, `make_bot`).
+- `docs/strategies.md`: one paragraph per bot, enforced by a test.
 - `src/saltmarket/sim/`: `fuzz.py` and `landing.py`, both parallel with spawn.
 - `src/saltmarket/analysis/style.py`: shared chart style.
-- `scripts/fuzz.py`, `scripts/landing_frequency.py`: write to `results/`.
-- Tests: 151 passed, 98% coverage. `pytest -m smoke` runs 148 tests in about 3 seconds.
+- `scripts/fuzz.py`, `scripts/fuzz_bots.py`, `scripts/landing_frequency.py`: write to
+  `results/`.
+- Tests: 242 passed, 99% coverage. `pytest -m smoke` runs 236 tests in about 19 seconds.
 - See `git log` for the latest commit.
 
 ## In progress
 
-Nothing. Waiting at the M2 review gate.
+Nothing. Waiting at the M3 review gate.
 
 ## Next steps
 
-1. Get owner feedback on M2.
-2. M3: add 20+ strategies in `src/saltmarket/bots/`, subclassing `Strategy`, plus a
-   registry. ROI bots can use `landing_probabilities` from `engine/markov.py`.
-3. M3: `docs/strategies.md`, and fuzz each bot for 1,000 games using
-   `fuzz_seeds(seeds, make_bot)`.
+1. Get owner feedback on M3, including the stalemate question below.
+2. M4: build `src/saltmarket/sim/tournament.py` and `scripts/simulate.py`: round-robin and
+   random-table tournaments at 2 and 4 players, rotating seats, parallel, resumable.
+3. M4: record per-game results including whether the game hit the cap, and report win
+   rates with and without capped games.
 
 ## Machine facts (checked 2026-11-06)
 
@@ -86,6 +90,14 @@ Nothing. Waiting at the M2 review gate.
 
 ## Known bugs and open questions
 
+- **Stalemates (needs owner decision).** Heuristic tables often stall until the turn cap.
+  An exploratory 3,000-game probe with random tables (not saved to `results/`, so do not
+  quote it in docs) gave cap rates of 3.7%, 16.3%, and 28.8% at 2, 3, and 4 players. Of
+  capped games, 71.3% had no completed group, and they averaged 4.2 building levels against
+  30.3 in finished games. Spaces get split between players and few bots trade. M4 must
+  measure this properly. Capped games are decided by net worth.
+- `expert` is not the top bot in the mixed-table fuzz sample. That sample is not a ranking.
+  Do not tune `expert` against it. Wait for the M4 tournament.
 - **Smart App Control** blocked two pandas files once each on 2026-11-06:
   `tslib.cp314-win_amd64.pyd` and `window\indexers.cp314-win_amd64.pyd`. Both loaded on
   later runs, with no new blocks since. Cause not confirmed. Do not disable it or work

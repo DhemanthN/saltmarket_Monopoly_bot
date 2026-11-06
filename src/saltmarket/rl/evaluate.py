@@ -1,0 +1,134 @@
+"""Held-out evaluation of a trained policy against the bot pool.
+
+A "matchup" here means one complete game. 2-player evaluation plays the agent against
+each bot in turn, alternating who moves first. 4-player evaluation seats the agent with
+three distinct bots drawn from the pool and rotates the table through every seat order.
+Seeds start at EVAL_SEED_BASE, a range training never uses.
+"""
+
+import multiprocessing
+from concurrent.futures import ProcessPoolExecutor
+from dataclasses import dataclass
+from functools import partial
+
+import numpy as np
+import pandas as pd
+from tqdm import tqdm
+
+from saltmarket.analysis.tournament_stats import wilson_interval
+from saltmarket.bots.catalog import make_bot
+from saltmarket.engine.game import Game
+from saltmarket.rl.agent import AgentStrategy
+from saltmarket.rl.policy import NumpyPolicy, PolicyWeights
+
+EVAL_SEED_BASE = 9_000_000_000
+AGENT = "ppo"
+CHUNK_SIZE = 100
+
+
+@dataclass(frozen=True, slots=True)
+class EvalGame:
+    """One evaluation game: seats in order, with AGENT marking the agent."""
+
+    game_id: int
+    seats: tuple[str, ...]
+    seed: int
+
+
+def two_player_schedule(bots: list[str], games_per_bot: int) -> list[EvalGame]:
+    """Play each bot ``games_per_bot`` times, alternating seats."""
+    games = []
+    for repeat in range(games_per_bot):
+        for bot in sorted(bots):
+            seats = (AGENT, bot) if repeat % 2 == 0 else (bot, AGENT)
+            games.append(EvalGame(len(games), seats, EVAL_SEED_BASE + len(games)))
+    return games
+
+
+def four_player_schedule(bots: list[str], tables: int) -> list[EvalGame]:
+    """Seat the agent with three distinct bots, playing all four rotations of each table."""
+    pool = sorted(bots)
+    games = []
+    base = EVAL_SEED_BASE + 1_000_000
+    for table in range(tables):
+        rng = np.random.default_rng([base, table])
+        drawn = [AGENT, *(str(name) for name in rng.choice(pool, size=3, replace=False))]
+        for shift in range(4):
+            seats = tuple(drawn[shift:] + drawn[:shift])
+            games.append(EvalGame(len(games), seats, base + len(games)))
+    return games
+
+
+def play_eval_games(
+    games: list[EvalGame], weights: PolicyWeights, greedy: bool
+) -> list[dict]:
+    """Play games with the agent and return one row per game."""
+    policy = NumpyPolicy(weights)
+    rows = []
+    for game in games:
+        rng = np.random.default_rng(game.seed)
+        if greedy:
+            agent = AgentStrategy(policy.greedy)
+        else:
+            agent = AgentStrategy(lambda obs, mask, r=rng: policy.sample(obs, mask, r)[0])
+        seat = game.seats.index(AGENT)
+        bots = [agent if name == AGENT else make_bot(name) for name in game.seats]
+        result = Game(bots, seed=game.seed).play()
+        rows.append(
+            {
+                "game_id": game.game_id,
+                "table_size": len(game.seats),
+                "seat": seat,
+                "opponents": "|".join(sorted(n for n in game.seats if n != AGENT)),
+                "won": int(result.winner == seat),
+                "hit_cap": int(result.hit_cap),
+                "turns": result.turns,
+                "agent_bankrupt": int(result.bankrupt[seat]),
+            }
+        )
+    return rows
+
+
+def run_evaluation(
+    schedule: list[EvalGame], weights: PolicyWeights, workers: int, greedy: bool = True
+) -> pd.DataFrame:
+    """Play a schedule in parallel and return per-game rows."""
+    chunks = [schedule[i : i + CHUNK_SIZE] for i in range(0, len(schedule), CHUNK_SIZE)]
+    context = multiprocessing.get_context("spawn")
+    play = partial(play_eval_games, weights=weights, greedy=greedy)
+    rows: list[dict] = []
+    with ProcessPoolExecutor(max_workers=workers, mp_context=context) as pool:
+        for part in tqdm(pool.map(play, chunks), total=len(chunks), unit="chunk"):
+            rows.extend(part)
+    return pd.DataFrame(rows)
+
+
+def summarize_wins(frame: pd.DataFrame) -> dict[str, float]:
+    """Return win rates with 95% intervals, over all games and over decided games."""
+    decided = frame[frame["hit_cap"] == 0]
+    wins, games = int(frame["won"].sum()), len(frame)
+    decided_wins, decided_games = int(decided["won"].sum()), len(decided)
+    low, high = wilson_interval(wins, games)
+    decided_low, decided_high = wilson_interval(decided_wins, decided_games)
+    return {
+        "games": games,
+        "wins": wins,
+        "win_rate": wins / games if games else float("nan"),
+        "ci_low": low,
+        "ci_high": high,
+        "decided_games": decided_games,
+        "decided_wins": decided_wins,
+        "decided_win_rate": decided_wins / decided_games if decided_games else float("nan"),
+        "decided_ci_low": decided_low,
+        "decided_ci_high": decided_high,
+        "cap_rate": float(frame["hit_cap"].mean()),
+    }
+
+
+def per_opponent(frame: pd.DataFrame) -> pd.DataFrame:
+    """Return the agent's results against each bot it faced, including shared tables."""
+    exploded = frame.assign(opponent=frame["opponents"].str.split("|")).explode("opponent")
+    records = [
+        {"opponent": name, **summarize_wins(part)} for name, part in exploded.groupby("opponent")
+    ]
+    return pd.DataFrame(records).sort_values("win_rate", ignore_index=True)

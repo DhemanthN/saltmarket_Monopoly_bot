@@ -39,7 +39,6 @@ def test_every_bot_is_documented(name):
     assert f"### `{name}`" in DOCS.read_text(encoding="utf-8")
 
 
-@smoke
 @pytest.mark.parametrize("name", sorted(BOTS))
 def test_each_bot_plays_short_mixed_games(name):
     assert fuzz_bot_seeds(name, range(6)).games == 6

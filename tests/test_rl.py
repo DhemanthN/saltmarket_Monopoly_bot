@@ -300,7 +300,6 @@ def test_sampling_only_returns_legal_actions():
     assert {policy.sample(obs, mask, rng)[0] for _ in range(200)} == {1, 3}
 
 
-@smoke
 def test_update_moves_policy_toward_rewarded_action():
     ppo = PPO(2, 2, PPOConfig(hidden_size=16, learning_rate=0.01, minibatch_size=64), seed=0)
     obs = np.ones((64, 2), dtype=np.float32)

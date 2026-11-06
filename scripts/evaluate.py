@@ -9,6 +9,8 @@ import json
 import os
 from pathlib import Path
 
+import pandas as pd
+
 from saltmarket.bots.catalog import BOTS
 from saltmarket.rl import evaluate as ev
 from saltmarket.rl.policy import PolicyWeights
@@ -48,6 +50,11 @@ def main() -> None:
         table = ev.per_opponent(frame)
         table.to_csv(RESULTS / f"rl_eval_{name}_{suffix}.csv", index=False, float_format="%.5f")
         summary[name] = ev.summarize_wins(frame)
+        bots_table = pd.read_csv(RESULTS / f"{name}_win_rates.csv")
+        comparison = ev.compare_with_bots(bots_table, summary[name], ev.AGENT)
+        comparison.to_csv(
+            RESULTS / f"rl_vs_bots_{name}_{suffix}.csv", index=False, float_format="%.5f"
+        )
     path = RESULTS / f"rl_eval_summary_{suffix}.json"
     path.write_text(json.dumps(summary, indent=2) + "\n")
     print(json.dumps(summary, indent=2))

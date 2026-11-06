@@ -121,6 +121,30 @@ def test_summaries_report_all_and_decided_games():
     assert table.loc["a", "games"] == 3 and table.loc["b", "games"] == 2
 
 
+@smoke
+def test_compare_with_bots_ranks_the_agent_both_ways():
+    bots = pd.DataFrame(
+        {
+            "bot": ["a", "b"],
+            "games": [100, 100],
+            "wins": [80, 30],
+            "win_rate": [0.8, 0.3],
+            "ci_low": [0.7, 0.2],
+            "ci_high": [0.9, 0.4],
+            "decided_games": [100, 50],
+            "decided_wins": [80, 10],
+            "decided_win_rate": [0.8, 0.2],
+            "cap_rate": [0.0, 0.5],
+        }
+    )
+    agent = ev.summarize_wins(pd.DataFrame({"won": [1, 1, 1, 0], "hit_cap": [1, 1, 0, 0]}))
+    table = ev.compare_with_bots(bots, agent, "ppo").set_index("bot")
+    assert table.loc["ppo", "rank"] == 2
+    assert table.loc["ppo", "decided_rank"] == 2
+    assert table.loc["ppo", "capped_win_rate"] == 1.0
+    assert table.loc["b", "capped_win_rate"] == pytest.approx(0.4)
+
+
 @pytest.mark.slow
 def test_training_runs_logs_and_resumes(tmp_path):
     ppo_config = PPOConfig(hidden_size=16, minibatch_size=128, epochs=1)

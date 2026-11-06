@@ -132,3 +132,31 @@ def per_opponent(frame: pd.DataFrame) -> pd.DataFrame:
         {"opponent": name, **summarize_wins(part)} for name, part in exploded.groupby("opponent")
     ]
     return pd.DataFrame(records).sort_values("win_rate", ignore_index=True)
+
+
+def compare_with_bots(bots: pd.DataFrame, agent: dict[str, float], label: str) -> pd.DataFrame:
+    """Rank the agent among the tournament bots, over all games and decided games.
+
+    The two sets of games are close but not identical: a bot's tournament games exclude
+    itself and the agent, while the agent's evaluation games face all of the bots.
+    """
+    capped_games = agent["games"] - agent["decided_games"]
+    capped_wins = agent["wins"] - agent["decided_wins"]
+    row = {
+        "bot": label,
+        "win_rate": agent["win_rate"],
+        "ci_low": agent["ci_low"],
+        "ci_high": agent["ci_high"],
+        "decided_win_rate": agent["decided_win_rate"],
+        "cap_rate": agent["cap_rate"],
+        "capped_win_rate": capped_wins / capped_games if capped_games else float("nan"),
+    }
+    table = bots.assign(
+        capped_win_rate=(bots["wins"] - bots["decided_wins"])
+        / (bots["games"] - bots["decided_games"]).replace(0, float("nan"))
+    )[list(row)]
+    table = pd.concat([table, pd.DataFrame([row])], ignore_index=True)
+    table["rank"] = table["win_rate"].rank(ascending=False, method="min").astype(int)
+    table["decided_rank"] = table["decided_win_rate"].rank(ascending=False, method="min")
+    table["decided_rank"] = table["decided_rank"].astype(int)
+    return table.sort_values("rank", ignore_index=True)

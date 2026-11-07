@@ -83,8 +83,10 @@ A slow test checks that this code solves CartPole before it is trusted on Saltma
 ## Training
 
 `rl/train.py` runs parallel worker processes, each stepping its own env with a NumPy copy
-of the policy. The main process runs each update. Tables are 2-player or 4-player with
-equal chance.
+of the policy. The main process runs each update on the GPU. Game simulation stays on the
+CPU because it is branching Python. Run `main` uses 2-player and 4-player tables with equal
+chance, and run `two_player` uses only 2-player tables (`--opponents 1`). Nothing else
+differs between them.
 
 | Stage | Starts at | Opponents |
 | --- | --- | --- |
@@ -109,6 +111,10 @@ likely legal action rather than sampling.
   who moves first.
 - **4-player:** the agent sits with three distinct bots drawn at random from the pool, and
   each table is played in all four rotations, so the agent takes every seat.
+
+Two seed sets exist. The default set was used to compare runs. `--fresh-seeds` uses a
+separate set, and those are the numbers to quote, because they played no part in choosing
+between runs.
 
 Results are reported with 95% Wilson intervals, separately for each table size, overall
 and per opponent, over all games and over decided games only. Per-opponent 4-player

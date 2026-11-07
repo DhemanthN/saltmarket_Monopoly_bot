@@ -46,6 +46,7 @@ python scripts/simulate.py            # tournament (from M4)
 python scripts/train.py               # PPO training (from M5)
 python scripts/evaluate.py            # held-out evaluation (from M5)
 python scripts/analyze.py             # charts and tables (from M6)
+python scripts/reproduce_all.py --quick   # whole pipeline in about 3 minutes
 ```
 
 ## Rules

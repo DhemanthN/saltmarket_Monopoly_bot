@@ -10,10 +10,10 @@ Living progress file. A fresh session should read `CLAUDE.md`, then this file.
 | M2 | Rules engine | Done |
 | M3 | Strategy bots (20+) | Done |
 | M4 | Monte Carlo tournament | Done |
-| M5 | RL agent (PPO) | First run evaluated, awaiting owner review |
-| M6 | Data analysis and charts | Not started |
-| M7 | Documentation and polish | Not started |
-| Final | `docs/RESUME_UPDATE.md` | Not started |
+| M5 | RL agent (PPO) | Done |
+| M6 | Data analysis and charts | Done |
+| M7 | Documentation and polish | In final checks |
+| Final | `docs/RESUME_UPDATE.md` | Done |
 
 ## Done so far
 
@@ -45,17 +45,14 @@ Living progress file. A fresh session should read `CLAUDE.md`, then this file.
 
 ## In progress
 
-Nothing running. Waiting at the M5 review gate. Run `main` is trained and evaluated:
-`models/main.npz`, `results/training_log_main.csv`, `results/rl_eval_summary_main.json`,
-`results/rl_eval_*_main.csv`, and `results/rl_vs_bots_*_main.csv`.
+Final checks: fresh virtual environment install, lint, full tests, quick pipeline, CI.
 
 ## Next steps
 
-1. Finish run `two_player` (`python scripts/train.py --steps 20000000 --run two_player
-   --opponents 1`), then evaluate it on the comparison seeds and with `--fresh-seeds`.
-2. Any new run needs a new `--run` name so run `main` stays intact for comparison.
-3. Then M6: charts and `RESULTS.md`. Save a measured version of the `auction_sniper` price
-   finding first.
+1. Finish the final checks, then give the owner one summary.
+2. The owner makes the repo public, never Claude.
+3. Ideas left open: reward capped wins less, test against unseen strategies, repeat
+   training with more seeds.
 
 ## Machine facts (checked 2026-11-06)
 
@@ -67,6 +64,16 @@ Nothing running. Waiting at the M5 review gate. Run `main` is trained and evalua
 
 ## Decisions
 
+- **Final agents:** `two_player` is quoted for 2 players (85.6% on fresh seeds) and `main`
+  for 4 players (40.7%). `two_player` was not retrained after evaluation. Only two runs
+  exist, and option 1 (reward change) was not tried, because the owner chose option 2.
+- **Fresh seeds:** final numbers use `--fresh-seeds`, which played no part in comparing runs.
+- **Removed seaborn:** it was in the planned stack, but no code used it.
+- **Output paths:** `SALTMARKET_OUTPUT` redirects outputs, so `--quick` cannot touch real
+  results.
+- **Measured auction prices replace the earlier probe.** `balanced` also pays about 16% of
+  list price at 2 players, so cheap auctions are not unique to `auction_sniper`. It just
+  wins about twice as many.
 - **Original game instead of Monopoly.** Claude does not build recreations of a
   specific existing game, so the owner approved an original game with the same kinds
   of mechanics. See the originality rule in `CLAUDE.md`.
@@ -107,13 +114,7 @@ Nothing running. Waiting at the M5 review gate. Run `main` is trained and evalua
 
 ## Known bugs and open questions
 
-- **RL run `main` misses the 90% target.** Held-out results: 70.8% at 2 players and 40.8%
-  at 4. Against the bots it ranks 4th at 2 players, and 2nd at 4 players but 11th on
-  decided games. Its 4-player cap rate is 41.6% against 26.1% for bot tables, and it wins
-  46.3% of capped games, so it benefits from stalled games. Training counts a capped win
-  the same as a bankruptcy win, which probably encourages this (not yet tested). Curves
-  flatten after about 8M steps. Untested ideas: reward capped wins less, raise
-  `gae_lambda` for long games, train per table size, train longer.
+- **The 90% target was not met.** Best result is 85.6% at 2 players. See `RESULTS.md`.
 - **Stalemates (owner decided: keep the rules, report both).** Every win rate is reported
   over all games and over decided games only, with the cap rate per bot. Measured figures
   are in `results/tournament_summary.json`. These replace the earlier exploratory probe.
@@ -138,6 +139,6 @@ Nothing running. Waiting at the M5 review gate. Run `main` is trained and evalua
 | --- | --- |
 | Use an original game rather than recreating Monopoly | Done |
 | Keep the rules and report win rates with and without capped games | Done |
-| M5 option 2: train a 2-player specialist | In progress |
+| M5 option 2: train a 2-player specialist | Done |
 | Run GPU work on the RTX 5070 Ti, not the integrated GPU, now and in future | Done |
 | Skip review gates through M5, M6, M7, and the resume update, log decisions here, and give one final summary. Stop only for a blocker, two failed attempts, or a Smart App Control block | Active |

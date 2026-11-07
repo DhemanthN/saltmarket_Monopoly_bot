@@ -6,11 +6,9 @@ Usage: python scripts/fuzz.py --games 10000
 import argparse
 import json
 import os
-from pathlib import Path
 
+from saltmarket.paths import RESULTS
 from saltmarket.sim.fuzz import run_fuzz
-
-RESULTS = Path(__file__).resolve().parents[1] / "results"
 
 
 def main() -> None:
@@ -30,6 +28,7 @@ def main() -> None:
         "exceptions": 0,
         "invariant_violations": 0,
     }
+    RESULTS.mkdir(parents=True, exist_ok=True)
     (RESULTS / "fuzz_summary.json").write_text(json.dumps(summary, indent=2) + "\n")
     print(json.dumps(summary, indent=2))
 

@@ -23,6 +23,7 @@ Thumbs.db
 .DS_Store
 
 # Large outputs: keep summaries and final charts, drop raw dumps and checkpoints
+quick_output/
 results/raw/
 results/runs/
 checkpoints/

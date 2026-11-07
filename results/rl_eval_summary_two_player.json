@@ -1,0 +1,31 @@
+{
+  "run": "two_player",
+  "greedy": true,
+  "fresh_seeds": false,
+  "two_player": {
+    "games": 10400,
+    "wins": 8871,
+    "win_rate": 0.8529807692307693,
+    "ci_low": 0.8460445050929978,
+    "ci_high": 0.859656367902835,
+    "decided_games": 9921,
+    "decided_wins": 8609,
+    "decided_win_rate": 0.8677552666061888,
+    "decided_ci_low": 0.8609468046991364,
+    "decided_ci_high": 0.8742790455349545,
+    "cap_rate": 0.046057692307692306
+  },
+  "four_player": {
+    "games": 10000,
+    "wins": 3820,
+    "win_rate": 0.382,
+    "ci_low": 0.37252402762356757,
+    "ci_high": 0.39156659599191207,
+    "decided_games": 7390,
+    "decided_wins": 2870,
+    "decided_win_rate": 0.38836265223274696,
+    "decided_ci_low": 0.37731140502295196,
+    "decided_ci_high": 0.39952990146305806,
+    "cap_rate": 0.261
+  }
+}

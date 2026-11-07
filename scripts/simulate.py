@@ -15,13 +15,13 @@ import pandas as pd
 
 from saltmarket.analysis import tournament_stats as stats
 from saltmarket.bots.catalog import BOTS
+from saltmarket.paths import RESULTS
 from saltmarket.sim.tournament import (
     random_table_schedule,
     round_robin_schedule,
     run_tournament,
 )
 
-RESULTS = Path(__file__).resolve().parents[1] / "results"
 RAW = RESULTS / "raw"
 ROUND_ROBIN_SEED = 1_000_000_000
 TABLE_SEED = 2_000_000_000

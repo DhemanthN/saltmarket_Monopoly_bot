@@ -1,6 +1,6 @@
 """Create every chart and analysis table from saved results.
 
-Usage: python scripts/analyze.py --runs main two_player --best-run two_player
+Usage: python scripts/analyze.py --runs main two_player --best-run two_player --fresh
 Needs results/raw/ from simulate.py and saved models and evaluations from train.py and
 evaluate.py. The first run listed is used for 4-player charts.
 """
@@ -10,7 +10,6 @@ import multiprocessing
 import os
 from concurrent.futures import ProcessPoolExecutor
 from functools import partial
-from pathlib import Path
 
 import pandas as pd
 
@@ -18,14 +17,11 @@ from saltmarket.analysis import plots
 from saltmarket.analysis import tournament_stats as stats
 from saltmarket.analysis.tendencies import auction_prices, measure_tendencies
 from saltmarket.bots.catalog import make_bot
+from saltmarket.paths import FIGURES, MODELS, RESULTS
 from saltmarket.rl.agent import AgentStrategy
 from saltmarket.rl.policy import NumpyPolicy, PolicyWeights
 
-ROOT = Path(__file__).resolve().parents[1]
-RESULTS = ROOT / "results"
-FIGURES = RESULTS / "figures"
-TENDENCY_GAMES = 2600
-AUCTION_GAMES = 2000
+DEFAULT_BEHAVIOR_GAMES = 2600
 ANALYSIS_SEED = 5_000_000_000
 
 
@@ -35,22 +31,25 @@ def make_agent(weights: PolicyWeights) -> AgentStrategy:
 
 
 def _tendencies(task: tuple) -> pd.DataFrame:
-    label, weights, bot = task
+    label, weights, bot, games = task
     maker = partial(make_agent, weights) if weights is not None else partial(make_bot, bot)
-    return measure_tendencies(maker, label, TENDENCY_GAMES, ANALYSIS_SEED)
+    return measure_tendencies(maker, label, games, ANALYSIS_SEED)
 
 
-def _auction(task: tuple[str, int]) -> dict:
-    return auction_prices(task[0], task[1], AUCTION_GAMES, ANALYSIS_SEED + 1_000_000)
+def _auction(task: tuple[str, int, int]) -> dict:
+    return auction_prices(task[0], task[1], task[2], ANALYSIS_SEED + 1_000_000)
 
 
-def behavior_tables(weights: PolicyWeights, best_bot: str) -> tuple[pd.DataFrame, pd.DataFrame]:
+def behavior_tables(
+    weights: PolicyWeights, best_bot: str, games: int
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Measure the agent's habits and auction prices, in parallel."""
     context = multiprocessing.get_context("spawn")
     workers = os.cpu_count() or 1
     with ProcessPoolExecutor(max_workers=workers, mp_context=context) as pool:
-        habits = pool.map(_tendencies, [("PPO agent", weights, None), (best_bot, None, best_bot)])
-        tasks = [(best_bot, 2), (best_bot, 4), ("balanced", 2), ("balanced", 4)]
+        players = [("PPO agent", weights, None, games), (best_bot, None, best_bot, games)]
+        habits = pool.map(_tendencies, players)
+        tasks = [(name, size, games) for name in (best_bot, "balanced") for size in (2, 4)]
         prices = pool.map(_auction, tasks)
         return pd.concat(list(habits), ignore_index=True), pd.DataFrame(list(prices))
 
@@ -62,6 +61,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--runs", nargs="+", default=["main"])
     parser.add_argument("--best-run", default="main", help="Run shown in 2-player charts.")
+    parser.add_argument("--fresh", action="store_true", help="Use fresh-seed evaluations.")
+    parser.add_argument("--behavior-games", type=int, default=DEFAULT_BEHAVIOR_GAMES)
     args = parser.parse_args()
     FIGURES.mkdir(parents=True, exist_ok=True)
 
@@ -73,11 +74,12 @@ def main() -> None:
     )
     levels.to_csv(RESULTS / "peak_level_win_rates.csv", index=False, float_format="%.5f")
 
-    two_table = pd.read_csv(RESULTS / f"rl_vs_bots_two_player_{args.best_run}.csv")
-    four_table = pd.read_csv(RESULTS / f"rl_vs_bots_four_player_{args.runs[0]}.csv")
+    suffix = "_fresh" if args.fresh else ""
+    two_table = pd.read_csv(RESULTS / f"rl_vs_bots_two_player_{args.best_run}{suffix}.csv")
+    four_table = pd.read_csv(RESULTS / f"rl_vs_bots_four_player_{args.runs[0]}{suffix}.csv")
     best_bot = pd.read_csv(RESULTS / "two_player_win_rates.csv").iloc[0]["bot"]
-    weights = load_policy(ROOT / "models" / f"{args.best_run}.npz")
-    tendencies, prices = behavior_tables(weights, best_bot)
+    weights = load_policy(MODELS / f"{args.best_run}.npz")
+    tendencies, prices = behavior_tables(weights, best_bot, args.behavior_games)
     tendencies.to_csv(RESULTS / "rl_tendencies.csv", index=False, float_format="%.5f")
     prices.to_csv(RESULTS / "auction_prices.csv", index=False, float_format="%.5f")
 
@@ -98,7 +100,7 @@ def main() -> None:
     logs = {run: pd.read_csv(RESULTS / f"training_log_{run}.csv") for run in args.runs}
     plots.training_curves(logs, FIGURES / "training_curves.png")
     plots.agent_vs_opponents(
-        pd.read_csv(RESULTS / f"rl_eval_two_player_{args.best_run}.csv"),
+        pd.read_csv(RESULTS / f"rl_eval_two_player_{args.best_run}{suffix}.csv"),
         FIGURES / "agent_vs_opponents.png",
         "PPO agent against each bot, 2 players",
     )

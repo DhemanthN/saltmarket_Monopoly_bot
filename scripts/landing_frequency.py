@@ -19,9 +19,9 @@ from saltmarket.engine.board import default_board
 from saltmarket.engine.cards import default_cards
 from saltmarket.engine.config import GameConfig
 from saltmarket.engine.markov import landing_probabilities
+from saltmarket.paths import RESULTS
 from saltmarket.sim.landing import simulate_landings
 
-RESULTS = Path(__file__).resolve().parents[1] / "results"
 LABELLED_SPACES = 3
 
 

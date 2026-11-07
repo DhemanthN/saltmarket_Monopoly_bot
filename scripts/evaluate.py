@@ -7,23 +7,20 @@ Writes results/rl_eval_summary_<run>.json and per-opponent CSVs for each table s
 import argparse
 import json
 import os
-from pathlib import Path
 
 import pandas as pd
 
 from saltmarket.bots.catalog import BOTS
+from saltmarket.paths import MODELS, RESULTS
 from saltmarket.rl import evaluate as ev
 from saltmarket.rl.policy import PolicyWeights
-
-ROOT = Path(__file__).resolve().parents[1]
-RESULTS = ROOT / "results"
 
 
 def load_weights(run: str) -> PolicyWeights:
     """Load saved weights without importing PyTorch into evaluation workers."""
     from saltmarket.rl.train import load_policy
 
-    return load_policy(ROOT / "models" / f"{run}.npz")
+    return load_policy(MODELS / f"{run}.npz")
 
 
 def main() -> None:

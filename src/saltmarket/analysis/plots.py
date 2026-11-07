@@ -26,6 +26,14 @@ def _percent_axis(axis) -> None:
     axis.set_major_formatter(lambda value, _: f"{value:.0f}%")
 
 
+def _error_bars(table: pd.DataFrame) -> list[np.ndarray]:
+    """Return lower and upper bar lengths, clipped because rounding can make them negative."""
+    rate = table["win_rate"].to_numpy() * 100
+    lower = rate - table["ci_low"].to_numpy() * 100
+    upper = table["ci_high"].to_numpy() * 100 - rate
+    return [np.clip(lower, 0, None), np.clip(upper, 0, None)]
+
+
 def board_position(index: int) -> tuple[int, int]:
     """Return the (row, column) of a space on an 11 by 11 ring, starting bottom right."""
     last = BOARD_SIDE - 1
@@ -48,13 +56,13 @@ def board_heatmap(table: pd.DataFrame, path: Path) -> None:
     low, high = others["exact"].min() * 100, others["exact"].max() * 100
     for row in table.itertuples():
         y, x = board_position(row.index)
-        value = row.exact * 100
+        value = max(0.0, row.exact * 100)
         level = min(1.0, max(0.0, (value - low) / (high - low)))
         ax.add_patch(
             plt.Rectangle((x, BOARD_SIDE - 1 - y), 0.96, 0.96, color=cmap(level), lw=0)
         )
         ink = "#ffffff" if level > 0.55 else INK
-        label = textwrap.fill(row.name, 11)
+        label = textwrap.fill(row.name, 12, break_long_words=False)
         center_x, center_y = x + 0.48, BOARD_SIDE - 1 - y + 0.48
         ax.text(center_x, center_y + 0.14, label, ha="center", va="center", fontsize=6.3,
                 color=ink, linespacing=0.95)
@@ -78,7 +86,7 @@ def _ranked_panel(ax, table: pd.DataFrame, title: str, baseline: float) -> None:
     y = np.arange(len(table))
     rate = table["win_rate"] * 100
     colors = [AGENT_COLOR if bot == "ppo" else BOT_COLOR for bot in table["bot"]]
-    errors = [rate - table["ci_low"] * 100, table["ci_high"] * 100 - rate]
+    errors = _error_bars(table)
     ax.barh(y, rate, height=0.68, color=colors)
     ax.errorbar(rate, y, xerr=errors, fmt="none", ecolor=INK, elinewidth=1, capsize=2)
     ax.axvline(baseline, color=INK_SECONDARY, lw=1)
@@ -155,8 +163,8 @@ def game_length_distribution(two: pd.DataFrame, four: pd.DataFrame, path: Path) 
         weights = np.full(len(games), 100 / len(games))
         ax.hist(games["turns"], bins=bins, weights=weights, color=BOT_COLOR, rwidth=0.86)
         capped = games["hit_cap"].mean()
-        ax.annotate(f"{capped:.1%} of games\nhit the turn cap", (2000, 0), xytext=(-8, 60),
-                    textcoords="offset points", ha="right", fontsize=9.5, color=INK_SECONDARY)
+        ax.text(0.86, 0.5, f"{capped:.1%} of games\nhit the turn cap", ha="right",
+                transform=ax.transAxes, fontsize=9.5, color=INK_SECONDARY)
         ax.set_title(title)
         ax.set_xlabel("Player turns in the game")
         _percent_axis(ax.yaxis)
@@ -188,7 +196,7 @@ def building_level_effect(table: pd.DataFrame, path: Path) -> None:
     labels = ["None", "1 depot", "2 depots", "3 depots", "4 depots", "Port"]
     for color, (size, part) in zip(SERIES, table.groupby("table_size"), strict=False):
         rate = part["win_rate"] * 100
-        errors = [rate - part["ci_low"] * 100, part["ci_high"] * 100 - rate]
+        errors = _error_bars(part)
         ax.errorbar(part["peak_level"], rate, yerr=errors, color=color, lw=2, marker="o",
                     markersize=7, capsize=3, label=f"{size} players")
     ax.set_xticks(range(6), labels)
@@ -214,18 +222,19 @@ def training_curves(logs: dict[str, pd.DataFrame], path: Path) -> None:
                      color=color, lw=2, label=label)
     first = next(iter(logs.values()))
     for ax in axes:
-        for stage, part in first.groupby("stage", sort=False):
+        stages = first.groupby("stage", sort=False)
+        for position, (stage, part) in enumerate(stages):
             start = part["steps"].min() / 1e6
             ax.axvline(start, color=AXIS, lw=1)
-            ax.text(start, 1.0, f" {stage}", transform=ax.get_xaxis_transform(), fontsize=8,
-                    color=INK_SECONDARY, va="bottom")
+            ax.text(start, 1.0 + 0.045 * (position % 2), f" {stage}", fontsize=8,
+                    transform=ax.get_xaxis_transform(), color=INK_SECONDARY, va="bottom")
         ax.set_xlabel("Training steps (millions)")
     axes[0].set_ylabel("Mean episode reward")
     axes[1].set_ylabel("Win rate while training")
     _percent_axis(axes[1].yaxis)
     axes[0].legend(loc="lower right")
     fig.suptitle("Opponents get harder at each stage, so a falling curve is not forgetting",
-                 x=0.01, ha="left", fontsize=13, fontweight="semibold", y=1.06)
+                 x=0.01, ha="left", fontsize=13, fontweight="semibold", y=1.09)
     _save(fig, path)
 
 
@@ -236,7 +245,7 @@ def agent_vs_opponents(table: pd.DataFrame, path: Path, title: str) -> None:
     fig, ax = plt.subplots(figsize=(8.5, 8), layout="constrained")
     y = np.arange(len(table))
     rate = table["win_rate"] * 100
-    errors = [rate - table["ci_low"] * 100, table["ci_high"] * 100 - rate]
+    errors = _error_bars(table)
     ax.barh(y, rate, height=0.68, color=AGENT_COLOR)
     ax.errorbar(rate, y, xerr=errors, fmt="none", ecolor=INK, elinewidth=1, capsize=2)
     ax.axvline(50, color=INK_SECONDARY, lw=1)
@@ -274,5 +283,6 @@ def tendencies_chart(table: pd.DataFrame, path: Path) -> None:
         ax.set_title(title, fontsize=11.5)
         if percent:
             _percent_axis(ax.yaxis)
-    axes[0, 0].legend(loc="upper right", ncols=2)
+    handles, labels = axes[0, 0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc="outside upper right", ncols=2)
     _save(fig, path)

@@ -94,6 +94,17 @@ def assert_png(path):
     assert path.exists() and path.stat().st_size > 5000
 
 
+def test_error_bars_survive_rounding_at_a_zero_win_rate(tmp_path):
+    low = 1e-17
+    levels = pd.DataFrame(
+        {"table_size": 2, "peak_level": [0, 1], "win_rate": [0.0, 0.5],
+         "ci_low": [low, 0.4], "ci_high": [0.1, 0.6]}
+    )
+    path = tmp_path / "levels.png"
+    plots.building_level_effect(levels, path)
+    assert_png(path)
+
+
 def test_chart_functions_write_images(tmp_path):
     names = ["ppo", "a", "b"]
     landing = pd.DataFrame(

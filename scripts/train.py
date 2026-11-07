@@ -6,9 +6,8 @@ final weights to models/<run>.npz.
 """
 
 import argparse
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+from saltmarket.paths import CHECKPOINTS, MODELS, RESULTS
 
 
 def main() -> None:
@@ -41,10 +40,11 @@ def main() -> None:
         opponent_counts=tuple(args.opponents),
         device=device,
     )
-    log_path = ROOT / "results" / f"training_log_{args.run}.csv"
-    ppo = train(config, PPOConfig(), ROOT / "checkpoints" / args.run, log_path)
-    (ROOT / "models").mkdir(exist_ok=True)
-    save_policy(ppo.model.numpy_weights(), ROOT / "models" / f"{args.run}.npz")
+    RESULTS.mkdir(parents=True, exist_ok=True)
+    MODELS.mkdir(parents=True, exist_ok=True)
+    log_path = RESULTS / f"training_log_{args.run}.csv"
+    ppo = train(config, PPOConfig(), CHECKPOINTS / args.run, log_path)
+    save_policy(ppo.model.numpy_weights(), MODELS / f"{args.run}.npz")
 
 
 if __name__ == "__main__":

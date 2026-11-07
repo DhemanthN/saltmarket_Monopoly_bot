@@ -12,7 +12,7 @@ Living progress file. A fresh session should read `CLAUDE.md`, then this file.
 | M4 | Monte Carlo tournament | Done |
 | M5 | RL agent (PPO) | Done |
 | M6 | Data analysis and charts | Done |
-| M7 | Documentation and polish | In final checks |
+| M7 | Documentation and polish | Done |
 | Final | `docs/RESUME_UPDATE.md` | Done |
 
 ## Done so far
@@ -45,11 +45,10 @@ Living progress file. A fresh session should read `CLAUDE.md`, then this file.
 
 ## In progress
 
-Final checks: fresh virtual environment install, lint, full tests, quick pipeline, CI.
+Nothing. All milestones are finished. A fresh virtual environment install passed lint, all 333 tests, and `reproduce_all.py --quick`.
 
 ## Next steps
 
-1. Finish the final checks, then give the owner one summary.
 2. The owner makes the repo public, never Claude.
 3. Ideas left open: reward capped wins less, test against unseen strategies, repeat
    training with more seeds.

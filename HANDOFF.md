@@ -68,6 +68,29 @@ Living progress file. A fresh session should read `CLAUDE.md`, then this file.
 - Not merged into `main`. The owner asked that `Claude outputs/` be removed and ignored.
   It is still present in earlier commits. Rewriting history is the owner's call.
 
+## DQN comparison (branch `feat/dqn`, finished 2026-11-08, not merged)
+
+Training was paused at 10.24M decisions, resumed from `checkpoints/dqn_two_player/` with
+the same command, and finished at 20,008,960 decisions (round 1954, 155,919 gradient
+steps, 2,467 s of training time).
+
+- **Result:** DQN won 81.8% of 10,400 fresh-seed 2-player games (CI 81.0–82.5), against
+  85.6% for PPO. That is 3.8 points behind (bootstrap CI 2.8–4.7, z = 7.37,
+  p = 1.7e-13). DQN ranks 2nd of the 26 bots, behind `auction_sniper`. At 4 players it
+  won 17.9%. Full write-up: "PPO vs. DQN" in `RESULTS.md`.
+- **New files:** `models/dqn_two_player.npz`, `results/training_log_dqn_two_player.csv`,
+  `results/training_log_dqn_two_player_attempt1.csv`, `results/rl_eval_*_dqn_two_player_fresh.*`,
+  `results/rl_vs_bots_*_dqn_two_player_fresh.csv`, `results/ppo_vs_dqn.json`,
+  `results/ppo_vs_dqn_per_opponent.csv`, `results/ppo_vs_dqn_learning_curves.csv`, and
+  `results/figures/ppo_vs_dqn.png`. No existing result or model was changed.
+- **Tests:** 368 pass (35 new), ruff is clean, and coverage is 97%. Two torch-heavy DQN
+  tests are left out of `smoke` so it stays near 22 s. They still run in the full suite.
+- **Checkpoints kept, not committed:** `checkpoints/dqn_two_player/` and
+  `checkpoints/dqn_two_player_attempt1/`, about 1.2 GB each. Deleting them is the owner's
+  call.
+- **Open:** `docs/RESUME_UPDATE.md` still says 333 tests and does not mention DQN. That is
+  left for the owner to decide. Merging `feat/dqn` into main is also the owner's call.
+
 ## In progress
 
 Nothing. All milestones are finished. A fresh virtual environment install passed lint, all 333 tests, and `reproduce_all.py --quick`.
@@ -115,6 +138,27 @@ Nothing. All milestones are finished. A fresh virtual environment install passed
   a 5,000-game byte comparison, but no script or file backed it, so review removed it.
 - **Benchmark baseline** is the `c59a17c` source exported with `git archive`, timed in
   alternating child processes so both versions see the same machine load. Medians of 3.
+- **DQN comparison (branch `feat/dqn`, 2026-11-08).** Double DQN with dueling heads in
+  `rl/dqn.py`, trained like the `two_player` PPO run (same curriculum, opponents, budget,
+  shaping, seed). The decisions are below, with details in `docs/rl.md`.
+  - No hyperparameter search on Saltmarket, to match PPO. Defaults: n-step 8, batch 512,
+    buffer 500k, replay ratio 4, target refresh every 250 gradient steps, epsilon 1.0 to
+    0.02 over 10%.
+  - Attempt 1 stalled. The value head started at about 0.7 and the target refreshed only
+    every 2,000 steps. It was diagnosed from its state at 4.1M decisions and stopped at
+    4.88M, and its log and checkpoint were renamed `_attempt1`, not deleted. Attempt 2 fixes both settings and is the reported run.
+  - CartPole training rewards are scaled by 0.01 so Q lies in [0, 1], the same range as
+    Saltmarket.
+  - The DQN exports as `PolicyWeights` (trunk plus advantage head), so `evaluate.py` and
+    `NumpyPolicy.greedy` run it unchanged. `evaluate.py` gained `--label`, default `ppo`.
+  - DQN self-play snapshots play epsilon-greedy at 0.05.
+  - `sample_opponents` takes a snapshot factory, and `train.py` exposes `append_log` and
+    `episode_stats`. PPO behavior is unchanged.
+  - The significance test is unpaired, though both agents saw the same seeds, so it is
+    slightly conservative.
+  - Sample efficiency uses training-log win rates, since no intermediate PPO weights
+    were saved.
+  - A CartPole trial was stopped early to keep the CPU free during the timed run.
 
 - **Final agents:** `two_player` is quoted for 2 players (85.6% on fresh seeds) and `main`
   for 4 players (40.7%). `two_player` was not retrained after evaluation. Only two runs
@@ -200,3 +244,7 @@ Nothing. All milestones are finished. A fresh virtual environment install passed
 | Remove the accidentally committed personal folder and ignore it | Done (still in older commits; rewriting history needs owner approval) |
 | Grow the pool with 14 held-out bots and evaluate the agent against them (2026-11-08) | Done |
 | Skip review gates through M5, M6, M7, and the resume update, log decisions here, and give one final summary. Stop only for a blocker, two failed attempts, or a Smart App Control block | Active |
+| Remove the accidentally committed `Claude outputs/` folder and ignore it (files not read). It still exists in earlier commits, and only a history rewrite, which the owner decides on, would remove it | Done |
+| Add a DQN agent and compare it fairly with PPO, on branch `feat/dqn`, without merging to main | Done, not merged |
+| Resume DQN training from the checkpoint and finish the task list | Done |
+| Pause cleanly for the day: checkpoint, stop everything, commit, update this file | Done |

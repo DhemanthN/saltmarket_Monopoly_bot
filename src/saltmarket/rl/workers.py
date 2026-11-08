@@ -1,5 +1,6 @@
 """Rollout worker processes. This module avoids PyTorch so workers start fast."""
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from multiprocessing.connection import Connection
 
@@ -14,6 +15,7 @@ from saltmarket.rl.policy import NumpyPolicy, PolicyWeights
 from saltmarket.rl.rollout import RolloutCollector
 
 OPPONENT_COUNTS = (1, 3)
+SnapshotFactory = Callable[[PolicyWeights, np.random.Generator], Strategy]
 
 
 @dataclass(slots=True)
@@ -43,13 +45,21 @@ def snapshot_bot(weights: PolicyWeights, rng: np.random.Generator) -> AgentStrat
     return AgentStrategy(lambda obs, mask: policy.sample(obs, mask, rng)[0])
 
 
-def sample_opponents(spec: TableSpec, rng: np.random.Generator) -> list[Strategy]:
-    """Draw a table of the allowed sizes from the stage's opponents."""
+def sample_opponents(
+    spec: TableSpec,
+    rng: np.random.Generator,
+    make_snapshot: SnapshotFactory = snapshot_bot,
+) -> list[Strategy]:
+    """Draw a table of the allowed sizes from the stage's opponents.
+
+    ``make_snapshot`` turns saved weights into an opponent, so PPO and DQN snapshots can
+    each play the way their own agent does.
+    """
     opponents: list[Strategy] = []
     for _ in range(int(rng.choice(spec.opponent_counts))):
         if spec.snapshots and rng.random() < spec.snapshot_share:
             weights = spec.snapshots[int(rng.integers(len(spec.snapshots)))]
-            opponents.append(snapshot_bot(weights, rng))
+            opponents.append(make_snapshot(weights, rng))
         else:
             opponents.append(make_bot(spec.pool[int(rng.integers(len(spec.pool)))]))
     return opponents

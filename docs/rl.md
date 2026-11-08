@@ -130,3 +130,126 @@ starting at 9,200,000,000, a range no other evaluation uses. `auction_sniper`, t
 training-pool bot at 2 players, then plays the identical schedule as a baseline, which
 helps separate "the agent overfits" from "these bots are simply harder". Results are in
 `results/rl_eval_heldout_bots.json` and `.csv`, and are discussed in `RESULTS.md`.
+
+## DQN
+
+`rl/dqn.py` implements a second learning algorithm, Double DQN with dueling heads, so PPO
+can be compared against a different family of methods. It was trained on the same
+2-player tables as the `two_player` PPO run. Results are in the "PPO vs. DQN" section of
+`RESULTS.md`.
+
+### How it differs from PPO
+
+PPO learns a policy directly: a probability for each action. DQN learns a **Q-value** for
+each action, the reward it expects after taking that action and playing well afterwards,
+and then picks the action with the highest Q-value. PPO learns only from data the current
+policy just collected and then throws it away. DQN keeps old data in a replay buffer and
+learns from it many times, which is called learning **off-policy**.
+
+| Piece | What it does |
+| --- | --- |
+| Dueling heads | A shared trunk (two hidden layers of 256 tanh units, like PPO) feeds a value head V(s) and an advantage head A(s, a). Q = V + A − mean of A over the legal actions. Both heads start with small weights, so every Q-value starts near 0. |
+| Experience replay | A ring buffer holds the latest 500,000 transitions. Batches of 512 are drawn uniformly at random. |
+| Target network | A copy of the network computes learning targets. It is refreshed every 250 gradient steps, about every 32,000 decisions. |
+| Double DQN | The online network picks the best legal next action and the target network scores it, which reduces overestimation. |
+| Epsilon-greedy | With chance epsilon the agent plays a random legal action. Epsilon falls from 1.0 to 0.02 over the first 10% of training, then stays there. |
+| n-step returns | Each transition sums 8 decisions of reward before bootstrapping, with discount 0.999. |
+| Loss | Huber loss, Adam at learning rate 1e-4, gradient norm clipped at 10. |
+
+**Masking.** Illegal actions get a Q-value of minus infinity. That happens when acting,
+in the dueling mean (only legal actions count), and inside the target, so the argmax over
+the next state can only choose a legal action. When a game ends there is no next state,
+the stored discount is 0, and the target is just the reward. `torch.where` keeps the
+minus infinity from turning into NaN.
+
+**Evaluation reuses the PPO code.** Within one state, V(s) and the mean advantage are the
+same for every action, so the action with the highest advantage also has the highest
+Q-value. `DuelingQNetwork.numpy_weights` therefore exports the trunk plus advantage head as
+the "actor" of a `PolicyWeights`, and `NumpyPolicy.greedy` plays the DQN agent unchanged.
+`scripts/evaluate.py` runs on `models/dqn_two_player.npz` exactly as it does for PPO.
+
+### Training setup
+
+`rl/dqn_train.py` and `scripts/train_dqn.py` keep everything that is not part of the
+algorithm the same as the `two_player` PPO run.
+
+| Kept the same as PPO | Value |
+| --- | --- |
+| Tables | 2-player only |
+| Curriculum and opponent pools | `CURRICULUM` from `rl/train.py`, imported, not copied |
+| Budget | 20,000,000 decisions (DQN stops at the first round past it) |
+| Workers | 20 processes, game simulation on the CPU, network updates on the RTX 5070 Ti |
+| Reward | Win = 1, plus the same potential-based shaping (0.2) |
+| Discount | 0.999 |
+| Network size | Two hidden layers of 256 tanh units |
+| Self-play | 30% of seats from the stage on, up to 5 snapshots, one saved about every 1M decisions |
+| Seed | 0 |
+
+Each round, every worker plays 512 decisions (10,240 in all) with an epsilon-greedy NumPy
+copy of the network. While they play, the main process takes gradient steps on the GPU
+using earlier data, so collection uses weights one round old. Off-policy learning
+tolerates that. Each collected transition is used about 4 times (the replay ratio), which
+gives 80 gradient steps per round. Learning starts once the buffer holds 50,000
+transitions.
+
+Self-play snapshots of the DQN agent play greedily with epsilon 0.05, because a Q-network
+has no probabilities to sample from the way a PPO snapshot does.
+
+**Resuming.** Checkpoints in `checkpoints/<run>/` hold the online and target networks, the
+optimizer, the counters, the snapshots, and the whole replay buffer (`replay.npz`, about
+1.2 GB when full). Rerunning `train_dqn.py` with the same `--run` resumes from the last
+checkpoint. Games in progress at that point are lost and workers are reseeded from the
+round number, so a resumed run is deterministic but not identical to one that never
+stopped. The batch sampler is seeded from the round number, so it needs no saved state.
+
+### Choices made without tuning
+
+PPO's hyperparameters were not searched, so DQN's were not searched on Saltmarket either.
+They are common published defaults, adjusted only for this problem's scale: a larger
+batch and buffer because there are 20 workers, and n-step returns because the main reward
+arrives only when a game ends, often hundreds of decisions later. Before the first real run, the only check was a 300,000-decision trial to measure speed.
+
+### The first run stalled, and what changed
+
+The first 20M-decision run (`results/training_log_dqn_two_player_attempt1.csv`) was
+stopped at 4.88M decisions. Its pooled training win rate stayed between 11% and 25%,
+against 41% to 79% for PPO at the same points. Its log at 4.1M decisions showed why:
+
+- The value head started with full-size weights, so a fresh network gave large made-up
+  values. After 4.1M decisions the average Q-value was still 0.79, though the agent won
+  about 15% of its games.
+- Games last hundreds of decisions, so with 8-step returns a win has to pass back through
+  dozens of bootstrap steps to reach the start of a game. Each step needs a target
+  refresh, and with one refresh every 2,000 gradient steps only 15 had happened (31,600
+  gradient steps). Most states still held their made-up starting value.
+
+Two settings changed. Both heads now start with small weights, so Q starts near 0, and the
+target network refreshes every 250 gradient steps instead of every 2,000. Tests now check
+both. These fix setup mistakes found from the run's internals, not from its win rate.
+Nothing else was changed, and no other settings were tried. The second run is the one
+reported.
+
+### Verification
+
+`test_dqn_solves_cartpole` (marked slow) trains this code on CartPole and requires an
+average greedy score of at least 475 out of 500, the same bar as the PPO test. CartPole
+uses smaller settings: 64 hidden units, discount 0.99, 3-step returns, learning rate
+5e-4, and 80,000 steps. CartPole pays +1 per step, so its training reward is scaled by 0.01
+to keep Q between 0 and 1, as it is in Saltmarket. Scores count the unscaled reward. In trial runs
+that were not saved, DQN was less steady than PPO here, and the reward scaling made it
+pass more often. The test uses seed 0 and learning rate 5e-4. Fast tests cover the
+replay buffer, masked Double DQN targets, the dueling head, the NumPy export, n-step
+returns, and the training loop's resume.
+
+### Results
+
+On the fresh seed set, DQN won 81.8% of 10,400 2-player games (CI 81.0–82.5), against
+85.6% for the PPO specialist. It trained in 2,467 s, against 1,206 s for PPO. The full
+comparison, with significance tests, learning curves, likely reasons, and caveats, is in
+the "PPO vs. DQN" section of `RESULTS.md`. Reproduce it with:
+
+```powershell
+python scripts/train_dqn.py --steps 20000000 --run dqn_two_player
+python scripts/evaluate.py --run dqn_two_player --fresh-seeds --label dqn
+python scripts/compare_agents.py --runs two_player dqn_two_player --labels PPO DQN
+```

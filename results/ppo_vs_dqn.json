@@ -1,0 +1,92 @@
+{
+  "runs": {
+    "PPO": "two_player",
+    "DQN": "dqn_two_player"
+  },
+  "difference_is": "PPO minus DQN",
+  "evaluation": {
+    "PPO": {
+      "games": 10400,
+      "wins": 8899,
+      "win_rate": 0.8556730769230769,
+      "ci_low": 0.8487877516990088,
+      "ci_high": 0.8622957484948308,
+      "decided_games": 9947,
+      "decided_wins": 8666,
+      "decided_win_rate": 0.8712174524982407,
+      "decided_ci_low": 0.8644913122529739,
+      "decided_ci_high": 0.877656980488012,
+      "cap_rate": 0.04355769230769231
+    },
+    "DQN": {
+      "games": 10400,
+      "wins": 8506,
+      "win_rate": 0.8178846153846154,
+      "ci_low": 0.8103502981625718,
+      "ci_high": 0.8251841845735283,
+      "decided_games": 9997,
+      "decided_wins": 8352,
+      "decided_win_rate": 0.8354506351905572,
+      "decided_ci_low": 0.8280539235214643,
+      "decided_ci_high": 0.8425896445839434,
+      "cap_rate": 0.03875
+    }
+  },
+  "all_games": {
+    "difference": 0.03778846153846149,
+    "z": 7.373391852827571,
+    "p_value": 1.6634063353139178e-13,
+    "bootstrap_ci_low": 0.028173076923076912,
+    "bootstrap_ci_high": 0.047403846153846185
+  },
+  "decided_games": {
+    "difference": 0.035766817307683496,
+    "z": 7.137989645249843,
+    "p_value": 9.470576380264434e-13,
+    "bootstrap_ci_low": 0.02643682418086244,
+    "bootstrap_ci_high": 0.04506827568527928
+  },
+  "training": {
+    "PPO": {
+      "total_steps": 20029440,
+      "wall_clock_seconds": 1206.1772763000008,
+      "decisions_per_second": 16605.71824188327,
+      "stage_win_rates": {
+        "random": 0.7585301837270341,
+        "simple": 0.4302422723475355,
+        "full": 0.6790574481687826,
+        "self_play": 0.7321163388750045
+      },
+      "steps_to_reach": {
+        "50%": 500000,
+        "60%": 1000000,
+        "70%": 1000000,
+        "80%": null
+      },
+      "final_bin_win_rate": 0.7860674157303371
+    },
+    "DQN": {
+      "total_steps": 20008960,
+      "wall_clock_seconds": 2467.4927630997117,
+      "decisions_per_second": 8109.024796029943,
+      "stage_win_rates": {
+        "random": 0.3111111111111111,
+        "simple": 0.6229739252995067,
+        "full": 0.783704539047082,
+        "self_play": 0.7381972333779563
+      },
+      "steps_to_reach": {
+        "50%": 2500000,
+        "60%": 2500000,
+        "70%": 3000000,
+        "80%": 9500000
+      },
+      "final_bin_win_rate": 0.7267365661861075
+    }
+  },
+  "opponents_where_better": {
+    "PPO": 11,
+    "DQN": 0,
+    "note": "Per-opponent z-tests at p < 0.05, not corrected for 26 comparisons."
+  }
+}

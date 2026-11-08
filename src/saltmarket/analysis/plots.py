@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.colors import LinearSegmentedColormap, TwoSlopeNorm
 
-from saltmarket.analysis.style import AXIS, INK, INK_SECONDARY, SERIES, apply_style
+from saltmarket.analysis.style import AXIS, INK, INK_SECONDARY, SERIES, SURFACE, apply_style
 
 BLUE_RAMP = ("#cde2fb", "#86b6ef", "#3987e5", "#1c5cab", "#0d366b")
 DIVERGING = ("#e34948", "#f0efec", "#2a78d6")
@@ -319,4 +319,60 @@ def benchmark_scaling(table: pd.DataFrame, path: Path) -> None:
     for ax in axes:
         ax.set_xlabel("Worker processes")
     axes[0].set_xticks(workers)
+    _save(fig, path)
+
+
+def agent_comparison(
+    curves: dict[str, pd.DataFrame], tables: dict[str, pd.DataFrame], path: Path
+) -> None:
+    """Compare two agents: training win rate against steps, and held-out win rates.
+
+    ``curves`` are pooled learning curves from ``compare.learning_curve``, and ``tables``
+    are per-opponent evaluation tables. The first agent sets the opponent order.
+    """
+    apply_style()
+    fig, axes = plt.subplots(
+        1, 2, figsize=(13, 8.2), layout="constrained", width_ratios=(1.15, 1)
+    )
+    colors = dict(zip(curves, (SERIES[1], SERIES[2]), strict=False))
+    curve_ax, opponent_ax = axes
+    first = next(iter(curves.values()))
+    for position, (stage, part) in enumerate(first.groupby("stage", sort=False)):
+        start = (part["steps"].min() - (first["steps"].iloc[0])) / 1e6
+        curve_ax.axvline(start, color=AXIS, lw=1)
+        curve_ax.text(start, 0.99 - 0.035 * (position % 2), f" {stage}", fontsize=8,
+                      transform=curve_ax.get_xaxis_transform(), color=INK_SECONDARY,
+                      va="top")
+    for label, curve in curves.items():
+        curve_ax.plot(curve["steps"] / 1e6, curve["win_rate"] * 100, color=colors[label],
+                      lw=2, label=label)
+    curve_ax.set_xlabel("Training decisions (millions)")
+    curve_ax.set_ylabel("Win rate while training, pooled per 500,000 decisions")
+    curve_ax.set_ylim(0, 100)
+    _percent_axis(curve_ax.yaxis)
+    curve_ax.legend(loc="lower right")
+    curve_ax.set_title("Learning curves on the same curriculum", pad=12)
+
+    order = next(iter(tables.values())).sort_values("win_rate")["opponent"].tolist()
+    y = np.arange(len(order))
+    offsets = dict(zip(tables, (0.17, -0.17), strict=False))
+    for label, table in tables.items():
+        table = table.set_index("opponent").loc[order].reset_index()
+        rate = table["win_rate"] * 100
+        opponent_ax.errorbar(
+            rate, y + offsets[label], xerr=_error_bars(table), fmt="o", ms=5,
+            color=colors[label], ecolor=colors[label], elinewidth=1, capsize=0,
+            mec=SURFACE, mew=1, label=label,
+        )
+    opponent_ax.axvline(50, color=INK_SECONDARY, lw=1)
+    opponent_ax.text(50, len(order) - 0.3, " even chance 50%", fontsize=8.5,
+                     color=INK_SECONDARY, va="bottom")
+    opponent_ax.set_yticks(y, order, fontsize=9)
+    opponent_ax.grid(axis="x")
+    opponent_ax.grid(axis="y", visible=False)
+    opponent_ax.set_xlim(0, 104)
+    _percent_axis(opponent_ax.xaxis)
+    opponent_ax.set_xlabel("Win rate on fresh held-out seeds, with 95% interval")
+    opponent_ax.legend(loc="lower left")
+    opponent_ax.set_title("Against each bot, 400 games each", pad=12)
     _save(fig, path)

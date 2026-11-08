@@ -75,6 +75,18 @@ def _win_rate(infos: list[dict], size: int | None = None) -> float:
     return float(np.mean(chosen)) if chosen else float("nan")
 
 
+def episode_stats(infos: list[dict], returns: list[float]) -> dict[str, float]:
+    """Summarize the games that finished during one round of collection."""
+    return {
+        "episodes": len(infos),
+        "win_rate": _win_rate(infos),
+        "win_rate_2p": _win_rate(infos, 2),
+        "win_rate_4p": _win_rate(infos, 4),
+        "cap_rate": float(np.mean([i["hit_cap"] for i in infos])) if infos else float("nan"),
+        "mean_return": float(np.mean(returns)) if returns else float("nan"),
+    }
+
+
 def _log_row(
     update: int, steps: int, stage: Stage, rollouts: list[Rollout], metrics: dict, seconds: float
 ) -> dict:
@@ -84,21 +96,17 @@ def _log_row(
         "update": update,
         "steps": steps,
         "stage": stage.name,
-        "episodes": len(infos),
-        "win_rate": _win_rate(infos),
-        "win_rate_2p": _win_rate(infos, 2),
-        "win_rate_4p": _win_rate(infos, 4),
-        "cap_rate": float(np.mean([i["hit_cap"] for i in infos])) if infos else float("nan"),
-        "mean_return": float(np.mean(returns)) if returns else float("nan"),
+        **episode_stats(infos, returns),
         **metrics,
         "seconds": seconds,
     }
 
 
-def _append_log(path: Path, row: dict) -> None:
+def append_log(path: Path, row: dict, fields: tuple[str, ...] = LOG_FIELDS) -> None:
+    """Append one row to a CSV training log, writing the header for a new file."""
     new_file = not path.exists()
     with path.open("a", newline="", encoding="utf-8") as file:
-        writer = csv.DictWriter(file, LOG_FIELDS)
+        writer = csv.DictWriter(file, fields)
         if new_file:
             writer.writeheader()
         writer.writerow(row)
@@ -189,7 +197,7 @@ def train(config: TrainConfig, ppo_config: PPOConfig, out_dir: Path, log_path: P
             update += 1
             steps += config.workers * config.steps_per_worker
             seconds = elapsed + time.perf_counter() - started
-            _append_log(log_path, _log_row(update, steps, stage, rollouts, metrics, seconds))
+            append_log(log_path, _log_row(update, steps, stage, rollouts, metrics, seconds))
             if update % config.snapshot_every == 0:
                 snapshots = [*snapshots, ppo.model.numpy_weights()][-config.max_snapshots :]
             if update % config.checkpoint_every == 0:

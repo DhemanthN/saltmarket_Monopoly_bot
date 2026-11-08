@@ -180,7 +180,6 @@ def test_target_refresh_is_frequent_relative_to_a_game():
     assert DQNConfig().target_update_every <= 250
 
 
-@smoke
 def test_dueling_gradients_reach_both_heads():
     network = DuelingQNetwork(5, 6, 16)
     q = network(torch.randn(3, 5), torch.ones(3, 6, dtype=bool))
@@ -228,7 +227,6 @@ def test_update_learns_the_rewarded_action():
     assert q[0] == pytest.approx(0.0, abs=0.1)
 
 
-@smoke
 def test_target_network_syncs_on_schedule():
     dqn = DQN(2, 2, DQNConfig(hidden_size=8, learning_rate=0.1, target_update_every=3), seed=0)
     start = dqn.target.advantage.weight.clone()

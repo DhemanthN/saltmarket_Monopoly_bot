@@ -228,3 +228,16 @@ initialization change. With it, seeds 0 to 3 scored 492.7, 500, 500, and 495.1 a
 rate 5e-4, and 450.6, 500, 500, and 500 at 1e-3. The test uses seed 0 and 5e-4. Fast tests cover the
 replay buffer, masked Double DQN targets, the dueling head, the NumPy export, n-step
 returns, and the training loop's resume.
+
+### Results
+
+On the fresh seed set, DQN won 81.8% of 10,400 2-player games (CI 81.0–82.5), against
+85.6% for the PPO specialist. It trained in 2,467 s, against 1,206 s for PPO. The full
+comparison, with significance tests, learning curves, likely reasons, and caveats, is in
+the "PPO vs. DQN" section of `RESULTS.md`. Reproduce it with:
+
+```powershell
+python scripts/train_dqn.py --steps 20000000 --run dqn_two_player
+python scripts/evaluate.py --run dqn_two_player --fresh-seeds --label dqn
+python scripts/compare_agents.py --runs two_player dqn_two_player --labels PPO DQN
+```

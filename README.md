@@ -10,6 +10,10 @@ written from scratch in PyTorch then learns to play from its own experience.
 against all of them. It missed its 90% target. At 4 players no agent clearly leads. Full
 findings and limitations are in [RESULTS.md](RESULTS.md).
 
+A Double DQN agent, also written from scratch and trained under the same conditions, won
+81.8% (CI 81.0–82.5). PPO's lead of 3.8 points is significant (p < 10⁻¹²), and DQN took
+twice as long to train. See [PPO vs. DQN](RESULTS.md#ppo-vs-dqn).
+
 ![Win rates at both table sizes](results/figures/win_rates.png)
 
 | | |
@@ -36,6 +40,7 @@ pytest                                                # everything, about 5 minu
 python scripts/simulate.py                            # 180,000-game tournament
 python scripts/train.py --steps 20000000 --run main   # train an agent
 python scripts/evaluate.py --run main                 # held-out evaluation
+python scripts/train_dqn.py --steps 20000000           # train the DQN agent
 python scripts/analyze.py --runs main --best-run main # charts and tables
 
 python scripts/reproduce_all.py --quick               # whole pipeline, about 3 minutes
@@ -55,6 +60,8 @@ flowchart LR
     engine --> env[Gymnasium environment]
     env --> ppo[PPO training]
     ppo --> model[Trained agent]
+    env --> dqn[DQN training]
+    dqn --> model
     model --> eval[Held-out evaluation]
     bots --> eval
     sim --> results[CSV results]
@@ -73,10 +80,10 @@ src/saltmarket/
   engine/    board, cards, dice, rules, bank, trades, game loop, invariants, Markov model
   bots/      base Strategy, HeuristicBot, and the 26 named bots
   sim/       fuzz testing, landing simulation, resumable tournaments
-  rl/        action and observation encoding, environment, PPO, training, evaluation
+  rl/        action and observation encoding, environment, PPO, DQN, training, evaluation
   analysis/  statistics, behavior probes, charts
 scripts/     command-line entry points
-tests/       333 tests
+tests/       368 tests
 data/        the original board and cards
 results/     summary tables and figures
 models/      trained agent weights
@@ -94,7 +101,8 @@ docs/        strategies.md, rl.md, RESUME_UPDATE.md
 - **Property tests** use Hypothesis to try unusual game settings.
 - **Independent check:** simulated landing rates match an exact Markov chain calculation
   over 1.8 million rolls.
-- **PPO check:** the training code must solve CartPole before it is trusted on this game.
+- **PPO and DQN checks:** each algorithm must solve CartPole before it is trusted on this
+  game.
 - **CI** runs ruff and all non-slow tests on every push.
 
 ## Tech stack

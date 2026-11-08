@@ -30,6 +30,11 @@ should not be read as findings about Monopoly. Every number below comes from a f
    (72.0%) and 1st at 4 (41.0%). `expert`, the bot designed to be best, is 14th of the
    26 bots at 2 players (60.7%). `two_player_win_rates.csv`, `four_player_win_rates.csv`
 
+7. **PPO beat DQN under identical training conditions.** A Double DQN agent trained the
+   same way won 81.8% (CI 81.0–82.5), 3.8 points behind PPO (bootstrap CI 2.8–4.7,
+   p < 10⁻¹²), and took twice as long to train. See "PPO vs. DQN" below.
+   `ppo_vs_dqn.json`, `figures/ppo_vs_dqn.png`
+
 ## Which strategies win, and why
 
 **Auctions are cheap at 2 players.** With one rival, a space often goes for little because
@@ -69,6 +74,90 @@ groups, so this does not prove the group caused the win. `two_player_group_value
 `four_player_group_value.csv`, `two_player_group_economics.csv`,
 `four_player_group_economics.csv`, `figures/group_roi.png`
 
+## PPO vs. DQN
+
+A second agent was trained with Double DQN (dueling heads, experience replay, a target
+network, epsilon-greedy exploration) to test whether the choice of algorithm matters.
+It trained under the same conditions as the PPO specialist: 2-player tables, the same
+curriculum and opponents, 20 million decisions, the same reward, and seed 0. Both were
+evaluated on the same 10,400 fresh-seed games. Setup details are in `docs/rl.md`.
+Source: `ppo_vs_dqn.json` unless another file is named.
+
+**PPO is better.** The gap is small but clear.
+
+| | PPO | DQN |
+| --- | --- | --- |
+| Win rate, all games | 85.6% (CI 84.9–86.2) | 81.8% (CI 81.0–82.5) |
+| Win rate, decided games | 87.1% (CI 86.4–87.8) | 83.5% (CI 82.8–84.3) |
+| Games reaching the turn cap | 4.4% | 3.9% |
+| Rank among the 26 bots | 1st | 2nd, behind `auction_sniper` (83.4%) |
+| Bots it beats significantly more often than the other agent does (p < 0.05) | 11 of 26 | 0 of 26 |
+| Training time | 1,206 s | 2,467 s |
+| Decisions per second | 16,606 | 8,109 |
+
+- **Difference, all games:** PPO is ahead by 3.8 points. The two-proportion z-test gives
+  z = 7.37, p = 1.7 × 10⁻¹³. A bootstrap that resamples games within each opponent (10,000
+  replicates) gives a 95% interval of 2.8 to 4.7 points.
+- **Difference, decided games:** 3.6 points, z = 7.14, p = 9.5 × 10⁻¹³, bootstrap interval
+  2.6 to 4.5.
+- **Per opponent:** DQN's largest gaps are against `expert` (81.3% vs. 89.5%),
+  `coral_specialist` (91.8% vs. 99.0%), and `random` (93.8% vs. 100%). All 25 losses to
+  `random` were decided games, not capped ones. DQN's best result relative to PPO is
+  against `auction_sniper`, 65.3% vs. 61.5%, which is not significant (p = 0.27).
+  `ppo_vs_dqn_per_opponent.csv`, `rl_eval_two_player_dqn_two_player_fresh.csv`
+- **At 4 players,** where neither agent trained, DQN wins 17.9% (CI 17.2–18.7) against
+  PPO's 37.1%. DQN carries over to a new table size much worse.
+  `rl_eval_summary_dqn_two_player_fresh.json`, `rl_eval_summary_two_player_fresh.json`
+
+![PPO vs. DQN](results/figures/ppo_vs_dqn.png)
+
+**Sample efficiency has no clean winner.** No intermediate PPO weights were saved, so
+the only learning curves are training win rates. These are not a fair skill measure:
+PPO's training games sample from its probabilities, while DQN plays its best action
+98% of the time after the first 10% of training. Each agent's self-play opponents are
+also its own earlier versions. With that caveat, pooled per 500,000 decisions
+(`ppo_vs_dqn_learning_curves.csv`):
+
+| Stage | PPO training win rate | DQN training win rate |
+| --- | --- | --- |
+| `random` (0–1M) | 75.9% | 31.1% |
+| `simple` (1–4M) | 43.0% | 62.3% |
+| `full` (4–12M) | 67.9% | 78.4% |
+| `self_play` (12–20M) | 73.2% | 73.8% |
+
+After the full bot pool arrives at 4M decisions, DQN first reached 70% at 4.5M and PPO at
+10.5M. DQN's curve peaked at 81.4% around 10M and then fell, and it ended at 72.7% in the
+last bin against PPO's 78.6%. DQN learned faster in the middle of training, which is what
+data reuse should give, but PPO ended stronger when both play greedily.
+
+**Wall-clock time.** DQN took 2.0 times as long. About 0.8 to 1.0 seconds of each
+1.1–1.35 second round went to 80 small gradient steps in a row on the GPU. DQN also sends
+the next observation with every transition, so more data moves between processes. Other
+sessions were using the CPU during the first half of DQN training but not the second,
+and a round took about as long in both halves. These figures leave out DQN's first run,
+which was stopped at 4.1M decisions (see below).
+
+**Likely reasons DQN lost.** These are explanations, not tested causes.
+
+- **Long games, sparse reward.** A game lasts about 275 decisions and the win arrives at
+  the end. DQN passes value back 8 decisions per bootstrap step. PPO's advantage estimate
+  looks over long stretches of real outcomes at once.
+- **Close Q-values make greedy play brittle.** In a check on the stalled first run, the
+  legal actions in a state differed by only about 0.04 in Q on average. Small errors can
+  flip the argmax. This may explain the losses to `random`, whose play creates unusual
+  states, but that was not tested.
+- **Shifting opponents.** The curriculum and self-play change the opponents, so replayed
+  experience goes stale. PPO learns only from fresh data.
+- **Exploration.** Epsilon-greedy explores with uniformly random legal moves, such as
+  random bids or mortgages, rather than near-good alternatives.
+
+**This compares two trained agents, not two algorithms in general.** Each was trained
+once with seed 0, and neither had its settings searched, so the variation between runs
+is unknown. DQN also needed one fix. Its first run stalled at 11–24% training win rate,
+because Q-values started near 0.7 and the target network refreshed too rarely to correct
+them. Those two settings were fixed, and the second run is the one reported.
+`training_log_dqn_two_player_attempt1.csv`, `docs/rl.md`
+
 ## Methodology
 
 | Stage | Size | Source |
@@ -78,7 +167,7 @@ groups, so this does not prove the group caused the win. `two_player_group_value
 | Landing check | 1,863,535 rolls against an exact Markov chain, 0.16% total variation distance | `landing_summary.json` |
 | 2-player tournament | 130,000 games, 400 per pair, seats alternated | `tournament_summary.json` |
 | 4-player tournament | 50,000 games, 12,500 tables in all four rotations | `tournament_summary.json` |
-| Agent training | Two runs of 20 million decisions | `training_log_main.csv`, `training_log_two_player.csv` |
+| Agent training | Two PPO runs and one DQN run of 20 million decisions | `training_log_main.csv`, `training_log_two_player.csv`, `training_log_dqn_two_player.csv` |
 | Agent evaluation | 10,400 two-player and 10,000 four-player games per agent, per seed set | `rl_eval_summary_*.json` |
 
 Tournament win rates have 95% Wilson intervals no wider than ±1.1 points over all games
@@ -95,7 +184,7 @@ that was not used to compare runs. See `docs/rl.md`.
 - **Opponents are not held out.** Evaluation seeds are new, but the agent trained against
   these same 26 bots. Its win rate against unseen strategies is unknown.
 - **One training run per setup.** Each agent comes from a single seed, so how much results
-  vary between training runs is not measured.
+  vary between training runs is not measured. This includes the PPO vs. DQN comparison.
 - **Little tuning.** Hyperparameters were not searched, and I did not test whether reward
   changes or longer training would help.
 - **The bot pool shapes every ranking.** Win rates depend on which bots are in the pool,

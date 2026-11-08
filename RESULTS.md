@@ -130,22 +130,22 @@ After the full bot pool arrives at 4M decisions, DQN first reached 70% at 4.5M a
 last bin against PPO's 78.6%. DQN learned faster in the middle of training, which is what
 data reuse should give, but PPO ended stronger when both play greedily.
 
-**Wall-clock time.** DQN took 2.0 times as long. About 0.8 to 1.0 seconds of each
-1.1–1.35 second round went to 80 small gradient steps in a row on the GPU. DQN also sends
-the next observation with every transition, so more data moves between processes. Other
-sessions were using the CPU during the first half of DQN training but not the second,
-and a round took about as long in both halves. These figures leave out DQN's first run,
-which was stopped at 4.1M decisions (see below).
+**Wall-clock time.** DQN took 2.0 times as long. In the training log, the median round
+took 1.10 seconds in rounds 1–1,000 and 1.33 seconds after, and a median 0.75 and 0.85
+seconds of that went to 80 small gradient steps in a row on the GPU. DQN also sends the
+next observation with every transition, so more data moves between processes. Other
+sessions were using the CPU during part of DQN training, so the timing is approximate.
+These figures leave out DQN's first run, which reached 4.88M decisions before it was
+stopped (see below). `training_log_dqn_two_player.csv`
 
 **Likely reasons DQN lost.** These are explanations, not tested causes.
 
-- **Long games, sparse reward.** A game lasts about 275 decisions and the win arrives at
-  the end. DQN passes value back 8 decisions per bootstrap step. PPO's advantage estimate
+- **Long games, sparse reward.** A game lasts hundreds of decisions and the win arrives
+  at the end. DQN passes value back 8 decisions per bootstrap step. PPO's advantage estimate
   looks over long stretches of real outcomes at once.
-- **Close Q-values make greedy play brittle.** In a check on the stalled first run, the
-  legal actions in a state differed by only about 0.04 in Q on average. Small errors can
-  flip the argmax. This may explain the losses to `random`, whose play creates unusual
-  states, but that was not tested.
+- **Close Q-values may make greedy play brittle.** If the legal actions in a state have
+  similar Q-values, small errors can flip the argmax. This may explain the losses to
+  `random`, whose play creates unusual states, but neither idea was measured.
 - **Shifting opponents.** The curriculum and self-play change the opponents, so replayed
   experience goes stale. PPO learns only from fresh data.
 - **Exploration.** Epsilon-greedy explores with uniformly random legal moves, such as
@@ -153,7 +153,7 @@ which was stopped at 4.1M decisions (see below).
 
 **This compares two trained agents, not two algorithms in general.** Each was trained
 once with seed 0, and neither had its settings searched, so the variation between runs
-is unknown. DQN also needed one fix. Its first run stalled at 11–24% training win rate,
+is unknown. DQN also needed one fix. Its first run stalled at an 11–25% training win rate,
 because Q-values started near 0.7 and the target network refreshed too rarely to correct
 them. Those two settings were fixed, and the second run is the one reported.
 `training_log_dqn_two_player_attempt1.csv`, `docs/rl.md`

@@ -93,8 +93,8 @@ Nothing. All milestones are finished. A fresh virtual environment install passed
     buffer 500k, replay ratio 4, target refresh every 250 gradient steps, epsilon 1.0 to
     0.02 over 10%.
   - Attempt 1 stalled. The value head started at about 0.7 and the target refreshed only
-    every 2,000 steps. It was stopped at 4.1M decisions, and its log and checkpoint were
-    renamed `_attempt1`, not deleted. Attempt 2 fixes both settings and is the reported run.
+    every 2,000 steps. It was diagnosed from its state at 4.1M decisions and stopped at
+    4.88M, and its log and checkpoint were renamed `_attempt1`, not deleted. Attempt 2 fixes both settings and is the reported run.
   - CartPole training rewards are scaled by 0.01 so Q lies in [0, 1], the same range as
     Saltmarket.
   - The DQN exports as `PolicyWeights` (trunk plus advantage head), so `evaluate.py` and

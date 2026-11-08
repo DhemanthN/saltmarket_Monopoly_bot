@@ -129,8 +129,8 @@ class HeuristicBot(Strategy):
         bonus = self.group_bonus if completes_group(state, self.me, index, also_owned) else 0
         return price * (1 + bonus)
 
-    def accept_trade(self, state: GameState, offer: TradeOffer) -> bool:
-        """Accept if what arrives beats what leaves, counting group completion."""
+    def trade_value(self, state: GameState, offer: TradeOffer) -> tuple[float, float]:
+        """Return (gain, loss) of an incoming offer, counting group completion."""
         gain = offer.give_cash + BRIG_PASS_VALUE * offer.give_passes
         gain += sum(self._space_value(state, i, offer.give_spaces) for i in offer.give_spaces)
         loss = offer.take_cash + BRIG_PASS_VALUE * offer.take_passes
@@ -138,7 +138,20 @@ class HeuristicBot(Strategy):
             price = state.board[index].price
             hands_over_group = completes_group(state, offer.proposer, index, offer.take_spaces)
             loss += price * (1 + self.group_bonus) if hands_over_group else price
+        return gain, loss
+
+    def accept_trade(self, state: GameState, offer: TradeOffer) -> bool:
+        """Accept if what arrives beats what leaves by the bot's margin."""
+        gain, loss = self.trade_value(state, offer)
         return gain >= loss * self.accept_margin
+
+    def will_trade_with(self, state: GameState, seller: int) -> bool:
+        """Return True if this bot is willing to propose a trade to ``seller``."""
+        return True
+
+    def premium_for(self, state: GameState, seller: int) -> float:
+        """Return the multiple of list price offered to ``seller`` for its lots."""
+        return self.trade_premium
 
     def propose_trade(self, state: GameState) -> TradeOffer | None:
         """Try to complete a group with cash, then with a swap if the bot allows it."""
@@ -151,6 +164,8 @@ class HeuristicBot(Strategy):
             if not mine or not missing or len(sellers) != 1 or None in sellers:
                 continue
             seller = sellers.pop()
+            if not self.will_trade_with(state, seller):
+                continue
             offer = self._cash_offer(state, seller, tuple(missing))
             if offer is None and self.proposes_swaps:
                 offer = self._swap_offer(state, seller, tuple(missing))
@@ -162,7 +177,7 @@ class HeuristicBot(Strategy):
         self, state: GameState, seller: int, wanted: tuple[int, ...]
     ) -> TradeOffer | None:
         value = sum(state.board[i].price for i in wanted)
-        amount = int(value * self.trade_premium)
+        amount = int(value * self.premium_for(state, seller))
         if self._cash(state) - amount < self.cash_floor(state):
             return None
         offer = TradeOffer(self.me, seller, take_spaces=wanted, give_cash=amount)

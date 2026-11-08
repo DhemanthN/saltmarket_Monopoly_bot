@@ -1,13 +1,15 @@
 """Board evaluation helpers shared by the heuristic bots."""
 
-from collections.abc import Collection
+from collections.abc import Collection, Iterator
 from functools import cache
 
 from saltmarket.engine import rules
+from saltmarket.engine.actions import Liquidation, LiquidationKind
 from saltmarket.engine.board import SpaceKind, default_board
 from saltmarket.engine.cards import default_cards
 from saltmarket.engine.config import GameConfig
 from saltmarket.engine.markov import landing_probabilities
+from saltmarket.engine.rules import PORT_LEVEL
 from saltmarket.engine.state import GameState
 
 AVERAGE_DICE = 7
@@ -78,3 +80,23 @@ def highest_rival_rent(state: GameState, me: int) -> int:
         ),
         default=0,
     )
+
+
+def spare_mortgages(state: GameState, me: int) -> Iterator[Liquidation]:
+    """Mortgage spaces outside completed groups, if some completed group can still grow.
+
+    The cash goes into buildings, so nothing is mortgaged without a group to build on.
+    """
+    mine = state.spaces_of(me)
+    has_group = any(
+        state.board[i].group and rules.owns_group(state, me, state.board[i].group)
+        and not state.mortgaged[i] and state.level[i] < PORT_LEVEL
+        for i in mine
+    )
+    if not has_group:
+        return
+    for index in mine:
+        group = state.board[index].group
+        spare = group is None or not rules.owns_group(state, me, group)
+        if spare and rules.can_mortgage(state, me, index):
+            yield Liquidation(LiquidationKind.MORTGAGE, index)

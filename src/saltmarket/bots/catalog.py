@@ -11,10 +11,11 @@ from saltmarket.bots.values import (
     completes_group,
     highest_rival_rent,
     roi_scores,
+    spare_mortgages,
     unowned_share,
 )
 from saltmarket.engine import rules
-from saltmarket.engine.actions import BrigChoice, Liquidation, LiquidationKind
+from saltmarket.engine.actions import BrigChoice, Liquidation
 from saltmarket.engine.board import SpaceKind
 from saltmarket.engine.rules import PORT_LEVEL
 from saltmarket.engine.state import GameState
@@ -144,19 +145,7 @@ class AggressiveBuilder(HeuristicBot):
 
     def choose_liquidations(self, state: GameState) -> Iterator[Liquidation]:
         """Mortgage spaces outside completed groups when a group could be built on."""
-        mine = state.spaces_of(self.me)
-        has_group = any(
-            state.board[i].group and rules.owns_group(state, self.me, state.board[i].group)
-            and not state.mortgaged[i] and state.level[i] < PORT_LEVEL
-            for i in mine
-        )
-        if not has_group:
-            return
-        for index in mine:
-            group = state.board[index].group
-            spare = group is None or not rules.owns_group(state, self.me, group)
-            if spare and rules.can_mortgage(state, self.me, index):
-                yield Liquidation(LiquidationKind.MORTGAGE, index)
+        return spare_mortgages(state, self.me)
 
 
 class PortRush(HeuristicBot):

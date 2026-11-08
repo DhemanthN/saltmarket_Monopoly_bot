@@ -29,3 +29,6 @@ results/runs/
 checkpoints/
 *.pt
 *.parquet
+
+# Personal files, never commit
+Claude outputs/

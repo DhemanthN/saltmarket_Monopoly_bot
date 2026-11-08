@@ -55,14 +55,15 @@ def learning_curve(log: pd.DataFrame, bin_steps: int) -> pd.DataFrame:
     """Pool a training log into bins of ``bin_steps`` decisions.
 
     Each bin's win rate counts every game that finished in it, so rows with more games
-    weigh more. ``steps`` is the end of the bin.
+    weigh more. ``steps`` is the end of the bin. A final bin that the log only partly
+    covers is dropped, because a few games would make it noisy.
     """
     wins = (log["win_rate"].fillna(0) * log["episodes"]).round()
     bins = (log["steps"] - 1) // bin_steps
     grouped = pd.DataFrame({"bin": bins, "wins": wins, "episodes": log["episodes"]})
     pooled = grouped.groupby("bin", as_index=False)[["wins", "episodes"]].sum()
     stages = log.groupby(bins)["stage"].last().to_numpy()
-    return pd.DataFrame(
+    curve = pd.DataFrame(
         {
             "steps": (pooled["bin"] + 1) * bin_steps,
             "stage": stages,
@@ -70,6 +71,7 @@ def learning_curve(log: pd.DataFrame, bin_steps: int) -> pd.DataFrame:
             "win_rate": pooled["wins"] / pooled["episodes"].where(pooled["episodes"] > 0),
         }
     )
+    return curve[curve["steps"] <= log["steps"].max()].reset_index(drop=True)
 
 
 def stage_win_rates(log: pd.DataFrame) -> pd.Series:

@@ -24,9 +24,8 @@ BOOTSTRAP_SEED = 20_261_108
 def _significance(a: pd.DataFrame, b: pd.DataFrame, prefix: str, seed: int) -> dict:
     """Run the z-test and bootstrap on all games (prefix "") or decided games only."""
     def counts(table: pd.DataFrame) -> pd.DataFrame:
-        return table.rename(columns={f"{prefix}wins": "wins", f"{prefix}games": "games"})[
-            ["opponent", "wins", "games"]
-        ]
+        columns = {"opponent": "opponent", f"{prefix}wins": "wins", f"{prefix}games": "games"}
+        return table[list(columns)].rename(columns=columns)
 
     a, b = counts(a), counts(b)
     test = compare.two_proportion_z_test(

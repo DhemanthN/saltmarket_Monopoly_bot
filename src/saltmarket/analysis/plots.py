@@ -306,20 +306,18 @@ def agent_comparison(
     for position, (stage, part) in enumerate(first.groupby("stage", sort=False)):
         start = (part["steps"].min() - (first["steps"].iloc[0])) / 1e6
         curve_ax.axvline(start, color=AXIS, lw=1)
-        curve_ax.text(start, 1.0 + 0.03 * (position % 2), f" {stage}", fontsize=8,
+        curve_ax.text(start, 0.99 - 0.035 * (position % 2), f" {stage}", fontsize=8,
                       transform=curve_ax.get_xaxis_transform(), color=INK_SECONDARY,
-                      va="bottom")
+                      va="top")
     for label, curve in curves.items():
-        steps, rate = curve["steps"] / 1e6, curve["win_rate"] * 100
-        curve_ax.plot(steps, rate, color=colors[label], lw=2, label=label)
-        curve_ax.text(steps.iloc[-1] + 0.2, rate.iloc[-1], label, color=INK, fontsize=9,
-                      va="center")
+        curve_ax.plot(curve["steps"] / 1e6, curve["win_rate"] * 100, color=colors[label],
+                      lw=2, label=label)
     curve_ax.set_xlabel("Training decisions (millions)")
     curve_ax.set_ylabel("Win rate while training, pooled per 500,000 decisions")
     curve_ax.set_ylim(0, 100)
     _percent_axis(curve_ax.yaxis)
     curve_ax.legend(loc="lower right")
-    curve_ax.set_title("Learning curves on the same curriculum", pad=22)
+    curve_ax.set_title("Learning curves on the same curriculum", pad=12)
 
     order = next(iter(tables.values())).sort_values("win_rate")["opponent"].tolist()
     y = np.arange(len(order))
@@ -342,5 +340,5 @@ def agent_comparison(
     _percent_axis(opponent_ax.xaxis)
     opponent_ax.set_xlabel("Win rate on fresh held-out seeds, with 95% interval")
     opponent_ax.legend(loc="lower left")
-    opponent_ax.set_title("Against each bot, 400 games each", pad=22)
+    opponent_ax.set_title("Against each bot, 400 games each", pad=12)
     _save(fig, path)

@@ -84,3 +84,13 @@ def test_steps_to_reach_finds_the_first_qualifying_bin():
     assert steps_to_reach(curve, 0.5) == 200
     assert steps_to_reach(curve, 0.5, after=200) == 400
     assert steps_to_reach(curve, 0.99, after=200) is None
+
+
+def test_learning_curve_drops_a_final_partial_bin():
+    # The last row ends at 450, so the bin covering 401-600 holds only part of its range.
+    partial = pd.concat(
+        [log(), pd.DataFrame({"steps": [450], "stage": ["full"], "episodes": [5],
+                              "win_rate": [1.0]})],
+        ignore_index=True,
+    )
+    assert learning_curve(partial, 200)["steps"].tolist() == [200, 400]

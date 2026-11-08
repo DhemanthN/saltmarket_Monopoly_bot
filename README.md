@@ -8,8 +8,8 @@ written from scratch in PyTorch then learns to play from its own experience.
 **Headline result:** the 2-player agent won **85.6%** of 10,400 held-out games (95% CI
 84.9–86.2) against the 26 bots, ahead of the best bot at 83.4% and winning head-to-head
 against all of them. It missed its 90% target. Against 14 bots it never trained against,
-it won **75.8%** (CI 74.7–76.9). That is lower, but still ahead of the best bot's 71.2% on
-the same games. At 4 players no agent clearly leads. Full findings and limitations are in
+it won **75.8%** (CI 74.7–76.9). That is lower, but still ahead of `auction_sniper`, the best
+training bot, at 71.2% on the same games. At 4 players no agent clearly leads. Full findings and limitations are in
 [RESULTS.md](RESULTS.md).
 
 ![Win rates at both table sizes](results/figures/win_rates.png)

@@ -3,6 +3,9 @@
 The long-run landing probabilities say where players end up on average. These helpers
 instead start from where a player stands right now and look a few rolls ahead, which is
 what a bot needs to judge the rent it may owe soon or where rivals are about to land.
+
+The chain is built from the standard board and cards in ``data/``, which every game in
+this project uses. A game on a different board would need the chain rebuilt from it.
 """
 
 from functools import cache

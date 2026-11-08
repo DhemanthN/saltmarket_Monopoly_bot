@@ -80,7 +80,7 @@ dropping their cash cushion, or by recycling dead lots into cash. A likely reaso
 tested here, is that cash-rich rivals make auctions less cheap, and both the agent and
 `auction_sniper` rely on cheap auctions (Key finding 5). `mortgage_flipper`
 is the clearest case: it beats `auction_sniper` 58.5% of the time, but the agent holds it
-to 34.7%. With 400 games per bot, each per-opponent interval is about ±4.5 points, so
+to 34.8%. With 400 games per bot, each per-opponent interval is about ±4.5 points, so
 neighboring bots in this ranking are not clearly different.
 
 ## Which strategies win, and why

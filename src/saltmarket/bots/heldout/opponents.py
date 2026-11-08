@@ -136,6 +136,10 @@ class Reciprocator(HeuristicBot):
     Trust starts at zero. An accepted offer or a fair incoming deal raises it, and a
     rejection or a lowball offer lowers it. Distrusted rivals get no offers and must
     beat a steep margin. Every ``forgive_turns`` game turns, grudges soften by one.
+
+    Trust is updated inside ``accept_trade`` and from later ownership, so it assumes the
+    engine carries out every trade it accepts, as ``Game`` does. Probing ``accept_trade``
+    without trading would corrupt it.
     """
 
     name = "reciprocator"

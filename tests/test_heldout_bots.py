@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import numpy as np
@@ -88,7 +89,7 @@ def test_no_two_of_the_forty_bots_play_identically():
 @pytest.mark.slow
 def test_every_heldout_bot_survives_1000_fuzz_games():
     summaries = run_bot_fuzz(
-        1000, workers=20, names=sorted(HELDOUT_BOTS), pool=sorted(ALL_NAMED_BOTS)
+        1000, workers=os.cpu_count() or 1, names=sorted(HELDOUT_BOTS), pool=sorted(ALL_NAMED_BOTS)
     )
     assert [s.name for s in summaries] == sorted(HELDOUT_BOTS)
     assert all(s.games == 1000 for s in summaries)

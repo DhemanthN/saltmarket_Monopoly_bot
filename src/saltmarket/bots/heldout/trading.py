@@ -90,6 +90,8 @@ class MortgageFlipper(HeuristicBot):
     Many bots value a space at list price whether or not it is mortgaged. Mortgaging
     first collects half the price from the bank, and the sale collects most of the rest
     again, so a dead lot turns into about 1.4 times its price in cash for building.
+    Whether a sale went through is read from ownership afterwards, which assumes the
+    engine carries out every accepted trade, as ``Game`` does.
     """
 
     name = "mortgage_flipper"

@@ -137,9 +137,9 @@ learns from it many times, which is called learning **off-policy**.
 
 | Piece | What it does |
 | --- | --- |
-| Dueling heads | A shared trunk (two hidden layers of 256 tanh units, like PPO) feeds a value head V(s) and an advantage head A(s, a). Q = V + A − mean of A over the legal actions. |
+| Dueling heads | A shared trunk (two hidden layers of 256 tanh units, like PPO) feeds a value head V(s) and an advantage head A(s, a). Q = V + A − mean of A over the legal actions. Both heads start with small weights, so every Q-value starts near 0. |
 | Experience replay | A ring buffer holds the latest 500,000 transitions. Batches of 512 are drawn uniformly at random. |
-| Target network | A copy of the network computes learning targets. It is refreshed every 2,000 gradient steps. |
+| Target network | A copy of the network computes learning targets. It is refreshed every 250 gradient steps, about every 32,000 decisions. |
 | Double DQN | The online network picks the best legal next action and the target network scores it, which reduces overestimation. |
 | Epsilon-greedy | With chance epsilon the agent plays a random legal action. Epsilon falls from 1.0 to 0.02 over the first 10% of training, then stays there. |
 | n-step returns | Each transition sums 8 decisions of reward before bootstrapping, with discount 0.999. |
@@ -194,17 +194,37 @@ stopped. The batch sampler is seeded from the round number, so it needs no saved
 PPO's hyperparameters were not searched, so DQN's were not searched on Saltmarket either.
 They are common published defaults, adjusted only for this problem's scale: a larger
 batch and buffer because there are 20 workers, and n-step returns because the main reward
-arrives only when a game ends, often hundreds of decisions later. The only check before
-the real run was a 300,000-decision trial to measure speed. Its win rates were not used to
-change anything.
+arrives only when a game ends, often hundreds of decisions later. Before the first real run, the only check was a 300,000-decision trial to measure speed.
+
+### The first run stalled, and what changed
+
+The first 20M-decision run (`results/training_log_dqn_two_player_attempt1.csv`) was
+stopped at 4.1M decisions. Its pooled training win rate stayed between 11% and 24%,
+against 41% to 79% for PPO at the same points. A check of its checkpoint showed why:
+
+- A fresh network output a state value of about 0.71 everywhere, because the value head
+  started with full-size weights. After 4M decisions the average Q-value was still 0.79,
+  though the agent won about 15% of its games.
+- Games last about 275 decisions, so with 8-step returns a win has to pass back through
+  about 34 bootstrap steps to reach the start of a game. Each step needs a target refresh,
+  and with one refresh every 2,000 gradient steps only 15 had happened. Most states still
+  held their made-up starting value.
+
+Two settings changed. Both heads now start with small weights, so Q starts near 0, and the
+target network refreshes every 250 gradient steps instead of every 2,000. Tests now check
+both. These fix setup mistakes found from the run's internals, not from its win rate.
+Nothing else was changed, and no other settings were tried. The second run is the one
+reported.
 
 ### Verification
 
 `test_dqn_solves_cartpole` (marked slow) trains this code on CartPole and requires an
 average greedy score of at least 475 out of 500, the same bar as the PPO test. CartPole
-uses smaller settings (64 hidden units, discount 0.99, 3-step returns, 80,000 steps). DQN
-is less steady than PPO here. In trials before the test was written, 3 of 4 seeds scored
-500 after 50,000 steps but seed 0 scored 101, and with 80,000 steps seed 0 scored 500. The
-test uses seed 0 at 80,000 steps. Fast tests cover the
+uses smaller settings: 64 hidden units, discount 0.99, 3-step returns, learning rate
+5e-4, and 80,000 steps. CartPole pays +1 per step, so its training reward is scaled by 0.01
+to keep Q between 0 and 1, as it is in Saltmarket. Scores count the unscaled reward. DQN is
+less steady than PPO here. Without the scaling, only 2 of 8 trial runs passed after the
+initialization change. With it, seeds 0 to 3 scored 492.7, 500, 500, and 495.1 at learning
+rate 5e-4, and 450.6, 500, 500, and 500 at 1e-3. The test uses seed 0 and 5e-4. Fast tests cover the
 replay buffer, masked Double DQN targets, the dueling head, the NumPy export, n-step
 returns, and the training loop's resume.

@@ -63,6 +63,28 @@ Nothing. All milestones are finished. A fresh virtual environment install passed
 
 ## Decisions
 
+- **DQN comparison (branch `feat/dqn`, 2026-11-08).** Double DQN with dueling heads in
+  `rl/dqn.py`, trained like the `two_player` PPO run (same curriculum, opponents, budget,
+  shaping, seed). The decisions are below, with details in `docs/rl.md`.
+  - No hyperparameter search on Saltmarket, to match PPO. Defaults: n-step 8, batch 512,
+    buffer 500k, replay ratio 4, target refresh every 250 gradient steps, epsilon 1.0 to
+    0.02 over 10%.
+  - Attempt 1 stalled. The value head started at about 0.7 and the target refreshed only
+    every 2,000 steps. It was stopped at 4.1M decisions, and its log and checkpoint were
+    renamed `_attempt1`, not deleted. Attempt 2 fixes both settings and is the reported run.
+  - CartPole training rewards are scaled by 0.01 so Q lies in [0, 1], the same range as
+    Saltmarket.
+  - The DQN exports as `PolicyWeights` (trunk plus advantage head), so `evaluate.py` and
+    `NumpyPolicy.greedy` run it unchanged. `evaluate.py` gained `--label`, default `ppo`.
+  - DQN self-play snapshots play epsilon-greedy at 0.05.
+  - `sample_opponents` takes a snapshot factory, and `train.py` exposes `append_log` and
+    `episode_stats`. PPO behavior is unchanged.
+  - The significance test is unpaired, though both agents saw the same seeds, so it is
+    slightly conservative.
+  - Sample efficiency uses training-log win rates, since no intermediate PPO weights
+    were saved.
+  - A CartPole trial was stopped early to keep the CPU free during the timed run.
+
 - **Final agents:** `two_player` is quoted for 2 players (85.6% on fresh seeds) and `main`
   for 4 players (40.7%). `two_player` was not retrained after evaluation. Only two runs
   exist, and option 1 (reward change) was not tried, because the owner chose option 2.
@@ -141,3 +163,5 @@ Nothing. All milestones are finished. A fresh virtual environment install passed
 | M5 option 2: train a 2-player specialist | Done |
 | Run GPU work on the RTX 5070 Ti, not the integrated GPU, now and in future | Done |
 | Skip review gates through M5, M6, M7, and the resume update, log decisions here, and give one final summary. Stop only for a blocker, two failed attempts, or a Smart App Control block | Active |
+| Remove the accidentally committed `Claude outputs/` folder and ignore it (files not read). It still exists in earlier commits, and only a history rewrite, which the owner decides on, would remove it | Done |
+| Add a DQN agent and compare it fairly with PPO, on branch `feat/dqn`, without merging to main | In progress |

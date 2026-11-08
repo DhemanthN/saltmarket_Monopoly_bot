@@ -215,6 +215,20 @@ def test_resumed_results_match_an_uninterrupted_run(tmp_path):
     pd.testing.assert_frame_equal(stats.load_rows(interrupted), stats.load_rows(clean))
 
 
+def _saved_files(directory):
+    return {path.name: path.read_bytes() for path in sorted(directory.glob("*.csv"))}
+
+
+def test_results_are_identical_for_one_worker_and_many(tmp_path):
+    schedule = random_table_schedule(BOTS + ["balanced", "port_rush"], 3, 4, 77)
+    schedule += round_robin_schedule(BOTS, 2, 88)
+    single, parallel = tmp_path / "single", tmp_path / "parallel"
+    assert small_run(single, schedule, workers=1, chunk_size=3) == len(schedule)
+    assert small_run(parallel, schedule, workers=4, chunk_size=3) == len(schedule)
+    assert len(_saved_files(single)) == 2 * -(-len(schedule) // 3)
+    assert _saved_files(single) == _saved_files(parallel)
+
+
 def test_different_tournament_in_same_directory_is_refused(tmp_path):
     schedule = round_robin_schedule(["never_buy", "random"], 2, 5)
     run_tournament(schedule, tmp_path, {"kind": "one"}, 1)

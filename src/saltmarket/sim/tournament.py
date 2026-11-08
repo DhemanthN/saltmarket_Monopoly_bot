@@ -177,11 +177,16 @@ def run_tournament(
     manifest: dict,
     workers: int,
     chunk_size: int = CHUNK_SIZE,
+    progress: bool = True,
 ) -> int:
     """Play every unfinished chunk in parallel. Return the number of games played now.
 
     ``manifest`` identifies the tournament. It must not include the game count, so that
     a schedule can be extended, but anything that changes existing games belongs in it.
+
+    Every game takes its seed from the schedule and every chunk goes to its own file, so
+    the saved results are identical for any number of workers. One worker plays in this
+    process, which skips the cost of starting a pool.
     """
     directory.mkdir(parents=True, exist_ok=True)
     _check_manifest(directory, manifest)
@@ -191,14 +196,21 @@ def run_tournament(
         for number, chunk in enumerate(chunks)
         if not _chunk_is_complete(_chunk_path(directory, number), chunk)
     ]
+    total = sum(len(chunk) for _, chunk in pending)
     played = 0
-    context = multiprocessing.get_context("spawn")
-    with ProcessPoolExecutor(max_workers=workers, mp_context=context) as pool:
-        futures = [pool.submit(run_chunk, directory, n, chunk) for n, chunk in pending]
-        total = sum(len(chunk) for _, chunk in pending)
-        with tqdm(total=total, desc=directory.name, unit="game") as progress:
+    with tqdm(total=total, desc=directory.name, unit="game", disable=not progress) as bar:
+        if workers <= 1:
+            for number, chunk in pending:
+                count = run_chunk(directory, number, chunk)
+                played += count
+                bar.update(count)
+            return played
+        context = multiprocessing.get_context("spawn")
+        pool_size = min(workers, len(pending)) or 1
+        with ProcessPoolExecutor(max_workers=pool_size, mp_context=context) as pool:
+            futures = [pool.submit(run_chunk, directory, n, chunk) for n, chunk in pending]
             for future in as_completed(futures):
                 count = future.result()
                 played += count
-                progress.update(count)
+                bar.update(count)
     return played

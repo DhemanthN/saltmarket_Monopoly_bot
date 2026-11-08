@@ -2,6 +2,118 @@
 
 Living progress file. A fresh session should read `CLAUDE.md`, then this file.
 
+## Paused (Session 4, 2026-11-08)
+
+The owner paused Session 4 partway through the v2 task list. Nothing has been pushed.
+`main` is 41 commits ahead of `origin/main` (counting this one), the working tree is clean, and every commit
+passes ruff and the tests listed below.
+
+### Task list status
+
+| Step | Task | Status |
+| --- | --- | --- |
+| 1 | Subagent review of the three branches, fixes on each branch | **Done** |
+| 2 | Merge feat/perf, feat/new-bots, feat/dqn, docs/v2-roadmap, origin/main | **Done** |
+| 3 | 40-bot tournament, 1M+ games | **Partly done**: 2-player finished, 4-player 785 of 2,500 chunks |
+| 4 | PPO and DQN evaluation, 1,000 games per opponent, v2 seeds | Not started (code ready and tested) |
+| 5 | Regenerate charts, update docs, fact-check subagent | Not started (analyze.py ready) |
+| 6 | CHANGELOG [2.0.0] and ROADMAP marked done | Not started |
+| 7 | reproduce_all.py (and --quick) end to end, commit | Partly: steps updated and unit-tested, `--quick` not yet run |
+| 8 | Remove the three worktrees | Not started. All three still exist |
+| 9 | History cleanup with git filter-repo | **Not started.** Only installed `git-filter-repo` into `.venv` |
+| 10 | Update docs/RESUME_UPDATE.md | Not started, and needs an owner decision (see below) |
+
+After step 2, the full suite passed 450 tests with 97% coverage, ruff was clean, and the
+smoke suite ran in 24.7 s. Later commits added 8 tests, and each targeted test file
+passed. Run the full suite again before resuming.
+
+### Run state and how to resume
+
+The 40-bot tournament, `simulate.py --pool all --games-per-pair 2000 --tables 125000`:
+
+- 2-player, `results/raw/round_robin_all/`: 7,800 of 7,800 chunks (1,560,000 games).
+- 4-player, `results/raw/tables_all/`: 785 of 2,500 chunks (157,000 of 500,000 games).
+  No partial chunk files.
+- Summary tables in `results/` are still the v1, 26-bot ones. The script writes them only
+  after both phases finish.
+
+Resume in this order. Each command picks up where it stopped:
+
+```powershell
+python scripts/simulate.py --pool all --games-per-pair 2000 --tables 125000
+python scripts/evaluate.py --run two_player --seed-set v2 --pool all --games-per-bot 1000 --tables 0
+python scripts/evaluate.py --run dqn_two_player --seed-set v2 --pool all --games-per-bot 1000 --tables 0 --label dqn
+python scripts/evaluate.py --run main --seed-set v2 --pool all --games-per-bot 1000 --tables 5000
+python scripts/compare_agents.py --suffix v2_all
+python scripts/analyze.py --runs main two_player --best-run two_player --suffix _v2_all --raw-suffix _all --dqn-run dqn_two_player
+python scripts/project_stats.py
+```
+
+Throughput notes:
+- A probe ran 11,800 40-bot games in 33 s. The 2-player phase ran at 700–970 games/s.
+- The 4-player phase dropped to about 280 games/s, at times 15. The laptop was on battery
+  (discharging, 71%), so keep it plugged in for the rest.
+- The first launch hit `BrokenProcessPool` after 10 s. There was no Smart App Control
+  event and no error in the application log, so the cause is unknown. A plain rerun
+  resumed and worked.
+
+### What the review subagents found, and what was fixed
+
+- **feat/perf** (350 tests pass): no determinism or cache bugs. The golden fingerprints
+  were recorded before optimizing, and worker count and chunk size do not change results.
+  Fixed in `5013ed3`:
+  - removed the unbacked "5,000 games byte for byte" claim
+  - softened the cProfile claim and the 24-worker cause
+  - derived the pair count instead of hard-coding 325
+  - benchmark output now records the baseline commit and the min/max run rates
+  - added a chunk-size independence test
+- **feat/new-bots** (397 tests pass): no bugs or determinism issues.
+  - **Fixed in `91c781c`:**
+    - README wording on the 71.2% baseline
+    - 34.7% rounded to 34.8%
+    - documented the forecast board assumption and the trust-from-ownership assumption
+    - fuzz test uses `os.cpu_count()`
+  - **Backed by the merge:** the claim that the training bots are unchanged had no test.
+    After merging, the perf branch's golden games (all 26 training bots appear in them)
+    still match.
+  - **Measured and documented:** the reviewer found near-copies.
+    - The new `scripts/heldout_overlap.py` saves `results/heldout_overlap.csv`.
+    - `cash_reader` plays 71.9% of games exactly like `balanced`, `rival_watcher` 49.8%
+      like `group_blocker`, and `leader_denier` 48.7% like `monopoly_trader`.
+    - `docs/strategies.md` says so, and `analyze.py` will write `results/heldout_split.csv`,
+      with close variants and distinct bots reported separately.
+- **feat/dqn** (DQN core correct: Double-DQN target, masking, n-step, terminals). Fixed in
+  `4be4763`:
+  - The first run stopped at 4.88M decisions, not 4.1M; 4.1M is where it was diagnosed.
+  - Removed numbers no file backs: "275 decisions", "Q differed by 0.04", "value 0.71",
+    and the CartPole trial scores.
+  - Timing claims now quote the training log: median round 1.10 s and 1.33 s, learning
+    0.75 and 0.85 s.
+  - The unpaired z-test ignored that both agents play the same seeds. `compare.mcnemar_test`
+    plus the per-game rows from `evaluate.py` now give a paired test for v2.
+  - Left as known nits: resume reseeds workers, so a resumed run is deterministic but not
+    identical to an uninterrupted one (now documented). The collector seeds its generator
+    and env with the same integer. The replay buffer is saved before `latest.pt`.
+
+### Other decisions this session
+
+- **`docs/RESUME_UPDATE.md` was deleted by the owner** on GitHub on 2026-11-06 (commit
+  `4390d76`, merged from origin/main). Task step 10 asks to update it.
+  - Proposed: honor the deletion in git and keep the updated file locally, gitignored.
+  - **Owner to confirm.** The old version is still in git history and in tag `v1.0.0`.
+- **Local tag `v1.0.0`** on `15e5cbf` keeps the 26-bot results easy to find. Not pushed.
+- **v2 seed set:** offset 300,000,000 (`rl/evaluate.V2_SEED_OFFSET`). A test checks it
+  shares no seed with any earlier evaluation.
+- **v2 output names** follow the pattern `rl_eval_*_<run>_v2_all.*`. Per-game rows go to
+  `results/raw/eval/` (gitignored).
+- **Tournament size:** 2,000 games per pair (780 pairs) plus 125,000 4-player tables in
+  all four rotations, 2,060,000 games in all. That is chosen from the probe to fit about
+  85 minutes on mains power.
+- **Worktrees:** `../monopoly-ai-perf`, `../monopoly-ai-bots`, and `../monopoly-ai-dqn`
+  still exist, each clean at its fixed branch tip. Step 8 removes them.
+- **History cleanup** (step 9) has not run, so the remote is unchanged:
+  `origin https://github.com/DhemanthN/saltmarket-ai.git`.
+
 ## Status
 
 | Milestone | Description | Status |
@@ -43,7 +155,7 @@ Living progress file. A fresh session should read `CLAUDE.md`, then this file.
 - Tests: see the latest review gate in the log below.
 - See `git log` for the latest commit.
 
-## Held-out bots (branch `feat/new-bots`, 2026-11-08)
+## Held-out bots (branch `feat/new-bots`, 2026-11-08, merged in Session 4)
 
 - 14 new bots in `src/saltmarket/bots/heldout/`, registered in `HELDOUT_BOTS`. `BOTS` is
   still exactly the 26 training bots, so training, the tournament, and `bot_fuzz.csv` are
@@ -68,7 +180,7 @@ Living progress file. A fresh session should read `CLAUDE.md`, then this file.
 - Not merged into `main`. The owner asked that `Claude outputs/` be removed and ignored.
   It is still present in earlier commits. Rewriting history is the owner's call.
 
-## DQN comparison (branch `feat/dqn`, finished 2026-11-08, not merged)
+## DQN comparison (branch `feat/dqn`, finished 2026-11-08, merged in Session 4)
 
 Training was paused at 10.24M decisions, resumed from `checkpoints/dqn_two_player/` with
 the same command, and finished at 20,008,960 decisions (round 1954, 155,919 gradient
@@ -93,9 +205,9 @@ steps, 2,467 s of training time).
 
 ## In progress
 
-Nothing. All milestones are finished. A fresh virtual environment install passed lint, all 333 tests, and `reproduce_all.py --quick`.
+v2 work, paused. See "Paused (Session 4)" at the top.
 
-## Branch feat/perf (simulator speed, 2026-11-08)
+## Branch feat/perf (simulator speed, 2026-11-08, merged in Session 4)
 
 - Ownership views (spaces per player, sole owner per group, build sites, split groups)
   are cached in `GameState` and rebuilt only when `state.owner` changes. `owner` is an

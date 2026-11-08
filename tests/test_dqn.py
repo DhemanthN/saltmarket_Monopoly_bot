@@ -162,6 +162,25 @@ def test_dueling_q_values_average_to_the_state_value_over_legal_actions():
 
 
 @smoke
+def test_fresh_network_starts_with_q_values_near_zero():
+    # A large starting value has to be unlearned one bootstrap hop at a time, which
+    # stalled the first full training run (see docs/rl.md).
+    torch.manual_seed(0)
+    network = DuelingQNetwork(enc.OBS_SIZE, enc.NUM_ACTIONS, 256)
+    obs = torch.rand(512, enc.OBS_SIZE)
+    with torch.no_grad():
+        q = network(obs, torch.ones(512, enc.NUM_ACTIONS, dtype=bool))
+    assert q.abs().max() < 0.1
+
+
+@smoke
+def test_target_refresh_is_frequent_relative_to_a_game():
+    # About 128 decisions are collected per gradient step at the default replay ratio,
+    # so a refresh every 250 steps is about 32,000 decisions, near 100 games.
+    assert DQNConfig().target_update_every <= 250
+
+
+@smoke
 def test_dueling_gradients_reach_both_heads():
     network = DuelingQNetwork(5, 6, 16)
     q = network(torch.randn(3, 5), torch.ones(3, 6, dtype=bool))
@@ -359,9 +378,11 @@ def test_dqn_training_runs_logs_and_resumes(tmp_path):
 # CartPole check, the same bar the PPO code has to clear
 
 
-def train_cartpole_dqn(rounds, seed=0, steps=500):
-    env = gym.make("CartPole-v1")
-    config = DQNConfig(gamma=0.99, n_step=3, learning_rate=1e-3, batch_size=128,
+def train_cartpole_dqn(rounds, seed=0, steps=500, learning_rate=5e-4):
+    # Rewards are scaled by 0.01 for training, so Q-values lie between 0 and 1 as they do
+    # in Saltmarket. Scores below count the unscaled reward.
+    env = gym.wrappers.TransformReward(gym.make("CartPole-v1"), lambda reward: 0.01 * reward)
+    config = DQNConfig(gamma=0.99, n_step=3, learning_rate=learning_rate, batch_size=128,
                        buffer_size=50_000, target_update_every=250, hidden_size=64)
     dqn = DQN(4, 2, config, seed=seed)
     buffer = ReplayBuffer(config.buffer_size, 4, 2)
@@ -374,6 +395,8 @@ def train_cartpole_dqn(rounds, seed=0, steps=500):
         if len(buffer) >= 1_000:
             for _ in range(steps // 2):
                 dqn.update(buffer.sample(config.batch_size, rng))
+    env.close()
+    env = gym.make("CartPole-v1")
     policy = NumpyPolicy(dqn.online.numpy_weights())
     mask = np.ones(2, dtype=bool)
     scores = []

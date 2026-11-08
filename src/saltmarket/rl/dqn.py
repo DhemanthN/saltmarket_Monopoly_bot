@@ -48,7 +48,7 @@ class DQNConfig:
     n_step: int = 8
     batch_size: int = 512
     buffer_size: int = 500_000
-    target_update_every: int = 2_000
+    target_update_every: int = 250
     max_grad_norm: float = 10.0
     hidden_size: int = 256
 
@@ -118,6 +118,7 @@ class DuelingQNetwork(nn.Module):
     Q(s, a) = V(s) + A(s, a) - mean of A over the legal actions. Subtracting the mean
     makes the split unique, and using only legal actions keeps illegal ones from moving
     it. The trunk uses tanh like the PPO networks, so the same NumPy code can run it.
+    Both heads start with small weights so every Q-value starts near 0.
     """
 
     def __init__(self, obs_size: int, num_actions: int, hidden: int) -> None:
@@ -129,7 +130,7 @@ class DuelingQNetwork(nn.Module):
             _linear(hidden, hidden, 2**0.5),
             nn.Tanh(),
         )
-        self.value = _linear(hidden, 1, 1.0)
+        self.value = _linear(hidden, 1, 0.01)
         self.advantage = _linear(hidden, num_actions, 0.01)
 
     def forward(self, obs: torch.Tensor, masks: torch.Tensor) -> torch.Tensor:

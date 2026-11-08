@@ -1,6 +1,7 @@
 """Evaluate a trained policy on held-out seeds against the full bot pool.
 
 Usage: python scripts/evaluate.py --run main --games-per-bot 400 --tables 2500
+       python scripts/evaluate.py --run dqn_two_player --fresh-seeds --label dqn
 Writes results/rl_eval_summary_<run>.json and per-opponent CSVs for each table size.
 """
 
@@ -33,6 +34,9 @@ def main() -> None:
     parser.add_argument(
         "--fresh-seeds", action="store_true", help="Use seeds not used to compare runs."
     )
+    parser.add_argument(
+        "--label", default=ev.AGENT, help="Name for the agent's row in the bot comparison."
+    )
     args = parser.parse_args()
 
     bots = sorted(BOTS)
@@ -53,7 +57,7 @@ def main() -> None:
         table.to_csv(RESULTS / f"rl_eval_{name}_{suffix}.csv", index=False, float_format="%.5f")
         summary[name] = ev.summarize_wins(frame)
         bots_table = pd.read_csv(RESULTS / f"{name}_win_rates.csv")
-        comparison = ev.compare_with_bots(bots_table, summary[name], ev.AGENT)
+        comparison = ev.compare_with_bots(bots_table, summary[name], args.label)
         comparison.to_csv(
             RESULTS / f"rl_vs_bots_{name}_{suffix}.csv", index=False, float_format="%.5f"
         )

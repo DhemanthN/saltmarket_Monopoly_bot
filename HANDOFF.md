@@ -43,6 +43,54 @@ Living progress file. A fresh session should read `CLAUDE.md`, then this file.
 - Tests: see the latest review gate in the log below.
 - See `git log` for the latest commit.
 
+## Paused (2026-11-08, branch `feat/dqn`, DQN comparison task)
+
+Paused at the owner's request. Nothing is running.
+
+**Done and committed:** Double DQN with dueling heads, replay, a target network,
+epsilon-greedy, and n-step returns (`rl/dqn.py`). Also NumPy-only collection
+(`rl/dqn_workers.py`), resumable training (`rl/dqn_train.py`, `scripts/train_dqn.py`),
+comparison stats (`analysis/compare.py`), the chart function (`plots.agent_comparison`),
+`scripts/compare_agents.py`, `evaluate.py --label`, `tests/test_dqn.py` (27 tests,
+including the slow CartPole and resume tests, all passing), `tests/test_compare.py`
+(7 passing), and the DQN section of `docs/rl.md`.
+
+**Training reached:** 10,240,000 of 20,000,000 decisions (round 1000, 79,600 gradient
+steps, 1,166 s of training time). Last checkpoint: `checkpoints/dqn_two_player/latest.pt`
+plus `checkpoints/dqn_two_player/replay.npz` (1.2 GB, full buffer). The log
+`results/training_log_dqn_two_player.csv` ends at the same round, 1000, and is left
+uncommitted until the run finishes. Attempt 1 (stalled, see `docs/rl.md`) is kept in
+`checkpoints/dqn_two_player_attempt1/` and `results/training_log_dqn_two_player_attempt1.csv`.
+
+**Resume training** (same run name, same total; it continues from round 1000):
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+python scripts/train_dqn.py --steps 20000000 --run dqn_two_player
+```
+
+Notes for the resume. The saved seconds count only training time, so total wall-clock
+time stays comparable. Worker seeds are derived from the round number, so a resumed run is
+reproducible but not bit-identical to an uninterrupted run. Other sessions were using the
+CPU during training, which slows game collection, so the wall-clock comparison with PPO
+(1,206 s, measured without that load) needs that caveat.
+
+**Left from the task list:**
+1. Finish training (resume command above). It writes `models/dqn_two_player.npz`.
+2. `python scripts/evaluate.py --run dqn_two_player --fresh-seeds --label dqn`, which
+   writes the new `results/rl_eval_*_dqn_two_player_fresh.*` files.
+3. `python scripts/compare_agents.py`, which writes `results/ppo_vs_dqn*.{json,csv}` and
+   `results/figures/ppo_vs_dqn.png`. Look at the chart.
+4. Add "PPO vs. DQN" to `RESULTS.md` and a results paragraph to the DQN section of
+   `docs/rl.md`. Caveat: training-curve win rates compare near-greedy DQN (epsilon 0.02)
+   with sampled PPO, so only the fresh-seed evaluation is a fair skill comparison.
+   Partial curves, which are not final: from about 2M decisions, DQN's pooled training
+   win rate was 72-79% against PPO's 41-64%.
+5. Run `ruff check .`, the full `pytest`, and `pytest --cov`, update the test count in
+   the README, commit the results, and give the final summary (win rates with CIs,
+   p-value, training times, sample efficiency, files, test count, lines of Python). Do
+   not merge into main.
+
 ## In progress
 
 Nothing. All milestones are finished. A fresh virtual environment install passed lint, all 333 tests, and `reproduce_all.py --quick`.
@@ -164,4 +212,5 @@ Nothing. All milestones are finished. A fresh virtual environment install passed
 | Run GPU work on the RTX 5070 Ti, not the integrated GPU, now and in future | Done |
 | Skip review gates through M5, M6, M7, and the resume update, log decisions here, and give one final summary. Stop only for a blocker, two failed attempts, or a Smart App Control block | Active |
 | Remove the accidentally committed `Claude outputs/` folder and ignore it (files not read). It still exists in earlier commits, and only a history rewrite, which the owner decides on, would remove it | Done |
-| Add a DQN agent and compare it fairly with PPO, on branch `feat/dqn`, without merging to main | In progress |
+| Add a DQN agent and compare it fairly with PPO, on branch `feat/dqn`, without merging to main | Paused at 10.24M of 20M training decisions, see Paused |
+| Pause cleanly for the day: checkpoint, stop everything, commit, update this file | Done |

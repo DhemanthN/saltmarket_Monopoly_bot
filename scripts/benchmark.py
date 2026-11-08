@@ -45,8 +45,9 @@ def single_process_rate(table_size: int, games: int) -> dict:
     )
 
     bots = sorted(BOTS)
+    pairs = len(bots) * (len(bots) - 1) // 2
     if table_size == 2:
-        schedule = round_robin_schedule(bots, -(-games // 325), ROUND_ROBIN_SEED)[:games]
+        schedule = round_robin_schedule(bots, -(-games // pairs), ROUND_ROBIN_SEED)[:games]
     else:
         schedule = random_table_schedule(bots, -(-games // table_size), table_size, TABLE_SEED)
         schedule = schedule[:games]
@@ -86,6 +87,8 @@ def benchmark_single(
                 print(f"{size}-player {name} run {repeat + 1}: "
                       f"{run['games_per_second']:.1f} games/s", flush=True)
         entry = {name: {"median_games_per_second": _median(r, "games_per_second"),
+                        "min_games_per_second": min(run["games_per_second"] for run in r),
+                        "max_games_per_second": max(run["games_per_second"] for run in r),
                         "runs": r} for name, r in runs.items()}
         if baseline is not None:
             entry["speedup"] = (entry["current"]["median_games_per_second"]
@@ -101,7 +104,8 @@ def scaling_schedule(games: int) -> list:
 
     bots = sorted(BOTS)
     two = round(games * TWO_PLAYER_SHARE)
-    pairs = round_robin_schedule(bots, -(-two // 325), ROUND_ROBIN_SEED)[:two]
+    pair_count = len(bots) * (len(bots) - 1) // 2
+    pairs = round_robin_schedule(bots, -(-two // pair_count), ROUND_ROBIN_SEED)[:two]
     tables = random_table_schedule(bots, -(-(games - two) // 4), 4, TABLE_SEED)
     return pairs + tables[: games - two]
 
@@ -180,6 +184,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--baseline-src", type=Path, help="src folder of the code to compare")
+    parser.add_argument("--baseline-commit", default="",
+                        help="commit the baseline src was exported from, saved for the record")
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--games-2p", type=int, default=600)
     parser.add_argument("--games-4p", type=int, default=300)
@@ -218,7 +224,8 @@ def main() -> None:
         "settings": {"repeats": args.repeats, "games_2p": args.games_2p,
                      "games_4p": args.games_4p, "scaling_games": args.scaling_games,
                      "scaling_two_player_share": TWO_PLAYER_SHARE,
-                     "chunk_size": args.chunk_size, "baseline_src": str(baseline)},
+                     "chunk_size": args.chunk_size, "baseline_src": str(baseline),
+                     "baseline_commit": args.baseline_commit},
         "note": "Other processes may have been using the CPU. Each value is a median, and "
                 "baseline and current runs alternated so they saw the same load.",
         "single_process": single,

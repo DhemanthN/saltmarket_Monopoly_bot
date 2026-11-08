@@ -229,6 +229,16 @@ def test_results_are_identical_for_one_worker_and_many(tmp_path):
     assert _saved_files(single) == _saved_files(parallel)
 
 
+def test_results_do_not_depend_on_chunk_size(tmp_path):
+    schedule = round_robin_schedule(BOTS, 3, 99)
+    small, large = tmp_path / "small", tmp_path / "large"
+    small_run(small, schedule, workers=1, chunk_size=2)
+    small_run(large, schedule, workers=2, chunk_size=7)
+    rows_small = stats.load_rows(small).sort_values("game_id", ignore_index=True)
+    rows_large = stats.load_rows(large).sort_values("game_id", ignore_index=True)
+    pd.testing.assert_frame_equal(rows_small, rows_large)
+
+
 def test_different_tournament_in_same_directory_is_refused(tmp_path):
     schedule = round_robin_schedule(["never_buy", "random"], 2, 5)
     run_tournament(schedule, tmp_path, {"kind": "one"}, 1)

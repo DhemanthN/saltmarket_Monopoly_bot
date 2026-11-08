@@ -97,7 +97,7 @@ class HeuristicBot(Strategy):
 
     def choose_unmortgages(self, state: GameState) -> Iterator[int]:
         """Lift mortgages, most valuable first, when cash is comfortable."""
-        if True not in state.mortgaged:
+        if not any(state.mortgaged):
             return
         mortgaged = [i for i in state.spaces_of(self.me) if state.mortgaged[i]]
         for index in sorted(mortgaged, key=lambda i: -state.board[i].price):

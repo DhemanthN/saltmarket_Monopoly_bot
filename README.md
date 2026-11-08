@@ -100,12 +100,12 @@ docs/        strategies.md, rl.md, RESUME_UPDATE.md
 
 ## Performance
 
-Profiling with cProfile showed the engine re-scanning the board for facts that rarely
+Profiling showed the engine re-scanning the board for facts that rarely
 change, like who owns a whole island group. Ownership is now cached and refreshed only
 when a space changes hands. Dice are drawn from NumPy in batches, and bots only examine
 spaces where an action is possible. Games stay **bit-for-bit identical** for the same
-seed: 100 fingerprinted games (hashes of every event) and 5,000 tournament games match
-the engine from before the change exactly.
+seed: 100 fingerprinted games (hashes of every event), recorded with the engine from before
+the change, still match exactly (`tests/test_performance.py`).
 
 | Single process, median of 3 | Before | After | Speed-up |
 | --- | --- | --- | --- |
@@ -121,8 +121,9 @@ minutes**, compared with about 12.6 hours on one core before.
 
 ![Throughput and scaling efficiency by worker count](results/figures/benchmark_scaling.png)
 
-Other programs were using the CPU heavily during these measurements, which is why 24
-workers were no faster than 16. The tournament runner was already parallel before this
+24 workers measured slower than 16 (487 against 560 games per second). The cause was not
+measured: other programs were using the CPU, and the 24 logical CPUs share physical cores,
+so either could explain it. The tournament runner was already parallel before this
 work, so the new gain at full scale comes from the faster engine. Numbers are from
 `results/benchmark.json`, made by `python scripts/benchmark.py --baseline-src <old src>`.
 

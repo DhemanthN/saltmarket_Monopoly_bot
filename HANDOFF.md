@@ -84,8 +84,9 @@ Nothing. All milestones are finished. A fresh virtual environment install passed
 
 ## Decisions
 
-- **Speed work keeps games bit-for-bit identical.** Checked by golden fingerprints and by
-  comparing 5,000 games of tournament rows byte for byte with the old engine.
+- **Speed work keeps games bit-for-bit identical.** Checked by 100 golden fingerprints
+  recorded with the old engine (`tests/data/golden_games.json`). An earlier note also claimed
+  a 5,000-game byte comparison, but no script or file backed it, so review removed it.
 - **Benchmark baseline** is the `c59a17c` source exported with `git archive`, timed in
   alternating child processes so both versions see the same machine load. Medians of 3.
 

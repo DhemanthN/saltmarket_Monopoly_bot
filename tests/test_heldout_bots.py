@@ -1,3 +1,4 @@
+import importlib.util
 import os
 from pathlib import Path
 
@@ -418,3 +419,17 @@ def test_leveraged_buyer_stops_leveraging_after_the_land_grab(state):
     state.players[0].cash = 100
     assert list(bot.choose_liquidations(state)) == []
 
+
+
+@pytest.mark.smoke
+def test_overlap_table_finds_the_closest_training_bot():
+    path = Path(__file__).resolve().parents[1] / "scripts" / "heldout_overlap.py"
+    spec = importlib.util.spec_from_file_location("heldout_overlap", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    hashes = {name: [name, name, name, name] for name in {**BOTS, **HELDOUT_BOTS}}
+    hashes["cash_reader"] = ["balanced", "balanced", "balanced", "x"]
+    table = module.overlap_table(hashes).set_index("heldout_bot")
+    assert table.loc["cash_reader", "closest_training_bot"] == "balanced"
+    assert table.loc["cash_reader", "identical_share"] == 0.75
+    assert table["identical_share"].drop("cash_reader").eq(0).all()

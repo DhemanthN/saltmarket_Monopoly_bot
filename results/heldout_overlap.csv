@@ -1,0 +1,15 @@
+heldout_bot,closest_training_bot,identical_share,games
+cash_reader,balanced,0.7192,520
+rival_watcher,group_blocker,0.4981,520
+leader_denier,monopoly_trader,0.4865,520
+reciprocator,balanced,0.2885,520
+swap_negotiator,balanced,0.1538,520
+ambush_builder,balanced,0.1212,520
+mortgage_flipper,balanced,0.1135,520
+score_aware,balanced,0.0577,520
+npv_bidder,balanced,0.0385,520
+risk_manager,aggressive_builder,0.0308,520
+finisher,conservative_mortgager,0.0212,520
+leveraged_buyer,aggressive_builder,0.0000,520
+phase_shifter,aggressive_builder,0.0000,520
+stalemate_seeker,aggressive_builder,0.0000,520

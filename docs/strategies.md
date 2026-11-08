@@ -138,8 +138,14 @@ bot actually is, and that bot becomes the benchmark for the reinforcement-learni
 These 14 bots live in `src/saltmarket/bots/heldout/` and are registered in their own
 catalog, `HELDOUT_BOTS`. No training stage uses them, and a test checks that every
 curriculum pool excludes them. They exist to measure how the agent does against
-strategies it has never seen. Each one is built around an idea none of the 26 training
-bots uses. They were written after the agent was trained and were not tuned against it.
+strategies it has never seen. Each one adds an idea none of the 26 training bots uses,
+but most build on `HeuristicBot`, so some play exactly like a training bot whenever their
+special rule never fires. `scripts/heldout_overlap.py` measures this over 520 games each
+(`results/heldout_overlap.csv`). Three are close variants: `cash_reader` plays 71.9% of
+games exactly as `balanced` does, `rival_watcher` 49.8% as `group_blocker`, and
+`leader_denier` 48.7% as `monopoly_trader`. The other eleven match any training bot in at
+most 28.8% of games. They were written after the agent was trained and were not tuned
+against it.
 
 ## Adaptive
 

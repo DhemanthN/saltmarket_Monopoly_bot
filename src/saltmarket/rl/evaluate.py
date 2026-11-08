@@ -3,7 +3,8 @@
 A "matchup" here means one complete game. 2-player evaluation plays the agent against
 each bot in turn, alternating who moves first. 4-player evaluation seats the agent with
 three distinct bots drawn from the pool and rotates the table through every seat order.
-Seeds start at EVAL_SEED_BASE, a range training never uses.
+Seeds start at EVAL_SEED_BASE, a range training never uses. Held-out opponent games
+use their own offset, so they share no seed with either earlier evaluation set.
 """
 
 import multiprocessing
@@ -16,13 +17,14 @@ import pandas as pd
 from tqdm import tqdm
 
 from saltmarket.analysis.tournament_stats import wilson_interval
-from saltmarket.bots.catalog import make_bot
+from saltmarket.bots.registry import make_any_bot
 from saltmarket.engine.game import Game
 from saltmarket.rl.agent import AgentStrategy
 from saltmarket.rl.policy import NumpyPolicy, PolicyWeights
 
 EVAL_SEED_BASE = 9_000_000_000
 FRESH_SEED_OFFSET = 100_000_000
+HELDOUT_SEED_OFFSET = 200_000_000
 AGENT = "ppo"
 CHUNK_SIZE = 100
 
@@ -64,19 +66,28 @@ def four_player_schedule(bots: list[str], tables: int, seed_offset: int = 0) -> 
 
 
 def play_eval_games(
-    games: list[EvalGame], weights: PolicyWeights, greedy: bool
+    games: list[EvalGame],
+    weights: PolicyWeights | None,
+    greedy: bool,
+    subject: str | None = None,
 ) -> list[dict]:
-    """Play games with the agent and return one row per game."""
-    policy = NumpyPolicy(weights)
+    """Play games and return one row per game.
+
+    The AGENT seat holds the trained policy, or the bot named ``subject`` when one is
+    given, which lets a bot be measured on exactly the same schedule as the agent.
+    """
+    policy = NumpyPolicy(weights) if subject is None else None
     rows = []
     for game in games:
         rng = np.random.default_rng(game.seed)
-        if greedy:
+        if policy is None:
+            agent = make_any_bot(subject)
+        elif greedy:
             agent = AgentStrategy(policy.greedy)
         else:
             agent = AgentStrategy(lambda obs, mask, r=rng: policy.sample(obs, mask, r)[0])
         seat = game.seats.index(AGENT)
-        bots = [agent if name == AGENT else make_bot(name) for name in game.seats]
+        bots = [agent if name == AGENT else make_any_bot(name) for name in game.seats]
         result = Game(bots, seed=game.seed).play()
         rows.append(
             {
@@ -94,12 +105,16 @@ def play_eval_games(
 
 
 def run_evaluation(
-    schedule: list[EvalGame], weights: PolicyWeights, workers: int, greedy: bool = True
+    schedule: list[EvalGame],
+    weights: PolicyWeights | None,
+    workers: int,
+    greedy: bool = True,
+    subject: str | None = None,
 ) -> pd.DataFrame:
-    """Play a schedule in parallel and return per-game rows."""
+    """Play a schedule in parallel and return per-game rows. See ``play_eval_games``."""
     chunks = [schedule[i : i + CHUNK_SIZE] for i in range(0, len(schedule), CHUNK_SIZE)]
     context = multiprocessing.get_context("spawn")
-    play = partial(play_eval_games, weights=weights, greedy=greedy)
+    play = partial(play_eval_games, weights=weights, greedy=greedy, subject=subject)
     rows: list[dict] = []
     with ProcessPoolExecutor(max_workers=workers, mp_context=context) as pool:
         for part in tqdm(pool.map(play, chunks), total=len(chunks), unit="chunk"):
@@ -164,3 +179,16 @@ def compare_with_bots(bots: pd.DataFrame, agent: dict[str, float], label: str) -
     table["decided_rank"] = table["decided_win_rate"].rank(ascending=False, method="min")
     table["decided_rank"] = table["decided_rank"].astype(int)
     return table.sort_values("rank", ignore_index=True)
+
+
+def paired_outcomes(first: pd.DataFrame, second: pd.DataFrame) -> dict[str, int]:
+    """Count wins by outcome pair for two subjects that played the same schedule."""
+    joined = first.merge(second, on="game_id", suffixes=("_first", "_second"))
+    won_first, won_second = joined["won_first"] == 1, joined["won_second"] == 1
+    return {
+        "games": len(joined),
+        "both_won": int((won_first & won_second).sum()),
+        "only_first_won": int((won_first & ~won_second).sum()),
+        "only_second_won": int((~won_first & won_second).sum()),
+        "neither_won": int((~won_first & ~won_second).sum()),
+    }

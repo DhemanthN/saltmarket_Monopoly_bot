@@ -7,8 +7,10 @@ written from scratch in PyTorch then learns to play from its own experience.
 
 **Headline result:** the 2-player agent won **85.6%** of 10,400 held-out games (95% CI
 84.9–86.2) against the 26 bots, ahead of the best bot at 83.4% and winning head-to-head
-against all of them. It missed its 90% target. At 4 players no agent clearly leads. Full
-findings and limitations are in [RESULTS.md](RESULTS.md).
+against all of them. It missed its 90% target. Against 14 bots it never trained against,
+it won **75.8%** (CI 74.7–76.9). That is lower, but still ahead of the best bot's 71.2% on
+the same games. At 4 players no agent clearly leads. Full findings and limitations are in
+[RESULTS.md](RESULTS.md).
 
 ![Win rates at both table sizes](results/figures/win_rates.png)
 
@@ -36,6 +38,7 @@ pytest                                                # everything, about 5 minu
 python scripts/simulate.py                            # 180,000-game tournament
 python scripts/train.py --steps 20000000 --run main   # train an agent
 python scripts/evaluate.py --run main                 # held-out evaluation
+python scripts/evaluate_heldout.py --run two_player   # against the 14 unseen bots
 python scripts/analyze.py --runs main --best-run main # charts and tables
 
 python scripts/reproduce_all.py --quick               # whole pipeline, about 3 minutes
@@ -71,7 +74,7 @@ the same engine serve both tournaments and reinforcement learning.
 ```
 src/saltmarket/
   engine/    board, cards, dice, rules, bank, trades, game loop, invariants, Markov model
-  bots/      base Strategy, HeuristicBot, and the 26 named bots
+  bots/      base Strategy, HeuristicBot, the 26 training bots, and heldout/ (14 unseen bots)
   sim/       fuzz testing, landing simulation, resumable tournaments
   rl/        action and observation encoding, environment, PPO, training, evaluation
   analysis/  statistics, behavior probes, charts

@@ -119,3 +119,14 @@ between runs.
 Results are reported with 95% Wilson intervals, separately for each table size, overall
 and per opponent, over all games and over decided games only. Per-opponent 4-player
 figures count every game that bot was at the table, so those games overlap.
+
+### Unseen opponents
+
+The 26 bots above are also the agent's training opponents, so beating them does not show
+that the agent can handle strategies it has never met. `scripts/evaluate_heldout.py`
+plays the agent against the 14 held-out bots in `bots/heldout/`, which no training stage
+uses. Each held-out bot is played 400 times at 2 players, alternating seats, on seeds
+starting at 9,200,000,000, a range no other evaluation uses. `auction_sniper`, the best
+training-pool bot at 2 players, then plays the identical schedule as a baseline, which
+helps separate "the agent overfits" from "these bots are simply harder". Results are in
+`results/rl_eval_heldout_bots.json` and `.csv`, and are discussed in `RESULTS.md`.

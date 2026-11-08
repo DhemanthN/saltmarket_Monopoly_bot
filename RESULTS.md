@@ -29,6 +29,59 @@ should not be read as findings about Monopoly. Every number below comes from a f
 6. **Buying everything is a strong simple strategy.** `always_buy` is 2nd at 2 players
    (72.0%) and 1st at 4 (41.0%). `expert`, the bot designed to be best, is 14th of the
    26 bots at 2 players (60.7%). `two_player_win_rates.csv`, `four_player_win_rates.csv`
+7. **Against 14 unseen bots the agent's win rate falls to 75.8%** (CI 74.7–76.9), from
+   85.6% against its training bots. The `auction_sniper` baseline falls further on the
+   same games, to 71.2%, so the new pool is harder overall, and the agent still leads by
+   4.7 points. Its hardest new opponent is `leveraged_buyer` at 58.5% (CI 53.6–63.2).
+   `rl_eval_heldout_bots.json`
+
+## Unseen opponents
+
+The agent trained against the same 26 bots it was evaluated on, so I wrote 14 new bots
+afterwards and kept them out of every training stage (`docs/strategies.md`, "Held-out
+bots"). The `two_player` specialist was not retrained. It played each new bot 400 times
+at 2 players, alternating seats, on seeds no other evaluation uses. `auction_sniper`, the
+best training bot, played the identical schedule as a baseline.
+`rl_eval_heldout_bots.json`, `rl_eval_heldout_bots.csv`
+
+| Pool | Agent | Agent, decided games | `auction_sniper` |
+| --- | --- | --- | --- |
+| 26 training bots | 85.6% (CI 84.9–86.2) | 87.1% | 83.4% (CI 82.6–84.1) |
+| 14 held-out bots | **75.8% (CI 74.7–76.9)** | 78.1% (CI 77.0–79.2) | 71.2% (CI 70.0–72.3) |
+
+**The win rate fell by about 10 points against unseen bots.** That drop is the honest
+headline. Two things suggest it is mostly a harder pool rather than the agent failing
+to generalize:
+
+- **The baseline fell by more.** `auction_sniper` dropped about 12 points, from 83.4% to
+  71.2%. Its training-pool figure comes from the tournament, which used different seeds
+  and excluded itself, so the two rows are close but not identical comparisons.
+- **The held-out pool has no easy opponents.** Against the training pool the agent won
+  at least 95% against 8 of the 26 bots, including 100% against `random` and `never_buy`
+  (`rl_eval_two_player_two_player_fresh.csv`). Its easiest held-out matchup is 86.5%,
+  against `finisher`.
+
+**The agent still beats the baseline on the same games.** On the 5,600 shared seeds the
+agent won 917 games that `auction_sniper` lost, and lost 656 that it won. Overall it is
+4.7 points ahead, and the intervals do not overlap. It won more than half its games
+against every held-out bot.
+
+**Hardest new opponents for the agent:**
+
+| Bot | Agent win rate | `auction_sniper` win rate |
+| --- | --- | --- |
+| `leveraged_buyer` | 58.5% (CI 53.6–63.2) | 57.3% (CI 52.4–62.0) |
+| `phase_shifter` | 63.8% (CI 58.9–68.3) | 64.5% (CI 59.7–69.0) |
+| `mortgage_flipper` | 65.3% (CI 60.5–69.8) | 41.5% (CI 36.8–46.4) |
+| `score_aware` | 67.8% (CI 63.0–72.1) | 64.8% (CI 59.9–69.3) |
+
+The four hardest bots all spend aggressively in the land grab, by mortgaging, by
+dropping their cash cushion, or by recycling dead lots into cash. A likely reason, not
+tested here, is that cash-rich rivals make auctions less cheap, and both the agent and
+`auction_sniper` rely on cheap auctions (Key finding 5). `mortgage_flipper`
+is the clearest case: it beats `auction_sniper` 58.5% of the time, but the agent holds it
+to 34.7%. With 400 games per bot, each per-opponent interval is about ±4.5 points, so
+neighboring bots in this ranking are not clearly different.
 
 ## Which strategies win, and why
 
@@ -75,6 +128,8 @@ groups, so this does not prove the group caused the win. `two_player_group_value
 | --- | --- | --- |
 | Rules fuzz test | 10,000 random-bot games, invariants checked every turn | `fuzz_summary.json` |
 | Bot fuzz test | 26 bots × 1,000 mixed-table games | `bot_fuzz.csv` |
+| Held-out bot fuzz test | 14 bots × 1,000 games at tables drawn from all 40 bots | `bot_fuzz_heldout.csv` |
+| Held-out evaluation | 5,600 games each for the agent and `auction_sniper`, 400 per held-out bot | `rl_eval_heldout_bots.json` |
 | Landing check | 1,863,535 rolls against an exact Markov chain, 0.16% total variation distance | `landing_summary.json` |
 | 2-player tournament | 130,000 games, 400 per pair, seats alternated | `tournament_summary.json` |
 | 4-player tournament | 50,000 games, 12,500 tables in all four rotations | `tournament_summary.json` |
@@ -92,8 +147,10 @@ that was not used to compare runs. See `docs/rl.md`.
 
 ## Limitations and threats to validity
 
-- **Opponents are not held out.** Evaluation seeds are new, but the agent trained against
-  these same 26 bots. Its win rate against unseen strategies is unknown.
+- **Held-out opponents are a small, hand-written set.** The 14 unseen bots were written
+  by the same author as the training bots, after training, and were not tuned against
+  the agent. Truly different opponents, such as people, could do better against it.
+  Only the 2-player specialist was tested against them.
 - **One training run per setup.** Each agent comes from a single seed, so how much results
   vary between training runs is not measured.
 - **Little tuning.** Hyperparameters were not searched, and I did not test whether reward

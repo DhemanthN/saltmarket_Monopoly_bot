@@ -301,12 +301,12 @@ def benchmark_scaling(table: pd.DataFrame, path: Path) -> None:
     rate = table["games_per_second"].to_numpy()
     ideal = rate[0] * workers / workers[0]
     axes[0].plot(workers, ideal, color=INK_SECONDARY, lw=1, ls="--")
-    axes[0].text(workers[-1], ideal[-1], " perfect scaling", color=INK_SECONDARY,
-                 fontsize=9, va="center")
+    axes[0].annotate("perfect scaling", (workers[-1], ideal[-1]), xytext=(8, 0),
+                     textcoords="offset points", color=INK_SECONDARY, fontsize=9, va="center")
     axes[0].plot(workers, rate, color=BOT_COLOR, lw=2, marker="o", markersize=8,
                  markeredgecolor="white", markeredgewidth=2)
-    axes[0].text(workers[-1], rate[-1], f" {rate[-1]:,.0f} games/s", color=INK, fontsize=9,
-                 va="center")
+    axes[0].annotate(f"{rate[-1]:,.0f} games/s", (workers[-1], rate[-1]), xytext=(10, 0),
+                     textcoords="offset points", color=INK, fontsize=9, va="center")
     axes[0].set_ylabel("Games per second")
     axes[0].set_title("Throughput")
     positions = np.arange(len(workers))

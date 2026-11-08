@@ -141,6 +141,37 @@ def benchmark_scaling(games: int, counts: list[int], repeats: int, chunk_size: i
     return rows
 
 
+def _mixed_rate(two_player: float, four_player: float) -> float:
+    """Return games per second on the tournament mix, from per-table-size rates."""
+    seconds_per_game = TWO_PLAYER_SHARE / two_player + (1 - TWO_PLAYER_SHARE) / four_player
+    return 1 / seconds_per_game
+
+
+def summarize(report: dict) -> dict:
+    """Return the headline speed-ups computed from a saved report's medians."""
+    single = report["single_process"]
+    best = max(report["scaling"], key=lambda row: row["games_per_second"])
+    summary = {
+        "best_workers": best["workers"],
+        "best_games_per_second": best["games_per_second"],
+        "parallel_speedup": best["speedup"],
+        "projected_minutes_for_1m_games": 1_000_000 / best["games_per_second"] / 60,
+    }
+    if "baseline" in single["2_player"]:
+        rates = {name: _mixed_rate(single["2_player"][name]["median_games_per_second"],
+                                   single["4_player"][name]["median_games_per_second"])
+                 for name in ("baseline", "current")}
+        summary.update({
+            "baseline_mixed_games_per_second": rates["baseline"],
+            "current_mixed_games_per_second": rates["current"],
+            "optimization_speedup_mixed": rates["current"] / rates["baseline"],
+            "total_speedup_vs_baseline_single_process":
+                best["games_per_second"] / rates["baseline"],
+            "baseline_single_process_hours_for_1m_games": 1_000_000 / rates["baseline"] / 3600,
+        })
+    return summary
+
+
 def main() -> None:
     """Run the benchmarks and save the report and chart."""
     if len(sys.argv) == 4 and sys.argv[1] == "--child":
@@ -156,6 +187,8 @@ def main() -> None:
     parser.add_argument("--chunk-size", type=int, default=50)
     parser.add_argument("--max-workers", type=int, default=os.cpu_count() or 1)
     parser.add_argument("--quick", action="store_true", help="tiny run that saves nothing")
+    parser.add_argument("--resummarize", action="store_true",
+                        help="recompute the summary of results/benchmark.json without timing")
     args = parser.parse_args()
     if args.quick:
         args.repeats, args.games_2p, args.games_4p, args.scaling_games = 1, 40, 20, 200
@@ -166,6 +199,13 @@ def main() -> None:
     from saltmarket.analysis.plots import benchmark_scaling as scaling_chart
     from saltmarket.paths import FIGURES, RESULTS
 
+    if args.resummarize:
+        path = RESULTS / "benchmark.json"
+        report = json.loads(path.read_text(encoding="utf-8"))
+        report["summary"] = summarize(report)
+        path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+        print(json.dumps(report["summary"], indent=2))
+        return
     baseline = args.baseline_src.resolve() if args.baseline_src else None
     single = benchmark_single([2, 4], {2: args.games_2p, 4: args.games_4p}, args.repeats,
                               baseline)
@@ -186,6 +226,7 @@ def main() -> None:
         "best_workers": best["workers"],
         "projected_seconds_for_1m_games": 1_000_000 / best["games_per_second"],
     }
+    report["summary"] = summarize(report)
     print(json.dumps({k: v for k, v in report.items() if k != "single_process"}, indent=2))
     if args.quick:
         return

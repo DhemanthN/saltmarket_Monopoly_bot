@@ -18,8 +18,9 @@ GOLDEN = Path(__file__).parent / "data" / "golden_games.json"
 GOLDEN_GAMES = json.loads(GOLDEN.read_text(encoding="utf-8"))
 
 
-@pytest.mark.smoke
-@pytest.mark.parametrize("table_size", [2, 4])
+@pytest.mark.parametrize(
+    "table_size", [pytest.param(2, marks=pytest.mark.smoke), pytest.param(4)]
+)
 def test_seeded_games_match_fingerprints_recorded_before_optimizing(table_size):
     """The golden file was written by the engine before any performance work."""
     expected = GOLDEN_GAMES[str(table_size)]

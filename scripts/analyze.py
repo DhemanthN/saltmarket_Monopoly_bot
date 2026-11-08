@@ -27,6 +27,8 @@ from saltmarket.rl.agent import AgentStrategy
 from saltmarket.rl.policy import NumpyPolicy, PolicyWeights
 
 DEFAULT_BEHAVIOR_GAMES = 2600
+CLOSE_VARIANT_SHARE = 0.4
+"""A held-out bot playing at least this share of games exactly like a training bot."""
 ANALYSIS_SEED = 5_000_000_000
 
 
@@ -57,6 +59,21 @@ def behavior_tables(
         tasks = [(name, size, games) for name in (best_bot, "balanced") for size in (2, 4)]
         prices = pool.map(_auction, tasks)
         return pd.concat(list(habits), ignore_index=True), pd.DataFrame(list(prices))
+
+
+def heldout_split(tables: dict[str, pd.DataFrame], overlap: pd.DataFrame) -> pd.DataFrame:
+    """Pool each agent's results against close-variant and distinct held-out bots."""
+    close = set(overlap.loc[overlap["identical_share"] >= CLOSE_VARIANT_SHARE, "heldout_bot"])
+    rows = []
+    for agent, table in tables.items():
+        heldout = table[table["opponent"].isin(set(overlap["heldout_bot"]))]
+        for group, part in heldout.groupby(heldout["opponent"].isin(close)):
+            wins, games = int(part["wins"].sum()), int(part["games"].sum())
+            low, high = stats.wilson_interval(wins, games)
+            rows.append({"agent": agent, "group": "close_variant" if group else "distinct",
+                         "bots": len(part), "games": games, "wins": wins,
+                         "win_rate": wins / games, "ci_low": low, "ci_high": high})
+    return pd.DataFrame(rows)
 
 
 def main() -> None:
@@ -118,6 +135,17 @@ def main() -> None:
         heldout,
     )
     plots.tendencies_chart(tendencies, FIGURES / "agent_tendencies.png")
+
+    overlap_path = RESULTS / "heldout_overlap.csv"
+    if overlap_path.exists():
+        runs = {"ppo": args.best_run, **({"dqn": args.dqn_run} if args.dqn_run else {})}
+        tables = {
+            agent: pd.read_csv(RESULTS / f"rl_eval_two_player_{run}{suffix}.csv")
+            for agent, run in runs.items()
+        }
+        heldout_split(tables, pd.read_csv(overlap_path)).to_csv(
+            RESULTS / "heldout_split.csv", index=False, float_format="%.5f"
+        )
 
 
 if __name__ == "__main__":

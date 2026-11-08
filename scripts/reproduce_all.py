@@ -32,6 +32,7 @@ FULL = {
     "heldout": ["--games-per-bot", "400"],
     "evaluate_v2": ["--games-per-bot", "1000"],
     "tables_v2": "5000",
+    "overlap_seeds": "10",
     "analyze": [],
 }
 QUICK = {
@@ -45,6 +46,7 @@ QUICK = {
     "heldout": ["--games-per-bot", "2"],
     "evaluate_v2": ["--games-per-bot", "2"],
     "tables_v2": "10",
+    "overlap_seeds": "1",
     "analyze": ["--behavior-games", "26"],
 }
 
@@ -63,6 +65,7 @@ def build_steps(settings: dict) -> list[list[str]]:
         ["fuzz.py", *settings["fuzz"]],
         ["fuzz_bots.py", *settings["bots"]],
         ["fuzz_bots.py", *settings["bots"], "--heldout"],
+        ["heldout_overlap.py", "--seeds", settings["overlap_seeds"]],
         ["landing_frequency.py", *settings["landing"]],
         ["simulate.py", *settings["simulate"]],
         ["train.py", "--steps", steps, "--run", "main"],

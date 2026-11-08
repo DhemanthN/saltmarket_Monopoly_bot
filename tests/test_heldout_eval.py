@@ -76,3 +76,18 @@ def test_pool_summaries_split_training_and_heldout_opponents():
     split = script.pool_summaries(frame)
     assert split["training"]["games"] == 2 and split["training"]["wins"] == 1
     assert split["heldout"]["games"] == 2 and split["heldout"]["wins"] == 2
+
+
+@smoke
+def test_heldout_split_pools_close_variants_separately():
+    path = Path(__file__).resolve().parents[1] / "scripts" / "analyze.py"
+    spec = importlib.util.spec_from_file_location("analyze_script", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    overlap = pd.DataFrame({"heldout_bot": ["cash_reader", "finisher", "phase_shifter"],
+                            "identical_share": [0.7, 0.02, 0.0]})
+    table = pd.DataFrame({"opponent": ["balanced", "cash_reader", "finisher", "phase_shifter"],
+                          "wins": [9, 8, 6, 4], "games": [10, 10, 10, 10]})
+    split = module.heldout_split({"ppo": table}, overlap).set_index("group")
+    assert split.loc["close_variant", "wins"] == 8 and split.loc["close_variant", "bots"] == 1
+    assert split.loc["distinct", "wins"] == 10 and split.loc["distinct", "games"] == 20

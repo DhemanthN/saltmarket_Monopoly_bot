@@ -354,3 +354,41 @@ def test_dqn_training_runs_logs_and_resumes(tmp_path):
     assert log_rows["round"].tolist() == [1, 2, 3, 4, 5]
     assert log_rows["gradient_steps"].is_monotonic_increasing
     assert log_rows["buffer_size"].iloc[-1] > first["buffer_size"].iloc[-1]
+
+
+# CartPole check, the same bar the PPO code has to clear
+
+
+def train_cartpole_dqn(rounds, seed=0, steps=500):
+    env = gym.make("CartPole-v1")
+    config = DQNConfig(gamma=0.99, n_step=3, learning_rate=1e-3, batch_size=128,
+                       buffer_size=50_000, target_update_every=250, hidden_size=64)
+    dqn = DQN(4, 2, config, seed=seed)
+    buffer = ReplayBuffer(config.buffer_size, 4, 2)
+    collector = TransitionCollector(env, seed, 2, config.gamma, config.n_step)
+    rng = np.random.default_rng(seed)
+    for round_number in range(rounds):
+        epsilon = max(0.02, 1.0 - round_number / (0.4 * rounds))
+        policy = NumpyPolicy(dqn.online.numpy_weights())
+        buffer.add(collector.collect(policy, steps, epsilon).transitions)
+        if len(buffer) >= 1_000:
+            for _ in range(steps // 2):
+                dqn.update(buffer.sample(config.batch_size, rng))
+    policy = NumpyPolicy(dqn.online.numpy_weights())
+    mask = np.ones(2, dtype=bool)
+    scores = []
+    for episode in range(20):
+        obs, _ = env.reset(seed=10_000 + episode)
+        score, done = 0.0, False
+        while not done:
+            obs, reward, terminated, truncated, _ = env.step(policy.greedy(obs, mask))
+            score += reward
+            done = terminated or truncated
+        scores.append(score)
+    env.close()
+    return float(np.mean(scores))
+
+
+@pytest.mark.slow
+def test_dqn_solves_cartpole():
+    assert train_cartpole_dqn(160) >= 475

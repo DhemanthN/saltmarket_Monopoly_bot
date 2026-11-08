@@ -29,3 +29,5 @@ results/runs/
 checkpoints/
 *.pt
 *.parquet
+
+Claude outputs/

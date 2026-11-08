@@ -64,6 +64,7 @@ Living progress file. A fresh session should read `CLAUDE.md`, then this file.
   the 4-player table draw would mix held-out and training bots. The baseline plays the
   same seeds and seats as the agent, so paired counts are meaningful. Existing results
   and models were not modified.
+- Full suite including slow tests: 397 passed (333 before), coverage 98%, ruff clean.
 - Not merged into `main`. The owner asked that `Claude outputs/` be removed and ignored.
   It is still present in earlier commits. Rewriting history is the owner's call.
 

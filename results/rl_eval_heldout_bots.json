@@ -1,0 +1,89 @@
+{
+  "run": "two_player",
+  "baseline": "auction_sniper",
+  "greedy": true,
+  "table_size": 2,
+  "games_per_bot": 400,
+  "seed_base": 9200000000,
+  "opponents": [
+    "ambush_builder",
+    "cash_reader",
+    "finisher",
+    "leader_denier",
+    "leveraged_buyer",
+    "mortgage_flipper",
+    "npv_bidder",
+    "phase_shifter",
+    "reciprocator",
+    "risk_manager",
+    "rival_watcher",
+    "score_aware",
+    "stalemate_seeker",
+    "swap_negotiator"
+  ],
+  "agent": {
+    "games": 5600,
+    "wins": 4246,
+    "win_rate": 0.7582142857142857,
+    "ci_low": 0.7468256010045132,
+    "ci_high": 0.7692489562882997,
+    "decided_games": 5219,
+    "decided_wins": 4076,
+    "decided_win_rate": 0.7809925273040812,
+    "decided_ci_low": 0.7695677029036652,
+    "decided_ci_high": 0.7920040053561266,
+    "cap_rate": 0.06803571428571428
+  },
+  "baseline_result": {
+    "games": 5600,
+    "wins": 3985,
+    "win_rate": 0.7116071428571429,
+    "ci_low": 0.6996003002342963,
+    "ci_high": 0.7233238701612661,
+    "decided_games": 5427,
+    "decided_wins": 3952,
+    "decided_win_rate": 0.7282107978625392,
+    "decided_ci_low": 0.7162162459355986,
+    "decided_ci_high": 0.739882503914094,
+    "cap_rate": 0.030892857142857142
+  },
+  "paired_agent_vs_baseline": {
+    "games": 5600,
+    "both_won": 3329,
+    "only_first_won": 917,
+    "only_second_won": 656,
+    "neither_won": 698
+  },
+  "training_pool_reference": {
+    "agent": {
+      "source": "rl_eval_summary_two_player_fresh.json",
+      "games": 10400,
+      "wins": 8899,
+      "win_rate": 0.8556730769230769,
+      "ci_low": 0.8487877516990088,
+      "ci_high": 0.8622957484948308,
+      "decided_games": 9947,
+      "decided_wins": 8666,
+      "decided_win_rate": 0.8712174524982407,
+      "decided_ci_low": 0.8644913122529739,
+      "decided_ci_high": 0.877656980488012,
+      "cap_rate": 0.04355769230769231
+    },
+    "baseline": {
+      "source": "two_player_win_rates.csv",
+      "games": 10000.0,
+      "wins": 8339.0,
+      "win_rate": 0.8339,
+      "ci_low": 0.82648,
+      "ci_high": 0.84107,
+      "decided_games": 9783.0,
+      "decided_wins": 8300.0,
+      "decided_win_rate": 0.84841,
+      "decided_ci_low": 0.84117,
+      "decided_ci_high": 0.85538,
+      "cap_rate": 0.0217,
+      "mean_turns": 155.8445,
+      "bankrupt_rate": 0.1483
+    }
+  }
+}

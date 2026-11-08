@@ -132,3 +132,114 @@ reserve to the largest rent a rival can currently charge. It pays extra at aucti
 complete or block groups, trades with both cash and swaps, and stays in the Brig late in
 the game. It was designed to be the strongest heuristic, but the tournament decides which
 bot actually is, and that bot becomes the benchmark for the reinforcement-learning agent.
+
+# Held-out bots
+
+These 14 bots live in `src/saltmarket/bots/heldout/` and are registered in their own
+catalog, `HELDOUT_BOTS`. No training stage uses them, and a test checks that every
+curriculum pool excludes them. They exist to measure how the agent does against
+strategies it has never seen. Each one is built around an idea none of the 26 training
+bots uses. They were written after the agent was trained and were not tuned against it.
+
+## Adaptive
+
+These bots pick a new posture, meaning a full set of cash, bidding, and trading
+settings, before every decision.
+
+### `phase_shifter`
+Plays three different games in sequence. While at least half the board is unsold it
+buys everything with no cushion. After that it buys only spaces that advance a group or
+block a rival, and trades hard, with cash and swaps, to finish a group. Once it owns a
+group it stops proposing trades and mortgages its spare spaces to pay for buildings.
+
+### `score_aware`
+Compares its share of the table's net worth with an even split. More than 15% ahead, it
+protects the lead with a large reserve and a high price for any trade. More than 15%
+behind, it takes big risks: no cushion, generous trade offers, and mortgages to fund
+buildings. In between it plays like `balanced`.
+
+### `finisher`
+Plays patiently with a large reserve until some rival's cash plus everything that rival
+could sell or mortgage is less than two of its own biggest rents. Then it drops every
+reserve, mortgages spare land to build, and sits in the Brig so the weak rival keeps
+circling its spaces.
+
+## Opponent modeling
+
+### `rival_watcher`
+Tracks how much of each group every rival holds. It pays more at auction the further a
+rival is into a group, buys contested spaces even with almost no cash left, and refuses
+any trade that would leave the other player with half or more of a group. `group_blocker`
+reacts only at the last missing lot, while this bot contests groups from the first one.
+
+### `leader_denier`
+Models who is winning by net worth. It never trades with a rival who is ahead of it and
+pays extra at auction to keep that leader out of groups the leader has started. At a
+table of three or more it accepts slightly unfavorable deals from players who are
+behind, using them as a counterweight to the leader.
+
+### `cash_reader`
+Reads every rival's cash before buying. If no rival could bid even 80% of the price, it
+declines and wins the space at auction for little more than the richest rival's cash.
+Otherwise it pays list price. Unlike `auction_sniper`, it skips list price only when
+the auction is sure to be cheap.
+
+### `reciprocator`
+Remembers how each rival treats it. Accepted offers and fair incoming deals build trust,
+and rejections and lowball offers lose it. It makes no offers to distrusted rivals and
+demands a steep margin from them. It pays a little more to trusted partners. Every 50
+turns, each grudge softens by one step.
+
+## Trading
+
+### `swap_negotiator`
+Looks for swaps where both sides complete a group, for example its last reef lot for a
+rival's last kelp lot. It prices the rival's side with the standard bot valuation and
+adds just enough cash to make the deal acceptable. It proposes only when the group it
+gets has at least 90% of the expected rent of the group it gives up, using Markov
+landing rates. Otherwise it falls back to cash offers.
+
+### `mortgage_flipper`
+Exploits bots that value a space at list price whether or not it is mortgaged. When it
+holds a lone lot in a group a rival has started, it mortgages that lot for half its
+price, then offers it to the richest rival for 90% of the price. Together that is about
+1.4 times the price in cash. It offers each lot to each rival once.
+
+## Markov-aware
+
+These bots use the exact Markov chain from `engine/markov.py`, starting from where
+players stand now rather than from long-run averages. Helpers are in `bots/forecast.py`.
+
+### `risk_manager`
+Sizes its reserve to the rent it may owe over its next two rolls. For each roll it
+works out the chance of ending on every space from its current position, then keeps the
+expected rent plus 1.645 standard deviations. That is about a 95% upper estimate if the
+rolls were independent. It pays to leave the Brig only if the fine still leaves that
+reserve.
+
+### `ambush_builder`
+Builds just in time. It looks at where every rival can land in their next two rolls,
+builds where expected rival landings times the extra rent per coin is highest, and
+holds its cash when no rival is at least 15% likely to land on a buildable group soon,
+unless it has more than 800 in cash.
+
+### `npv_bidder`
+Puts a coin value on each space: long-run landing chance, times the number of rivals,
+times the rolls left in a typical game, times the rent it expects given who holds the
+rest of the group, minus building costs. It buys when the value beats the price and
+bids up to that value at auction. So it pays more at crowded tables and early on, and
+almost nothing late in the game.
+
+## Exploits and finance
+
+### `stalemate_seeker`
+Plays for the turn cap, where the richest player wins. It pays extra for a first lot in
+any group a rival has started, never trades, builds only with a large cushion, rarely
+lifts mortgages because the interest lowers its net worth, and sits in the Brig late in
+the game.
+
+### `leveraged_buyer`
+Keeps a war chest of 450, enough to buy any space, during the land grab by mortgaging
+ferries, utilities, and lots in groups a rival has started. Once less than 30% of the
+board is unsold it lifts those mortgages and builds. `aggressive_builder` mortgages to
+pay for buildings, while this bot mortgages to buy land.

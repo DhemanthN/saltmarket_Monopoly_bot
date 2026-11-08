@@ -43,6 +43,31 @@ Living progress file. A fresh session should read `CLAUDE.md`, then this file.
 - Tests: see the latest review gate in the log below.
 - See `git log` for the latest commit.
 
+## Held-out bots (branch `feat/new-bots`, 2026-11-08)
+
+- 14 new bots in `src/saltmarket/bots/heldout/`, registered in `HELDOUT_BOTS`. `BOTS` is
+  still exactly the 26 training bots, so training, the tournament, and `bot_fuzz.csv` are
+  unchanged. `bots/registry.make_any_bot` builds either set and is used only by
+  evaluation and fuzzing. A test checks no curriculum stage contains a held-out bot.
+- `bots/forecast.py`: short-horizon forecasts from the exact Markov chain, used by
+  `risk_manager`, `ambush_builder`, `npv_bidder`, and `swap_negotiator`.
+- `HeuristicBot` gained `trade_value`, `will_trade_with`, and `premium_for` hooks, and
+  `values.spare_mortgages` replaced `AggressiveBuilder`'s inline loop. Hashes of full game
+  logs for all 26 training bots were identical before and after.
+- Fuzz: 14 × 1,000 debug games at tables drawn from all 40 bots, zero violations
+  (`results/bot_fuzz_heldout.csv`, `scripts/fuzz_bots.py --heldout`).
+- Evaluation: `scripts/evaluate_heldout.py`, seeds from 9,200,000,000. The `two_player`
+  agent won 75.8% (CI 74.7–76.9) of 5,600 games, against 85.6% on the training pool.
+  `auction_sniper` on the identical schedule won 71.2%. Hardest bot: `leveraged_buyer`
+  at 58.5%. See `RESULTS.md`, "Unseen opponents".
+- Decisions: 2-player only, because only the 2-player specialist was asked for and
+  the 4-player table draw would mix held-out and training bots. The baseline plays the
+  same seeds and seats as the agent, so paired counts are meaningful. Existing results
+  and models were not modified.
+- Full suite including slow tests: 397 passed (333 before), coverage 98%, ruff clean.
+- Not merged into `main`. The owner asked that `Claude outputs/` be removed and ignored.
+  It is still present in earlier commits. Rewriting history is the owner's call.
+
 ## In progress
 
 Nothing. All milestones are finished. A fresh virtual environment install passed lint, all 333 tests, and `reproduce_all.py --quick`.
@@ -71,8 +96,9 @@ Nothing. All milestones are finished. A fresh virtual environment install passed
 ## Next steps
 
 2. The owner makes the repo public, never Claude.
-3. Ideas left open: reward capped wins less, test against unseen strategies, repeat
-   training with more seeds.
+3. Ideas left open: reward capped wins less, repeat training with more seeds, train with
+   some held-out-style bots and test on a further unseen set, and test the 4-player agent
+   against unseen bots.
 
 ## Machine facts (checked 2026-11-06)
 
@@ -172,4 +198,5 @@ Nothing. All milestones are finished. A fresh virtual environment install passed
 | M5 option 2: train a 2-player specialist | Done |
 | Run GPU work on the RTX 5070 Ti, not the integrated GPU, now and in future | Done |
 | Remove the accidentally committed personal folder and ignore it | Done (still in older commits; rewriting history needs owner approval) |
+| Grow the pool with 14 held-out bots and evaluate the agent against them (2026-11-08) | Done |
 | Skip review gates through M5, M6, M7, and the resume update, log decisions here, and give one final summary. Stop only for a blocker, two failed attempts, or a Smart App Control block | Active |

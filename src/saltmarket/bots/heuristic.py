@@ -74,12 +74,19 @@ class HeuristicBot(Strategy):
         return max(0, min(limit, self._cash(state) - self.cash_floor(state)))
 
     def choose_builds(self, state: GameState) -> Iterator[int]:
-        """Build until the level cap or the cash floor stops us."""
+        """Build until the level cap or the cash floor stops us.
+
+        Only lots in groups the bot owns outright can be built on, so those are the
+        only candidates checked.
+        """
         while True:
+            sites = state.build_sites(self.me)
+            if not sites:
+                return
             cap = self.level_cap(state)
             spare = self._cash(state) - self.build_floor(state)
             options = [
-                i for i in state.spaces_of(self.me)
+                i for i in sites
                 if state.level[i] < cap
                 and state.board[i].build_cost <= spare
                 and rules.can_build(state, self.me, i)
@@ -90,6 +97,8 @@ class HeuristicBot(Strategy):
 
     def choose_unmortgages(self, state: GameState) -> Iterator[int]:
         """Lift mortgages, most valuable first, when cash is comfortable."""
+        if not any(state.mortgaged):
+            return
         mortgaged = [i for i in state.spaces_of(self.me) if state.mortgaged[i]]
         for index in sorted(mortgaged, key=lambda i: -state.board[i].price):
             cost = rules.unmortgage_cost(state, index)
@@ -141,10 +150,16 @@ class HeuristicBot(Strategy):
         return gain >= loss * self.accept_margin
 
     def propose_trade(self, state: GameState) -> TradeOffer | None:
-        """Try to complete a group with cash, then with a swap if the bot allows it."""
+        """Try to complete a group with cash, then with a swap if the bot allows it.
+
+        Only groups split between owners can be completed by a trade, so whole groups
+        are skipped without scanning their lots.
+        """
         if not self.proposes_trades:
             return None
-        for lots in state.board.groups.values():
+        groups = state.board.groups
+        for group in state.mixed_groups():
+            lots = groups[group]
             mine = [i for i in lots if state.owner[i] == self.me]
             missing = [i for i in lots if state.owner[i] != self.me]
             sellers = {state.owner[i] for i in missing}

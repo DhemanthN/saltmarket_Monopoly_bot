@@ -90,7 +90,11 @@ class Game:
     @property
     def over(self) -> bool:
         """Return True once at most one player is solvent."""
-        return sum(not p.bankrupt for p in self.state.players) <= 1
+        solvent = 0
+        for player in self.state.players:
+            if not player.bankrupt:
+                solvent += 1
+        return solvent <= 1
 
     def _note_completed_group(self, player_id: int, index: int) -> None:
         """Record the first seat to earn a whole group.

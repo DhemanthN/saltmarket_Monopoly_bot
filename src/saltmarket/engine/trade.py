@@ -21,12 +21,20 @@ class TradeOffer:
 
 
 def _has_buildings(state: GameState, index: int) -> bool:
-    group = state.board[index].group
-    return group is not None and any(state.level[i] for i in state.board.groups[group])
+    group = state.board.spaces[index].group
+    if group is None:
+        return False
+    level = state.level
+    return any(level[i] for i in state.board.groups[group])
 
 
 def _transfer_fees(state: GameState, spaces: tuple[int, ...]) -> int:
-    return sum(rules.unmortgage_fee(state, i) for i in spaces if state.mortgaged[i])
+    mortgaged = state.mortgaged
+    fees = 0
+    for index in spaces:
+        if mortgaged[index]:
+            fees += rules.unmortgage_fee(state, index)
+    return fees
 
 
 def _side_is_valid(
@@ -36,14 +44,12 @@ def _side_is_valid(
     cash: int,
     passes: int,
 ) -> bool:
-    return (
-        cash >= 0
-        and passes >= 0
-        and len(set(spaces)) == len(spaces)
-        and cash <= player.cash
-        and passes <= len(player.passes)
-        and all(state.owner[i] == player.id and not _has_buildings(state, i) for i in spaces)
-    )
+    if not (0 <= cash <= player.cash and 0 <= passes <= len(player.passes)):
+        return False
+    if len(spaces) > 1 and len(set(spaces)) != len(spaces):
+        return False
+    owner = state.owner
+    return all(owner[i] == player.id and not _has_buildings(state, i) for i in spaces)
 
 
 def is_valid_trade(state: GameState, offer: TradeOffer) -> bool:

@@ -1,0 +1,1766 @@
+{
+ "2": [
+  {
+   "game_id": 0,
+   "names": [
+    "amber_specialist",
+    "brig_stayer"
+   ],
+   "seed": 7002000,
+   "winner": 1,
+   "turns": 135,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    8175
+   ],
+   "sha256": "72227eaa811b7b2302827a45efc9e9a9689de643fe42898389770c1755395d7c"
+  },
+  {
+   "game_id": 1,
+   "names": [
+    "cheap_lots",
+    "never_buy"
+   ],
+   "seed": 7002001,
+   "winner": 0,
+   "turns": 100,
+   "hit_cap": false,
+   "net_worths": [
+    5979,
+    0
+   ],
+   "sha256": "cd0afd9a47cef1edcd2f501e8852078ddc32439c08f315bba760c3f3f583def7"
+  },
+  {
+   "game_id": 2,
+   "names": [
+    "rent_maximizer",
+    "amber_specialist"
+   ],
+   "seed": 7002002,
+   "winner": 0,
+   "turns": 82,
+   "hit_cap": false,
+   "net_worths": [
+    7850,
+    0
+   ],
+   "sha256": "b1ba949604f2b05d19fcb04ab892235cae37972012f8c347166eb044a4caf1fa"
+  },
+  {
+   "game_id": 3,
+   "names": [
+    "cheap_lots",
+    "expert"
+   ],
+   "seed": 7002003,
+   "winner": 0,
+   "turns": 76,
+   "hit_cap": false,
+   "net_worths": [
+    4443,
+    0
+   ],
+   "sha256": "8bc49ef2411caee93e8b3646767422c44ac099f48719a40de2975f34f3262dea"
+  },
+  {
+   "game_id": 4,
+   "names": [
+    "always_buy",
+    "amber_specialist"
+   ],
+   "seed": 7002004,
+   "winner": 0,
+   "turns": 94,
+   "hit_cap": false,
+   "net_worths": [
+    8251,
+    0
+   ],
+   "sha256": "9e25444585f1f51353e87b371de82f6aff4776d47bb7ac7c0e947d6149088d45"
+  },
+  {
+   "game_id": 5,
+   "names": [
+    "expert",
+    "monopoly_trader"
+   ],
+   "seed": 7002005,
+   "winner": 1,
+   "turns": 141,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    7559
+   ],
+   "sha256": "b0e1641fa02a0ebabd4aea6396711eeea94bfa957d31814f7204093338f1ab62"
+  },
+  {
+   "game_id": 6,
+   "names": [
+    "roi_buyer",
+    "monopoly_trader"
+   ],
+   "seed": 7002006,
+   "winner": 0,
+   "turns": 204,
+   "hit_cap": false,
+   "net_worths": [
+    9655,
+    0
+   ],
+   "sha256": "c6624d1d0338b17067cc803bafbcdc7417a9dca3cde2ddd057bcc4f723cff3be"
+  },
+  {
+   "game_id": 7,
+   "names": [
+    "monopoly_trader",
+    "auction_sniper"
+   ],
+   "seed": 7002007,
+   "winner": 1,
+   "turns": 75,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    6799
+   ],
+   "sha256": "4d546f75504d1d1380875f22a956cdce0ea9717eeed2703e0d303a805bb1802b"
+  },
+  {
+   "game_id": 8,
+   "names": [
+    "brig_stayer",
+    "roi_buyer"
+   ],
+   "seed": 7002008,
+   "winner": 0,
+   "turns": 184,
+   "hit_cap": false,
+   "net_worths": [
+    8986,
+    0
+   ],
+   "sha256": "735a458396687630adb657cf4cceb5402d675587003a585366d035679672f8a4"
+  },
+  {
+   "game_id": 9,
+   "names": [
+    "coral_specialist",
+    "cinder_specialist"
+   ],
+   "seed": 7002009,
+   "winner": 1,
+   "turns": 211,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    10473
+   ],
+   "sha256": "46d7e8a35f3b3efcfa75dba673ecfe124079c71a3bdd7f3491aebcd246547551"
+  },
+  {
+   "game_id": 10,
+   "names": [
+    "group_blocker",
+    "high_roller"
+   ],
+   "seed": 7002010,
+   "winner": 1,
+   "turns": 89,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    7032
+   ],
+   "sha256": "79ac655ec6f966612c7ec1f2b596c68f1e4769dca17051fc7416fb9f63992e9d"
+  },
+  {
+   "game_id": 11,
+   "names": [
+    "cinder_specialist",
+    "auction_sniper"
+   ],
+   "seed": 7002011,
+   "winner": 1,
+   "turns": 43,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    7510
+   ],
+   "sha256": "677c1587ed185b1b9cd8c947438762fe715fbe0386a1b284609bf8508f4489f2"
+  },
+  {
+   "game_id": 12,
+   "names": [
+    "three_depots",
+    "high_roller"
+   ],
+   "seed": 7002012,
+   "winner": 0,
+   "turns": 78,
+   "hit_cap": false,
+   "net_worths": [
+    7608,
+    0
+   ],
+   "sha256": "cfe2a08af9f676b1e2c6a82d27403dc3614476381f6b7cb83decad0552837964"
+  },
+  {
+   "game_id": 13,
+   "names": [
+    "cheap_lots",
+    "group_blocker"
+   ],
+   "seed": 7002013,
+   "winner": 1,
+   "turns": 179,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    11113
+   ],
+   "sha256": "ff06c15b75d26248550aad74f71598bef0ceb9e20091075d57cfd265d8e33a41"
+  },
+  {
+   "game_id": 14,
+   "names": [
+    "conservative_mortgager",
+    "cheap_lots"
+   ],
+   "seed": 7002014,
+   "winner": 0,
+   "turns": 132,
+   "hit_cap": false,
+   "net_worths": [
+    9473,
+    0
+   ],
+   "sha256": "abbffc040b0efb123ff7387d1a2e1bf2ba186aa22ecb63e76e5f4e64fa3672bf"
+  },
+  {
+   "game_id": 15,
+   "names": [
+    "three_depots",
+    "auction_sniper"
+   ],
+   "seed": 7002015,
+   "winner": 1,
+   "turns": 243,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    10285
+   ],
+   "sha256": "e8f92c892a124becb26bf0ac68a110feedceacb80a1afb25e8db9fc03955ab8a"
+  },
+  {
+   "game_id": 16,
+   "names": [
+    "auction_sniper",
+    "high_roller"
+   ],
+   "seed": 7002016,
+   "winner": 0,
+   "turns": 74,
+   "hit_cap": false,
+   "net_worths": [
+    7708,
+    0
+   ],
+   "sha256": "75bee8ac8a2118578b31d3849826336b9794cfb6de6f6b6e26233475550ec7b4"
+  },
+  {
+   "game_id": 17,
+   "names": [
+    "aggressive_builder",
+    "random"
+   ],
+   "seed": 7002017,
+   "winner": 0,
+   "turns": 40,
+   "hit_cap": false,
+   "net_worths": [
+    4299,
+    0
+   ],
+   "sha256": "ee7a8e48136af5014ad678d11f5dfb9e44fd4800cecb62641ea3ee14669b940f"
+  },
+  {
+   "game_id": 18,
+   "names": [
+    "monopoly_trader",
+    "auction_sniper"
+   ],
+   "seed": 7002018,
+   "winner": 1,
+   "turns": 159,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    8569
+   ],
+   "sha256": "4c250c628cb9b348ad4f27200b9a3d019f22fa7cd0ff4c2026d46b207c64b046"
+  },
+  {
+   "game_id": 19,
+   "names": [
+    "monopoly_trader",
+    "amber_specialist"
+   ],
+   "seed": 7002019,
+   "winner": 0,
+   "turns": 66,
+   "hit_cap": false,
+   "net_worths": [
+    7935,
+    0
+   ],
+   "sha256": "b6f957afaaca5dd0c40aba657d8ab77414b777d456e47f2704111101a9ef7a94"
+  },
+  {
+   "game_id": 20,
+   "names": [
+    "ferry_baron",
+    "port_rush"
+   ],
+   "seed": 7002020,
+   "winner": 1,
+   "turns": 111,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    7515
+   ],
+   "sha256": "46f62e93c18be511f2a34aa9dd089fffaa5e3b67314955e75b85503adcf71db3"
+  },
+  {
+   "game_id": 21,
+   "names": [
+    "amber_specialist",
+    "balanced"
+   ],
+   "seed": 7002021,
+   "winner": 1,
+   "turns": 177,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    9919
+   ],
+   "sha256": "40b5f60c3bacfb6de24e5a3183d28dd9001e48ed0a0b1fc1e1d9a2dfb82341f6"
+  },
+  {
+   "game_id": 22,
+   "names": [
+    "balanced",
+    "cheap_lots"
+   ],
+   "seed": 7002022,
+   "winner": 0,
+   "turns": 152,
+   "hit_cap": false,
+   "net_worths": [
+    8012,
+    0
+   ],
+   "sha256": "5d6df59552f7d644c9aaff7099e7e214d7598d74287dd5247af57577655291c7"
+  },
+  {
+   "game_id": 23,
+   "names": [
+    "aggressive_builder",
+    "balanced"
+   ],
+   "seed": 7002023,
+   "winner": 0,
+   "turns": 110,
+   "hit_cap": false,
+   "net_worths": [
+    7110,
+    0
+   ],
+   "sha256": "e86561b37c85940a279f70acb414e7a312b123be9f9bafc91f68110dd1e3de53"
+  },
+  {
+   "game_id": 24,
+   "names": [
+    "conservative_mortgager",
+    "random"
+   ],
+   "seed": 7002024,
+   "winner": 0,
+   "turns": 86,
+   "hit_cap": false,
+   "net_worths": [
+    7343,
+    0
+   ],
+   "sha256": "fed1870555852e701cb6a9da5ec84821a16a18f16e899c30e2e3fb49bc1f792b"
+  },
+  {
+   "game_id": 25,
+   "names": [
+    "aggressive_builder",
+    "group_blocker"
+   ],
+   "seed": 7002025,
+   "winner": 0,
+   "turns": 362,
+   "hit_cap": false,
+   "net_worths": [
+    12383,
+    0
+   ],
+   "sha256": "1774d918febed4cb86308c3ee90fefa71f7d7d9b4838e853d8783ec23adf8b53"
+  },
+  {
+   "game_id": 26,
+   "names": [
+    "rent_maximizer",
+    "high_roller"
+   ],
+   "seed": 7002026,
+   "winner": 0,
+   "turns": 98,
+   "hit_cap": false,
+   "net_worths": [
+    7875,
+    0
+   ],
+   "sha256": "4104d8acce865fee1d77dc7b7817791574992cbf456c34f2468700e99147ca40"
+  },
+  {
+   "game_id": 27,
+   "names": [
+    "brig_stayer",
+    "conservative_mortgager"
+   ],
+   "seed": 7002027,
+   "winner": 1,
+   "turns": 447,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    17941
+   ],
+   "sha256": "416b70b3cb566de62829fde25ae7b2b9bafd8f1e298f5ee72f9759ab8d97637c"
+  },
+  {
+   "game_id": 28,
+   "names": [
+    "ferry_baron",
+    "shortage_blocker"
+   ],
+   "seed": 7002028,
+   "winner": 1,
+   "turns": 189,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    11571
+   ],
+   "sha256": "961ca4d554bb09bb18d35fb994850bd44b25e2e26b24b9e5e53e731afcc0e04c"
+  },
+  {
+   "game_id": 29,
+   "names": [
+    "expert",
+    "monopoly_trader"
+   ],
+   "seed": 7002029,
+   "winner": 1,
+   "turns": 125,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    7400
+   ],
+   "sha256": "c141089a5335e6fb152dc516485688b6bd38fdba9adcf8fc81b1606fdbe7a4d3"
+  },
+  {
+   "game_id": 30,
+   "names": [
+    "aggressive_builder",
+    "coral_specialist"
+   ],
+   "seed": 7002030,
+   "winner": 0,
+   "turns": 44,
+   "hit_cap": false,
+   "net_worths": [
+    4837,
+    0
+   ],
+   "sha256": "e4ec378d9349943278c2f99eae8ba84d63f2b1e8c5bcbd5ff006438c1603ccbc"
+  },
+  {
+   "game_id": 31,
+   "names": [
+    "no_utilities",
+    "expert"
+   ],
+   "seed": 7002031,
+   "winner": 0,
+   "turns": 178,
+   "hit_cap": false,
+   "net_worths": [
+    9046,
+    0
+   ],
+   "sha256": "57350a027984535b02680ba61f1daf7a9e59263d0c738e916a54501c10a2ec5c"
+  },
+  {
+   "game_id": 32,
+   "names": [
+    "conservative_mortgager",
+    "no_utilities"
+   ],
+   "seed": 7002032,
+   "winner": 0,
+   "turns": 96,
+   "hit_cap": false,
+   "net_worths": [
+    7050,
+    0
+   ],
+   "sha256": "b30128a1fb2e00090d816d7734627dc0901cc05d95089e3b5ae85c7003d29fdf"
+  },
+  {
+   "game_id": 33,
+   "names": [
+    "cheap_lots",
+    "cinder_specialist"
+   ],
+   "seed": 7002033,
+   "winner": 1,
+   "turns": 89,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    6817
+   ],
+   "sha256": "f317d50105d307ddba12cd62183cc4f72524638ff1ed56bb1df15f0e8eae44c1"
+  },
+  {
+   "game_id": 34,
+   "names": [
+    "ferry_baron",
+    "monopoly_trader"
+   ],
+   "seed": 7002034,
+   "winner": 1,
+   "turns": 135,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    10026
+   ],
+   "sha256": "2ba70f505ed61fee03435e443f2c153e433e2c37d07b89ed19bc480287dcf2e7"
+  },
+  {
+   "game_id": 35,
+   "names": [
+    "port_rush",
+    "cash_hoarder"
+   ],
+   "seed": 7002035,
+   "winner": 0,
+   "turns": 244,
+   "hit_cap": false,
+   "net_worths": [
+    11970,
+    0
+   ],
+   "sha256": "d0f45419a578f156d5054e3d764dcee07c26a40dfe5a96ef52b56bd60c427b39"
+  },
+  {
+   "game_id": 36,
+   "names": [
+    "aggressive_trader",
+    "ferry_baron"
+   ],
+   "seed": 7002036,
+   "winner": 0,
+   "turns": 106,
+   "hit_cap": false,
+   "net_worths": [
+    9241,
+    0
+   ],
+   "sha256": "01d6e3c180b72c730408bb2c41e261f931d5baf9db26300f5ca2041746c33d2e"
+  },
+  {
+   "game_id": 37,
+   "names": [
+    "balanced",
+    "premium_lots"
+   ],
+   "seed": 7002037,
+   "winner": 0,
+   "turns": 128,
+   "hit_cap": false,
+   "net_worths": [
+    8368,
+    0
+   ],
+   "sha256": "b40c07aaa27591ae5edd54ac04caa47c659183c061b24f5495f55118425adfbe"
+  },
+  {
+   "game_id": 38,
+   "names": [
+    "balanced",
+    "aggressive_builder"
+   ],
+   "seed": 7002038,
+   "winner": 1,
+   "turns": 809,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    25191
+   ],
+   "sha256": "548ab9d3fe3a3e05c8813d65b8d2936b6ecb5a6976c4545a383b03a7614b4333"
+  },
+  {
+   "game_id": 39,
+   "names": [
+    "aggressive_builder",
+    "three_depots"
+   ],
+   "seed": 7002039,
+   "winner": 1,
+   "turns": 99,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    5487
+   ],
+   "sha256": "8cb496a3444701537169769c5473c6c57354243ebe4ace9286aa68fdadaf2430"
+  },
+  {
+   "game_id": 40,
+   "names": [
+    "premium_lots",
+    "amber_specialist"
+   ],
+   "seed": 7002040,
+   "winner": 0,
+   "turns": 128,
+   "hit_cap": false,
+   "net_worths": [
+    8763,
+    0
+   ],
+   "sha256": "5f7338beac8cd5148eddf8884eb36c8a715b6487f896e3a5433ab528eeb82b31"
+  },
+  {
+   "game_id": 41,
+   "names": [
+    "ferry_baron",
+    "cheap_lots"
+   ],
+   "seed": 7002041,
+   "winner": 1,
+   "turns": 225,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    9407
+   ],
+   "sha256": "b9190f72afffb12d78841286aa7c344810d2c56fd5d6fd4989061d2b1270c48a"
+  },
+  {
+   "game_id": 42,
+   "names": [
+    "cash_hoarder",
+    "cheap_lots"
+   ],
+   "seed": 7002042,
+   "winner": 0,
+   "turns": 274,
+   "hit_cap": false,
+   "net_worths": [
+    13110,
+    0
+   ],
+   "sha256": "8321826419a186fd05d1e896b3dd1a8979733db526247b400e9ee051c305e15d"
+  },
+  {
+   "game_id": 43,
+   "names": [
+    "conservative_mortgager",
+    "auction_sniper"
+   ],
+   "seed": 7002043,
+   "winner": 0,
+   "turns": 132,
+   "hit_cap": false,
+   "net_worths": [
+    8786,
+    0
+   ],
+   "sha256": "1e7efa49be91751afaf72dc3d405cd54834f91849909daeec7a8b5bcafb4d273"
+  },
+  {
+   "game_id": 44,
+   "names": [
+    "aggressive_builder",
+    "aggressive_trader"
+   ],
+   "seed": 7002044,
+   "winner": 1,
+   "turns": 101,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    6936
+   ],
+   "sha256": "9ee3fec24fb8e25ca934545f2b3ddeafc77df12147e28e4eea08c8f135c5d276"
+  },
+  {
+   "game_id": 45,
+   "names": [
+    "roi_buyer",
+    "never_buy"
+   ],
+   "seed": 7002045,
+   "winner": 0,
+   "turns": 112,
+   "hit_cap": false,
+   "net_worths": [
+    9260,
+    0
+   ],
+   "sha256": "9a9b40a18ab639ab39075e7da7d8ba6e2b50e16aec7046ae00d35f1b222fad76"
+  },
+  {
+   "game_id": 46,
+   "names": [
+    "group_blocker",
+    "expert"
+   ],
+   "seed": 7002046,
+   "winner": 1,
+   "turns": 231,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    8967
+   ],
+   "sha256": "fde6803c78fa8c718b2cf56d560c01a9c741e74dc2cc02cf611c4cea8b32a8ab"
+  },
+  {
+   "game_id": 47,
+   "names": [
+    "coral_specialist",
+    "no_utilities"
+   ],
+   "seed": 7002047,
+   "winner": 1,
+   "turns": 109,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    8715
+   ],
+   "sha256": "dbbd7fb0c005f909a520292e1bedc08812736ddef68f590fe36f271ad1b7f799"
+  },
+  {
+   "game_id": 48,
+   "names": [
+    "brig_stayer",
+    "random"
+   ],
+   "seed": 7002048,
+   "winner": 0,
+   "turns": 68,
+   "hit_cap": false,
+   "net_worths": [
+    5365,
+    0
+   ],
+   "sha256": "7a090044fef9e94888f3ce1c3f64a7d82753a8c000c53d20b3cdba825ccd6173"
+  },
+  {
+   "game_id": 49,
+   "names": [
+    "ferry_baron",
+    "balanced"
+   ],
+   "seed": 7002049,
+   "winner": 1,
+   "turns": 163,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    10827
+   ],
+   "sha256": "7bffb9528c437cd264fdcecc2c03ff900bf4859e3c8412c1b047ab8d51c1481c"
+  },
+  {
+   "game_id": 50,
+   "names": [
+    "roi_buyer",
+    "cinder_specialist"
+   ],
+   "seed": 7002050,
+   "winner": 0,
+   "turns": 86,
+   "hit_cap": false,
+   "net_worths": [
+    6600,
+    0
+   ],
+   "sha256": "5fa744fc2b49478ab36b9d8b66bf6072c03aea7c77216bf30c22aea731bf1bd2"
+  },
+  {
+   "game_id": 51,
+   "names": [
+    "never_buy",
+    "auction_sniper"
+   ],
+   "seed": 7002051,
+   "winner": 1,
+   "turns": 79,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    8585
+   ],
+   "sha256": "b71dbbec7747020c98ae67a90107b24b05e320cd1cf9accd3de4cf942c50d118"
+  },
+  {
+   "game_id": 52,
+   "names": [
+    "roi_buyer",
+    "auction_sniper"
+   ],
+   "seed": 7002052,
+   "winner": 1,
+   "turns": 109,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    8260
+   ],
+   "sha256": "c037a8b9b10e95f47b752ac7f3aa953dfb578556fdd3b98caab5645612c60e5d"
+  },
+  {
+   "game_id": 53,
+   "names": [
+    "auction_sniper",
+    "cheap_lots"
+   ],
+   "seed": 7002053,
+   "winner": 0,
+   "turns": 122,
+   "hit_cap": false,
+   "net_worths": [
+    8539,
+    0
+   ],
+   "sha256": "cbf0f52ba19cc0723df7e105f026781c341689db07176ef43adf57eae7a1ef2c"
+  },
+  {
+   "game_id": 54,
+   "names": [
+    "expert",
+    "roi_buyer"
+   ],
+   "seed": 7002054,
+   "winner": 1,
+   "turns": 163,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    7338
+   ],
+   "sha256": "792876963bb0d659b3d8cb0245fdb1c06a79f3632c08f03958c6e81b10e7c68d"
+  },
+  {
+   "game_id": 55,
+   "names": [
+    "conservative_mortgager",
+    "port_rush"
+   ],
+   "seed": 7002055,
+   "winner": 1,
+   "turns": 159,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    7369
+   ],
+   "sha256": "fdf11e62ed9a847bd111879d9a54d9691756d8a93558d0e6d6df683437877d40"
+  },
+  {
+   "game_id": 56,
+   "names": [
+    "high_roller",
+    "random"
+   ],
+   "seed": 7002056,
+   "winner": 1,
+   "turns": 79,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    5498
+   ],
+   "sha256": "2fff98d88de7af31d3979469edf6136c5921c3d02fcadda4db2e68e89761b7e5"
+  },
+  {
+   "game_id": 57,
+   "names": [
+    "high_roller",
+    "group_blocker"
+   ],
+   "seed": 7002057,
+   "winner": 1,
+   "turns": 129,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    10207
+   ],
+   "sha256": "1a54769b12bb40865df989ac43e47a6095954f2de1529ee1907bed9513371b18"
+  },
+  {
+   "game_id": 58,
+   "names": [
+    "premium_lots",
+    "three_depots"
+   ],
+   "seed": 7002058,
+   "winner": 1,
+   "turns": 175,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    8069
+   ],
+   "sha256": "f37af9a4f38f2cfad0abda16514e6a66162a0f536d936ced423005fb9559b5b7"
+  },
+  {
+   "game_id": 59,
+   "names": [
+    "conservative_mortgager",
+    "expert"
+   ],
+   "seed": 7002059,
+   "winner": 0,
+   "turns": 170,
+   "hit_cap": false,
+   "net_worths": [
+    8128,
+    0
+   ],
+   "sha256": "98c94b1dff0b17d984f38c912eca1407a396b57f5e13cef8c0073d1800ac1243"
+  }
+ ],
+ "4": [
+  {
+   "game_id": 0,
+   "names": [
+    "expert",
+    "roi_buyer",
+    "ferry_baron",
+    "rent_maximizer"
+   ],
+   "seed": 7004000,
+   "winner": 3,
+   "turns": 113,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    0,
+    0,
+    9696
+   ],
+   "sha256": "7e12d6e69b102e2e71e6962f2a670775e41b0cc6e41c63a2880d5e08baf2c3eb"
+  },
+  {
+   "game_id": 1,
+   "names": [
+    "aggressive_trader",
+    "high_roller",
+    "three_depots",
+    "monopoly_trader"
+   ],
+   "seed": 7004001,
+   "winner": 2,
+   "turns": 2000,
+   "hit_cap": true,
+   "net_worths": [
+    26355,
+    10359,
+    29950,
+    4487
+   ],
+   "sha256": "f2174cb3e21258e55738e36a5b5b96f3e5c2093dba9eaccb33aea49d377ce365"
+  },
+  {
+   "game_id": 2,
+   "names": [
+    "rent_maximizer",
+    "auction_sniper",
+    "conservative_mortgager",
+    "always_buy"
+   ],
+   "seed": 7004002,
+   "winner": 2,
+   "turns": 2000,
+   "hit_cap": true,
+   "net_worths": [
+    5903,
+    0,
+    55606,
+    6637
+   ],
+   "sha256": "fe275c652448c4267f945b0427bebf6c751a54d966e8e2861165ece2d1a12767"
+  },
+  {
+   "game_id": 3,
+   "names": [
+    "cheap_lots",
+    "brig_stayer",
+    "rent_maximizer",
+    "cash_hoarder"
+   ],
+   "seed": 7004003,
+   "winner": 3,
+   "turns": 2000,
+   "hit_cap": true,
+   "net_worths": [
+    13462,
+    17935,
+    18852,
+    19137
+   ],
+   "sha256": "8e89ac33ad74590729a6713507bd726df91d28ac129a75e1b4a0299b9ae984db"
+  },
+  {
+   "game_id": 4,
+   "names": [
+    "aggressive_builder",
+    "conservative_mortgager",
+    "cheap_lots",
+    "premium_lots"
+   ],
+   "seed": 7004004,
+   "winner": 1,
+   "turns": 2000,
+   "hit_cap": true,
+   "net_worths": [
+    24405,
+    25667,
+    7236,
+    11435
+   ],
+   "sha256": "94eac31f92bb24bc99d401fb173d12e664654f086d3e29458db055b73f999d6c"
+  },
+  {
+   "game_id": 5,
+   "names": [
+    "no_utilities",
+    "brig_stayer",
+    "cinder_specialist",
+    "aggressive_builder"
+   ],
+   "seed": 7004005,
+   "winner": 1,
+   "turns": 169,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    11053,
+    0,
+    0
+   ],
+   "sha256": "5786ddf34a7edaec61b7fe90f5d5f9e4251ed1132f06f52d3ded0f6bc9c2a69a"
+  },
+  {
+   "game_id": 6,
+   "names": [
+    "balanced",
+    "monopoly_trader",
+    "three_depots",
+    "expert"
+   ],
+   "seed": 7004006,
+   "winner": 1,
+   "turns": 167,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    8169,
+    0,
+    0
+   ],
+   "sha256": "800b259942d4e8008180547e79ddfc6c9bc1df304c73dc1fdff840e04aecb7e8"
+  },
+  {
+   "game_id": 7,
+   "names": [
+    "high_roller",
+    "random",
+    "cheap_lots",
+    "no_utilities"
+   ],
+   "seed": 7004007,
+   "winner": 3,
+   "turns": 149,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    0,
+    0,
+    10920
+   ],
+   "sha256": "0bdfe08d7419f132642df7ee1d57783e11bb79284259129813c40c88ab0f5ad9"
+  },
+  {
+   "game_id": 8,
+   "names": [
+    "ferry_baron",
+    "aggressive_trader",
+    "monopoly_trader",
+    "amber_specialist"
+   ],
+   "seed": 7004008,
+   "winner": 2,
+   "turns": 363,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    0,
+    15691,
+    0
+   ],
+   "sha256": "3667c730d4036515ab0b46c2bb339e1b4c0a3630c13731d0d827853c07af7a7c"
+  },
+  {
+   "game_id": 9,
+   "names": [
+    "high_roller",
+    "cheap_lots",
+    "port_rush",
+    "aggressive_builder"
+   ],
+   "seed": 7004009,
+   "winner": 2,
+   "turns": 211,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    0,
+    9978,
+    0
+   ],
+   "sha256": "8dae4dc3b22f455446726b4750f9a7b2983ec02830d56fe580875f8d4a1a6571"
+  },
+  {
+   "game_id": 10,
+   "names": [
+    "cinder_specialist",
+    "expert",
+    "group_blocker",
+    "aggressive_trader"
+   ],
+   "seed": 7004010,
+   "winner": 1,
+   "turns": 2000,
+   "hit_cap": true,
+   "net_worths": [
+    4520,
+    45066,
+    6625,
+    8710
+   ],
+   "sha256": "37547fea9aa3f51268166af05c43f7b1582413a5cb1229f4bb3b24778419ee52"
+  },
+  {
+   "game_id": 11,
+   "names": [
+    "group_blocker",
+    "aggressive_trader",
+    "expert",
+    "brig_stayer"
+   ],
+   "seed": 7004011,
+   "winner": 3,
+   "turns": 247,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    0,
+    0,
+    10619
+   ],
+   "sha256": "e6acdcd89f4228935565e6a061d807bb4ff678b87734c7e7cba02c191f741fb8"
+  },
+  {
+   "game_id": 12,
+   "names": [
+    "aggressive_builder",
+    "port_rush",
+    "never_buy",
+    "always_buy"
+   ],
+   "seed": 7004012,
+   "winner": 1,
+   "turns": 192,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    10641,
+    0,
+    0
+   ],
+   "sha256": "d86f093c58e9e27e6984d68870de7d5da15a67f154586eedd41be44343de928d"
+  },
+  {
+   "game_id": 13,
+   "names": [
+    "conservative_mortgager",
+    "aggressive_trader",
+    "no_utilities",
+    "group_blocker"
+   ],
+   "seed": 7004013,
+   "winner": 0,
+   "turns": 204,
+   "hit_cap": false,
+   "net_worths": [
+    11002,
+    0,
+    0,
+    0
+   ],
+   "sha256": "58534a020d33ef846e5cd0d054dcfcbe136c365313d3e7922d8eaca367418235"
+  },
+  {
+   "game_id": 14,
+   "names": [
+    "group_blocker",
+    "no_utilities",
+    "premium_lots",
+    "roi_buyer"
+   ],
+   "seed": 7004014,
+   "winner": 0,
+   "turns": 2000,
+   "hit_cap": true,
+   "net_worths": [
+    54227,
+    7370,
+    0,
+    4945
+   ],
+   "sha256": "3804e917d6596dfa03e517e6fd330470354ae0ee2fe3c5a4f7356c9f8e43668c"
+  },
+  {
+   "game_id": 15,
+   "names": [
+    "always_buy",
+    "high_roller",
+    "conservative_mortgager",
+    "premium_lots"
+   ],
+   "seed": 7004015,
+   "winner": 1,
+   "turns": 272,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    12055,
+    0,
+    0
+   ],
+   "sha256": "2eb348eeb8ce80dd4989bb49ff578170f4a736d616c9109c6cbfdd36ccecc3c2"
+  },
+  {
+   "game_id": 16,
+   "names": [
+    "coral_specialist",
+    "monopoly_trader",
+    "cinder_specialist",
+    "random"
+   ],
+   "seed": 7004016,
+   "winner": 1,
+   "turns": 278,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    12592,
+    0,
+    0
+   ],
+   "sha256": "b32e60ae924e1f66d75930c9a27774ac570a44fadeeb061c4a2a3a78b4e6f8d8"
+  },
+  {
+   "game_id": 17,
+   "names": [
+    "auction_sniper",
+    "cinder_specialist",
+    "no_utilities",
+    "expert"
+   ],
+   "seed": 7004017,
+   "winner": 2,
+   "turns": 224,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    0,
+    9585,
+    0
+   ],
+   "sha256": "8c861bffce3fc9d80dc596ace753ce15adc5d028c6ed99c6d899e4cd4d6cea12"
+  },
+  {
+   "game_id": 18,
+   "names": [
+    "coral_specialist",
+    "aggressive_builder",
+    "aggressive_trader",
+    "monopoly_trader"
+   ],
+   "seed": 7004018,
+   "winner": 3,
+   "turns": 2000,
+   "hit_cap": true,
+   "net_worths": [
+    4664,
+    12844,
+    23049,
+    26412
+   ],
+   "sha256": "2a90752ad5025769d8e483ac649f7cbd6a5ecf4dcc76990f41469d1e12d5b842"
+  },
+  {
+   "game_id": 19,
+   "names": [
+    "monopoly_trader",
+    "balanced",
+    "coral_specialist",
+    "auction_sniper"
+   ],
+   "seed": 7004019,
+   "winner": 1,
+   "turns": 981,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    38166,
+    0,
+    0
+   ],
+   "sha256": "ba8cd4b15d87528e135df65d464f3099dac355342cbb24fa22ffcb1ced8a1636"
+  },
+  {
+   "game_id": 20,
+   "names": [
+    "coral_specialist",
+    "ferry_baron",
+    "group_blocker",
+    "random"
+   ],
+   "seed": 7004020,
+   "winner": 2,
+   "turns": 151,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    0,
+    8249,
+    0
+   ],
+   "sha256": "882859a52174b35c117b312ecd80219f70ac79726217bfd9fd4a0b55f691afc2"
+  },
+  {
+   "game_id": 21,
+   "names": [
+    "amber_specialist",
+    "three_depots",
+    "balanced",
+    "always_buy"
+   ],
+   "seed": 7004021,
+   "winner": 1,
+   "turns": 226,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    11569,
+    0,
+    0
+   ],
+   "sha256": "9331a05c6c1306b0005d828048485ce6b5eefea4a1d96f9b3d745ef836c08f3f"
+  },
+  {
+   "game_id": 22,
+   "names": [
+    "premium_lots",
+    "rent_maximizer",
+    "auction_sniper",
+    "roi_buyer"
+   ],
+   "seed": 7004022,
+   "winner": 2,
+   "turns": 194,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    0,
+    11653,
+    0
+   ],
+   "sha256": "4e3d92569a1b8dcd0e650d5545178a8bc655f27979426ee559a1d9963d8187cc"
+  },
+  {
+   "game_id": 23,
+   "names": [
+    "coral_specialist",
+    "premium_lots",
+    "group_blocker",
+    "roi_buyer"
+   ],
+   "seed": 7004023,
+   "winner": 2,
+   "turns": 125,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    0,
+    10338,
+    0
+   ],
+   "sha256": "c713205d2ea09dc761308dc3fd09b132a7fb0e6e369ae26d05b4062d02db911b"
+  },
+  {
+   "game_id": 24,
+   "names": [
+    "always_buy",
+    "aggressive_trader",
+    "random",
+    "cheap_lots"
+   ],
+   "seed": 7004024,
+   "winner": 0,
+   "turns": 156,
+   "hit_cap": false,
+   "net_worths": [
+    10407,
+    0,
+    0,
+    0
+   ],
+   "sha256": "48802f3ec03e15e3cbba40984ee8a44b5ce16a01043af60e186e9286bbc530fb"
+  },
+  {
+   "game_id": 25,
+   "names": [
+    "random",
+    "rent_maximizer",
+    "roi_buyer",
+    "cinder_specialist"
+   ],
+   "seed": 7004025,
+   "winner": 3,
+   "turns": 279,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    0,
+    0,
+    10977
+   ],
+   "sha256": "3c1787e617bb9d252381b1830d817a63c330905f4600b71c72e150ec470c3b15"
+  },
+  {
+   "game_id": 26,
+   "names": [
+    "always_buy",
+    "cheap_lots",
+    "expert",
+    "conservative_mortgager"
+   ],
+   "seed": 7004026,
+   "winner": 0,
+   "turns": 2000,
+   "hit_cap": true,
+   "net_worths": [
+    28052,
+    11233,
+    12860,
+    18276
+   ],
+   "sha256": "a1eb2c6948e6c5d747dc8b46578383fc4ad9fad1d1ef1070d6d2e12653632129"
+  },
+  {
+   "game_id": 27,
+   "names": [
+    "brig_stayer",
+    "cheap_lots",
+    "never_buy",
+    "random"
+   ],
+   "seed": 7004027,
+   "winner": 0,
+   "turns": 271,
+   "hit_cap": false,
+   "net_worths": [
+    12406,
+    0,
+    0,
+    0
+   ],
+   "sha256": "d82cad1d0c9b48d0bbefc59c64b8274674bd56ed774db01042ce604dff364a92"
+  },
+  {
+   "game_id": 28,
+   "names": [
+    "auction_sniper",
+    "random",
+    "coral_specialist",
+    "high_roller"
+   ],
+   "seed": 7004028,
+   "winner": 3,
+   "turns": 361,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    0,
+    0,
+    16667
+   ],
+   "sha256": "419cbbfd395c4b86b4e6a787df76ce83c480a6c20d5174ac0e385a4fce8b8fd8"
+  },
+  {
+   "game_id": 29,
+   "names": [
+    "amber_specialist",
+    "expert",
+    "cash_hoarder",
+    "port_rush"
+   ],
+   "seed": 7004029,
+   "winner": 3,
+   "turns": 181,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    0,
+    0,
+    10655
+   ],
+   "sha256": "77bb427c4429617fe6cde4349598bd312467d6ce5faf437e032d476ffebe7bbb"
+  },
+  {
+   "game_id": 30,
+   "names": [
+    "high_roller",
+    "balanced",
+    "random",
+    "monopoly_trader"
+   ],
+   "seed": 7004030,
+   "winner": 3,
+   "turns": 242,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    0,
+    0,
+    12595
+   ],
+   "sha256": "0231b2bc02afb9a1d38a6ada6729f34341feb4245d07a13326a3865c2fccc7ed"
+  },
+  {
+   "game_id": 31,
+   "names": [
+    "group_blocker",
+    "cheap_lots",
+    "coral_specialist",
+    "conservative_mortgager"
+   ],
+   "seed": 7004031,
+   "winner": 0,
+   "turns": 300,
+   "hit_cap": false,
+   "net_worths": [
+    15382,
+    0,
+    0,
+    0
+   ],
+   "sha256": "1516c120ae9ddf1c52da3681e77a7932af66b4060f954e802fa8d30a9210e4af"
+  },
+  {
+   "game_id": 32,
+   "names": [
+    "balanced",
+    "three_depots",
+    "premium_lots",
+    "expert"
+   ],
+   "seed": 7004032,
+   "winner": 3,
+   "turns": 2000,
+   "hit_cap": true,
+   "net_worths": [
+    18186,
+    2970,
+    0,
+    42359
+   ],
+   "sha256": "af60055d9a10dc5cf34bc1992c9bb9d8a07c11b40479154dd0dd839b91aad228"
+  },
+  {
+   "game_id": 33,
+   "names": [
+    "group_blocker",
+    "never_buy",
+    "monopoly_trader",
+    "conservative_mortgager"
+   ],
+   "seed": 7004033,
+   "winner": 2,
+   "turns": 2000,
+   "hit_cap": true,
+   "net_worths": [
+    20849,
+    9920,
+    22196,
+    16263
+   ],
+   "sha256": "746c1868a3b67b4387e9c31b892f562427c207fdf4136fcdb5480975f80f31ae"
+  },
+  {
+   "game_id": 34,
+   "names": [
+    "premium_lots",
+    "always_buy",
+    "aggressive_builder",
+    "roi_buyer"
+   ],
+   "seed": 7004034,
+   "winner": 1,
+   "turns": 145,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    9428,
+    0,
+    0
+   ],
+   "sha256": "0a7993840de8f68fe8cd80333ee2a50a033a8163603111dcc3c94a27250c4886"
+  },
+  {
+   "game_id": 35,
+   "names": [
+    "monopoly_trader",
+    "expert",
+    "auction_sniper",
+    "cheap_lots"
+   ],
+   "seed": 7004035,
+   "winner": 3,
+   "turns": 356,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    0,
+    0,
+    16402
+   ],
+   "sha256": "e930760d6e2c3dd902fb378c43efc54e5a11991666d26759c8b6cce377e4cf3c"
+  },
+  {
+   "game_id": 36,
+   "names": [
+    "coral_specialist",
+    "aggressive_trader",
+    "high_roller",
+    "conservative_mortgager"
+   ],
+   "seed": 7004036,
+   "winner": 2,
+   "turns": 125,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    0,
+    9114,
+    0
+   ],
+   "sha256": "82a56bf1efc1ccef84dd6f88a70e328c1981b84e0f158a87968b0956d794f3aa"
+  },
+  {
+   "game_id": 37,
+   "names": [
+    "expert",
+    "never_buy",
+    "cheap_lots",
+    "cash_hoarder"
+   ],
+   "seed": 7004037,
+   "winner": 2,
+   "turns": 121,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    0,
+    11028,
+    0
+   ],
+   "sha256": "dd1c0d69144a0105835ac8f0d32504ccf66a0d4ec8a2b9ae58ed7dbc85f3fb26"
+  },
+  {
+   "game_id": 38,
+   "names": [
+    "high_roller",
+    "cinder_specialist",
+    "rent_maximizer",
+    "no_utilities"
+   ],
+   "seed": 7004038,
+   "winner": 2,
+   "turns": 164,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    0,
+    10910,
+    0
+   ],
+   "sha256": "7dff9f19b344b9d1ea0719fee2459270da24d0738089291f077ab2e55855ad46"
+  },
+  {
+   "game_id": 39,
+   "names": [
+    "ferry_baron",
+    "shortage_blocker",
+    "never_buy",
+    "premium_lots"
+   ],
+   "seed": 7004039,
+   "winner": 3,
+   "turns": 133,
+   "hit_cap": false,
+   "net_worths": [
+    0,
+    0,
+    0,
+    10752
+   ],
+   "sha256": "fed8c5ae91bf294ae309ced9f846152fab1e19bce741c377f3137d74d053dfca"
+  }
+ ]
+}

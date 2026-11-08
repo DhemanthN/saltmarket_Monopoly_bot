@@ -37,6 +37,7 @@ python scripts/simulate.py                            # 180,000-game tournament
 python scripts/train.py --steps 20000000 --run main   # train an agent
 python scripts/evaluate.py --run main                 # held-out evaluation
 python scripts/analyze.py --runs main --best-run main # charts and tables
+python scripts/benchmark.py                           # simulator speed and scaling
 
 python scripts/reproduce_all.py --quick               # whole pipeline, about 3 minutes
 python scripts/reproduce_all.py                       # all results, over an hour
@@ -76,7 +77,7 @@ src/saltmarket/
   rl/        action and observation encoding, environment, PPO, training, evaluation
   analysis/  statistics, behavior probes, charts
 scripts/     command-line entry points
-tests/       333 tests
+tests/       350 tests
 data/        the original board and cards
 results/     summary tables and figures
 models/      trained agent weights
@@ -96,6 +97,35 @@ docs/        strategies.md, rl.md, RESUME_UPDATE.md
   over 1.8 million rolls.
 - **PPO check:** the training code must solve CartPole before it is trusted on this game.
 - **CI** runs ruff and all non-slow tests on every push.
+
+## Performance
+
+Profiling showed the engine re-scanning the board for facts that rarely
+change, like who owns a whole island group. Ownership is now cached and refreshed only
+when a space changes hands. Dice are drawn from NumPy in batches, and bots only examine
+spaces where an action is possible. Games stay **bit-for-bit identical** for the same
+seed: 100 fingerprinted games (hashes of every event), recorded with the engine from before
+the change, still match exactly (`tests/test_performance.py`).
+
+| Single process, median of 3 | Before | After | Speed-up |
+| --- | --- | --- | --- |
+| 2-player games per second | 30.9 | 59.6 | 1.93x |
+| 4-player games per second | 12.6 | 34.3 | 2.71x |
+| Tournament mix (72% 2-player) | 22.0 | 49.5 | 2.24x |
+
+Tournaments split games into chunks across worker processes. Each game's seed comes from
+the schedule, so results are identical for any number of workers, which a test checks.
+The best measured rate was **560 games per second with 16 workers**, 10.9x one worker
+and 25x the old engine on one core. At that rate 1,000,000 games take about **30
+minutes**, compared with about 12.6 hours on one core before.
+
+![Throughput and scaling efficiency by worker count](results/figures/benchmark_scaling.png)
+
+24 workers measured slower than 16 (487 against 560 games per second). The cause was not
+measured: other programs were using the CPU, and the 24 logical CPUs share physical cores,
+so either could explain it. The tournament runner was already parallel before this
+work, so the new gain at full scale comes from the faster engine. Numbers are from
+`results/benchmark.json`, made by `python scripts/benchmark.py --baseline-src <old src>`.
 
 ## Tech stack
 

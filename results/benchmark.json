@@ -1,0 +1,204 @@
+{
+  "machine": {
+    "logical_cpus": 24,
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.14.7"
+  },
+  "settings": {
+    "repeats": 3,
+    "games_2p": 600,
+    "games_4p": 300,
+    "scaling_games": 6000,
+    "scaling_two_player_share": 0.7222222222222222,
+    "chunk_size": 50,
+    "baseline_src": "C:\\Users\\Dhema\\AppData\\Local\\Temp\\claude\\2d9946419453d698\\aab031e0-3523-4931-bc62-a38447dde81e\\scratchpad\\base\\src"
+  },
+  "note": "Other processes may have been using the CPU. Each value is a median, and baseline and current runs alternated so they saw the same load.",
+  "single_process": {
+    "2_player": {
+      "baseline": {
+        "median_games_per_second": 30.892641326491102,
+        "runs": [
+          {
+            "games": 600,
+            "turns": 134797,
+            "seconds": 23.249378299995442,
+            "games_per_second": 25.80714169032716
+          },
+          {
+            "games": 600,
+            "turns": 134797,
+            "seconds": 17.876900499999465,
+            "games_per_second": 33.562865106287184
+          },
+          {
+            "games": 600,
+            "turns": 134797,
+            "seconds": 19.42210100000375,
+            "games_per_second": 30.892641326491102
+          }
+        ]
+      },
+      "current": {
+        "median_games_per_second": 59.61945438839237,
+        "runs": [
+          {
+            "games": 600,
+            "turns": 134797,
+            "seconds": 14.962233899997955,
+            "games_per_second": 40.1009638006048
+          },
+          {
+            "games": 600,
+            "turns": 134797,
+            "seconds": 10.063829099999566,
+            "games_per_second": 59.61945438839237
+          },
+          {
+            "games": 600,
+            "turns": 134797,
+            "seconds": 8.530470300000161,
+            "games_per_second": 70.3360985853252
+          }
+        ]
+      },
+      "speedup": 1.9298917744941224
+    },
+    "4_player": {
+      "baseline": {
+        "median_games_per_second": 12.63990883356145,
+        "runs": [
+          {
+            "games": 300,
+            "turns": 207776,
+            "seconds": 26.263650599998073,
+            "games_per_second": 11.42263139915599
+          },
+          {
+            "games": 300,
+            "turns": 207776,
+            "seconds": 19.263358999996854,
+            "games_per_second": 15.573607905041328
+          },
+          {
+            "games": 300,
+            "turns": 207776,
+            "seconds": 23.73434840000118,
+            "games_per_second": 12.63990883356145
+          }
+        ]
+      },
+      "current": {
+        "median_games_per_second": 34.282392223976586,
+        "runs": [
+          {
+            "games": 300,
+            "turns": 207776,
+            "seconds": 7.669139199999336,
+            "games_per_second": 39.11781911586974
+          },
+          {
+            "games": 300,
+            "turns": 207776,
+            "seconds": 8.750847899995279,
+            "games_per_second": 34.282392223976586
+          },
+          {
+            "games": 300,
+            "turns": 207776,
+            "seconds": 11.121512999998231,
+            "games_per_second": 26.974747051057506
+          }
+        ]
+      },
+      "speedup": 2.7122341367645055
+    }
+  },
+  "scaling": [
+    {
+      "workers": 1,
+      "median_seconds": 117.03382229999988,
+      "seconds": [
+        117.03382229999988,
+        128.62138799999957,
+        106.79214850000426
+      ],
+      "games_per_second": 51.26723097721133,
+      "speedup": 1.0,
+      "efficiency": 1.0
+    },
+    {
+      "workers": 2,
+      "median_seconds": 61.65527020000445,
+      "seconds": [
+        61.65527020000445,
+        61.50449440000375,
+        73.47120430000359
+      ],
+      "games_per_second": 97.31528189782496,
+      "speedup": 1.8981965681174071,
+      "efficiency": 0.9490982840587036
+    },
+    {
+      "workers": 4,
+      "median_seconds": 34.271418500000436,
+      "seconds": [
+        34.271418500000436,
+        30.403341200006253,
+        36.353987499998766
+      ],
+      "games_per_second": 175.07299851040375,
+      "speedup": 3.414910366199123,
+      "efficiency": 0.8537275915497807
+    },
+    {
+      "workers": 8,
+      "median_seconds": 17.486404299997957,
+      "seconds": [
+        18.82989180000004,
+        17.486404299997957,
+        16.086447500005306
+      ],
+      "games_per_second": 343.1237146907727,
+      "speedup": 6.692846642005959,
+      "efficiency": 0.8366058302507449
+    },
+    {
+      "workers": 16,
+      "median_seconds": 10.706269299997075,
+      "seconds": [
+        12.306715300001088,
+        10.064872999995714,
+        10.706269299997075
+      ],
+      "games_per_second": 560.419304976911,
+      "speedup": 10.931335558692874,
+      "efficiency": 0.6832084724183046
+    },
+    {
+      "workers": 24,
+      "median_seconds": 12.32627969999885,
+      "seconds": [
+        12.32627969999885,
+        13.16133290000289,
+        10.536468699996476
+      ],
+      "games_per_second": 486.7648752121502,
+      "speedup": 9.494658984576734,
+      "efficiency": 0.39561079102403063
+    }
+  ],
+  "best_workers": 16,
+  "projected_seconds_for_1m_games": 1784.378216666179,
+  "summary": {
+    "best_workers": 16,
+    "best_games_per_second": 560.419304976911,
+    "parallel_speedup": 10.931335558692874,
+    "projected_minutes_for_1m_games": 29.739636944436317,
+    "baseline_mixed_games_per_second": 22.048429919359815,
+    "current_mixed_games_per_second": 49.46453330514246,
+    "optimization_speedup_mixed": 2.2434492381568494,
+    "total_speedup_vs_baseline_single_process": 25.417651371394477,
+    "baseline_single_process_hours_for_1m_games": 12.598528729425427
+  }
+}

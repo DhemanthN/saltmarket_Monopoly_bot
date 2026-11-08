@@ -10,7 +10,7 @@ PORT_LEVEL = 5
 
 def owns_group(state: GameState, player_id: int, group: str) -> bool:
     """Return True if the player owns every lot in an island group."""
-    return all(state.owner[i] == player_id for i in state.board.groups[group])
+    return state.group_owner(group) == player_id
 
 
 def count_owned(state: GameState, player_id: int, indices: tuple[int, ...]) -> int:
@@ -23,7 +23,7 @@ def rent(state: GameState, index: int, dice_total: int) -> int:
     owner = state.owner[index]
     if owner is None or state.mortgaged[index]:
         return 0
-    space = state.board[index]
+    space = state.board.spaces[index]
     if space.kind == SpaceKind.FERRY:
         return space.rents[count_owned(state, owner, state.board.ferries) - 1]
     if space.kind == SpaceKind.UTILITY:
@@ -52,7 +52,7 @@ def building_refund(state: GameState, index: int) -> int:
 
 def can_build(state: GameState, player_id: int, index: int) -> bool:
     """Return True if the player may add one building level to a space."""
-    space = state.board[index]
+    space = state.board.spaces[index]
     if space.kind != SpaceKind.PROPERTY or state.owner[index] != player_id:
         return False
     if not owns_group(state, player_id, space.group):

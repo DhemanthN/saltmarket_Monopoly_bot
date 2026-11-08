@@ -47,6 +47,27 @@ Living progress file. A fresh session should read `CLAUDE.md`, then this file.
 
 Nothing. All milestones are finished. A fresh virtual environment install passed lint, all 333 tests, and `reproduce_all.py --quick`.
 
+## Branch feat/perf (simulator speed, 2026-11-08)
+
+- Ownership views (spaces per player, sole owner per group, build sites, split groups)
+  are cached in `GameState` and rebuilt only when `state.owner` changes. `owner` is an
+  `OwnerList` whose writes bump a version counter.
+- `RandomDice` draws faces 512 rolls at a time. NumPy gives the same stream either way,
+  which a test checks.
+- Bots search only groups they own outright when building, and only split groups when
+  proposing trades.
+- `run_tournament` plays in-process when `workers == 1` and takes `progress=False`.
+- `scripts/fingerprint_games.py` and `tests/data/golden_games.json`: 100 seeded games
+  hashed over their full event log, recorded with the engine before optimizing.
+  `tests/test_performance.py` replays them. Use `--write` only for intended rule changes.
+- `scripts/benchmark.py` writes `results/benchmark.json` and
+  `results/figures/benchmark_scaling.png`.
+- Measured (`results/benchmark.json`, medians of 3, CPU shared with other sessions):
+  2-player 30.9 to 59.6 games/s, 4-player 12.6 to 34.3, best 560 games/s at 16
+  workers, about 30 minutes per 1,000,000 games. 350 tests pass, ruff clean.
+- Not done here, on purpose: the full tournament was not rerun and no existing result
+  file changed. Session 4 reruns it after merging.
+
 ## Next steps
 
 2. The owner makes the repo public, never Claude.
@@ -62,6 +83,11 @@ Nothing. All milestones are finished. A fresh virtual environment install passed
 - **Windows Smart App Control is On.** See known issues.
 
 ## Decisions
+
+- **Speed work keeps games bit-for-bit identical.** Checked by golden fingerprints and by
+  comparing 5,000 games of tournament rows byte for byte with the old engine.
+- **Benchmark baseline** is the `c59a17c` source exported with `git archive`, timed in
+  alternating child processes so both versions see the same machine load. Medians of 3.
 
 - **Final agents:** `two_player` is quoted for 2 players (85.6% on fresh seeds) and `main`
   for 4 players (40.7%). `two_player` was not retrained after evaluation. Only two runs
@@ -132,6 +158,10 @@ Nothing. All milestones are finished. A fresh virtual environment install passed
 - The palette validator was not run because Node is not installed. The chart uses the
   first two slots of the documented, pre-validated palette.
 
+- **Smoke suite over 30 seconds under load.** On 2026-11-08, with other sessions using
+  the CPU, `pytest -m smoke` took 52 s on the old commit and 57 s on feat/perf. Two RL
+  tests take most of it. Only the 2-player fingerprint check is in the smoke set.
+
 ## Owner feedback log
 
 | Request | Status |
@@ -140,4 +170,5 @@ Nothing. All milestones are finished. A fresh virtual environment install passed
 | Keep the rules and report win rates with and without capped games | Done |
 | M5 option 2: train a 2-player specialist | Done |
 | Run GPU work on the RTX 5070 Ti, not the integrated GPU, now and in future | Done |
+| Remove the accidentally committed personal folder and ignore it | Done (still in older commits; rewriting history needs owner approval) |
 | Skip review gates through M5, M6, M7, and the resume update, log decisions here, and give one final summary. Stop only for a blocker, two failed attempts, or a Smart App Control block | Active |

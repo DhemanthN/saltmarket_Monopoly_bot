@@ -4,7 +4,8 @@ A "matchup" here means one complete game. 2-player evaluation plays the agent ag
 each bot in turn, alternating who moves first. 4-player evaluation seats the agent with
 three distinct bots drawn from the pool and rotates the table through every seat order.
 Seeds start at EVAL_SEED_BASE, a range training never uses. Held-out opponent games
-use their own offset, so they share no seed with either earlier evaluation set.
+use their own offset, so they share no seed with either earlier evaluation set. The v2
+seed set, used for the 40-bot evaluation, has its own offset too.
 """
 
 import multiprocessing
@@ -25,6 +26,7 @@ from saltmarket.rl.policy import NumpyPolicy, PolicyWeights
 EVAL_SEED_BASE = 9_000_000_000
 FRESH_SEED_OFFSET = 100_000_000
 HELDOUT_SEED_OFFSET = 200_000_000
+V2_SEED_OFFSET = 300_000_000
 AGENT = "ppo"
 CHUNK_SIZE = 100
 

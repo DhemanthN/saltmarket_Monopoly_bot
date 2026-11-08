@@ -1,8 +1,12 @@
 """Create every chart and analysis table from saved results.
 
 Usage: python scripts/analyze.py --runs main two_player --best-run two_player --fresh
+       python scripts/analyze.py --runs main two_player --best-run two_player \
+           --suffix _v2_all --raw-suffix _all --dqn-run dqn_two_player
 Needs results/raw/ from simulate.py and saved models and evaluations from train.py and
-evaluate.py. The first run listed is used for 4-player charts.
+evaluate.py. The first run listed is used for 4-player charts. ``--suffix`` picks which
+evaluation files to chart, and ``--raw-suffix`` which tournament, such as ``_all`` for the
+40-bot pool. ``--dqn-run`` adds that agent's 2-player row to the win-rate chart.
 """
 
 import argparse
@@ -16,7 +20,8 @@ import pandas as pd
 from saltmarket.analysis import plots
 from saltmarket.analysis import tournament_stats as stats
 from saltmarket.analysis.tendencies import auction_prices, measure_tendencies
-from saltmarket.bots.catalog import make_bot
+from saltmarket.bots.heldout.catalog import HELDOUT_BOTS
+from saltmarket.bots.registry import make_any_bot
 from saltmarket.paths import FIGURES, MODELS, RESULTS
 from saltmarket.rl.agent import AgentStrategy
 from saltmarket.rl.policy import NumpyPolicy, PolicyWeights
@@ -32,7 +37,7 @@ def make_agent(weights: PolicyWeights) -> AgentStrategy:
 
 def _tendencies(task: tuple) -> pd.DataFrame:
     label, weights, bot, games = task
-    maker = partial(make_agent, weights) if weights is not None else partial(make_bot, bot)
+    maker = partial(make_agent, weights) if weights is not None else partial(make_any_bot, bot)
     return measure_tendencies(maker, label, games, ANALYSIS_SEED)
 
 
@@ -61,21 +66,28 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--runs", nargs="+", default=["main"])
     parser.add_argument("--best-run", default="main", help="Run shown in 2-player charts.")
-    parser.add_argument("--fresh", action="store_true", help="Use fresh-seed evaluations.")
+    parser.add_argument("--fresh", action="store_true", help="Same as --suffix _fresh.")
+    parser.add_argument("--suffix", default="", help="Evaluation file suffix, like _v2_all.")
+    parser.add_argument("--raw-suffix", default="", help="Tournament raw folder suffix.")
+    parser.add_argument("--dqn-run", default="", help="DQN run to add to the win-rate chart.")
     parser.add_argument("--behavior-games", type=int, default=DEFAULT_BEHAVIOR_GAMES)
     args = parser.parse_args()
     FIGURES.mkdir(parents=True, exist_ok=True)
 
-    two_rows = stats.load_rows(RESULTS / "raw" / "round_robin")
-    four_rows = stats.load_rows(RESULTS / "raw" / "tables")
+    two_rows = stats.load_rows(RESULTS / "raw" / f"round_robin{args.raw_suffix}")
+    four_rows = stats.load_rows(RESULTS / "raw" / f"tables{args.raw_suffix}")
     levels = pd.concat(
         [stats.peak_level_win_rates(two_rows), stats.peak_level_win_rates(four_rows)],
         ignore_index=True,
     )
     levels.to_csv(RESULTS / "peak_level_win_rates.csv", index=False, float_format="%.5f")
 
-    suffix = "_fresh" if args.fresh else ""
+    suffix = "_fresh" if args.fresh else args.suffix
     two_table = pd.read_csv(RESULTS / f"rl_vs_bots_two_player_{args.best_run}{suffix}.csv")
+    if args.dqn_run:
+        dqn = pd.read_csv(RESULTS / f"rl_vs_bots_two_player_{args.dqn_run}{suffix}.csv")
+        two_table = pd.concat([two_table, dqn[dqn["bot"] == "dqn"]], ignore_index=True)
+    heldout = frozenset(HELDOUT_BOTS)
     four_table = pd.read_csv(RESULTS / f"rl_vs_bots_four_player_{args.runs[0]}{suffix}.csv")
     best_bot = pd.read_csv(RESULTS / "two_player_win_rates.csv").iloc[0]["bot"]
     weights = load_policy(MODELS / f"{args.best_run}.npz")
@@ -85,7 +97,7 @@ def main() -> None:
 
     landing = pd.read_csv(RESULTS / "landing_frequency.csv")
     plots.board_heatmap(landing, FIGURES / "board_heatmap.png")
-    plots.ranked_win_rates(two_table, four_table, FIGURES / "win_rates.png")
+    plots.ranked_win_rates(two_table, four_table, FIGURES / "win_rates.png", heldout)
     plots.head_to_head_heatmap(
         pd.read_csv(RESULTS / "head_to_head.csv", index_col=0), FIGURES / "head_to_head.png"
     )
@@ -103,6 +115,7 @@ def main() -> None:
         pd.read_csv(RESULTS / f"rl_eval_two_player_{args.best_run}{suffix}.csv"),
         FIGURES / "agent_vs_opponents.png",
         "PPO agent against each bot, 2 players",
+        heldout,
     )
     plots.tendencies_chart(tendencies, FIGURES / "agent_tendencies.png")
 

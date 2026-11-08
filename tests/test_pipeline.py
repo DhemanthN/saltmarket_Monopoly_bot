@@ -35,3 +35,14 @@ def test_quick_output_is_separate_from_real_results():
     module = load_script()
     assert module.QUICK_OUTPUT != ROOT
     assert "quick_output/" in (ROOT / ".gitignore").read_text(encoding="utf-8")
+
+
+def test_project_stats_counts_python_in_every_code_folder():
+    spec = importlib.util.spec_from_file_location(
+        "project_stats", ROOT / "scripts" / "project_stats.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    lines = module.python_lines()
+    assert set(lines) == {"src", "scripts", "tests"}
+    assert all(count > 100 for count in lines.values())

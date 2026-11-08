@@ -13,7 +13,10 @@ from saltmarket.analysis.style import AXIS, INK, INK_SECONDARY, SERIES, SURFACE,
 BLUE_RAMP = ("#cde2fb", "#86b6ef", "#3987e5", "#1c5cab", "#0d366b")
 DIVERGING = ("#e34948", "#f0efec", "#2a78d6")
 AGENT_COLOR = SERIES[1]
+DQN_COLOR = SERIES[2]
 BOT_COLOR = SERIES[0]
+HELDOUT_COLOR = SERIES[6]
+ENTRANT_COLORS = {"ppo": AGENT_COLOR, "dqn": DQN_COLOR}
 BOARD_SIDE = 11
 
 
@@ -81,11 +84,27 @@ def board_heatmap(table: pd.DataFrame, path: Path) -> None:
     _save(fig, path)
 
 
-def _ranked_panel(ax, table: pd.DataFrame, title: str, baseline: float) -> None:
+def _row_height(rows: int) -> float:
+    """Return a figure height that keeps one bar per row readable."""
+    return max(8.2, 0.24 * rows + 1.6)
+
+
+def _pool_legend(ax, entrants: list[str]) -> None:
+    handles = [plt.Rectangle((0, 0), 1, 1, color=BOT_COLOR, label="training bot"),
+               plt.Rectangle((0, 0), 1, 1, color=HELDOUT_COLOR, label="held-out bot")]
+    handles += [plt.Rectangle((0, 0), 1, 1, color=ENTRANT_COLORS[name], label=name.upper())
+                for name in entrants]
+    ax.legend(handles=handles, loc="lower right", fontsize=8.5)
+
+
+def _ranked_panel(
+    ax, table: pd.DataFrame, title: str, baseline: float, heldout: frozenset[str]
+) -> None:
     table = table.sort_values("win_rate")
     y = np.arange(len(table))
     rate = table["win_rate"] * 100
-    colors = [AGENT_COLOR if bot == "ppo" else BOT_COLOR for bot in table["bot"]]
+    colors = [ENTRANT_COLORS.get(bot, HELDOUT_COLOR if bot in heldout else BOT_COLOR)
+              for bot in table["bot"]]
     errors = _error_bars(table)
     ax.barh(y, rate, height=0.68, color=colors)
     ax.errorbar(rate, y, xerr=errors, fmt="none", ecolor=INK, elinewidth=1, capsize=2)
@@ -97,14 +116,21 @@ def _ranked_panel(ax, table: pd.DataFrame, title: str, baseline: float) -> None:
     ax.grid(axis="y", visible=False)
     _percent_axis(ax.xaxis)
     ax.set_title(title, pad=16)
+    _pool_legend(ax, [bot for bot in ENTRANT_COLORS if bot in set(table["bot"])])
 
 
-def ranked_win_rates(two: pd.DataFrame, four: pd.DataFrame, path: Path) -> None:
-    """Draw every player's win rate with 95% intervals at both table sizes."""
+def ranked_win_rates(
+    two: pd.DataFrame, four: pd.DataFrame, path: Path, heldout: frozenset[str] = frozenset()
+) -> None:
+    """Draw every player's win rate with 95% intervals at both table sizes.
+
+    Rows named ``ppo`` or ``dqn`` are agents, and bots in ``heldout`` get their own color.
+    """
     apply_style()
-    fig, axes = plt.subplots(1, 2, figsize=(13, 8.2), layout="constrained")
-    _ranked_panel(axes[0], two, "2 players", 50)
-    _ranked_panel(axes[1], four, "4 players", 25)
+    height = _row_height(max(len(two), len(four)))
+    fig, axes = plt.subplots(1, 2, figsize=(13, height), layout="constrained")
+    _ranked_panel(axes[0], two, "2 players", 50, heldout)
+    _ranked_panel(axes[1], four, "4 players", 25, heldout)
     axes[0].set_xlabel("Win rate with 95% interval")
     axes[1].set_xlabel("Win rate with 95% interval")
     _save(fig, path)
@@ -238,15 +264,26 @@ def training_curves(logs: dict[str, pd.DataFrame], path: Path) -> None:
     _save(fig, path)
 
 
-def agent_vs_opponents(table: pd.DataFrame, path: Path, title: str) -> None:
-    """Draw the agent's win rate against each bot with 95% intervals."""
+def agent_vs_opponents(
+    table: pd.DataFrame, path: Path, title: str, heldout: frozenset[str] = frozenset()
+) -> None:
+    """Draw the agent's win rate against each bot with 95% intervals.
+
+    Bars against bots in ``heldout``, which the agent never trained against, are colored
+    separately.
+    """
     apply_style()
     table = table.sort_values("win_rate")
-    fig, ax = plt.subplots(figsize=(8.5, 8), layout="constrained")
+    fig, ax = plt.subplots(figsize=(8.5, _row_height(len(table)) - 0.2), layout="constrained")
     y = np.arange(len(table))
     rate = table["win_rate"] * 100
     errors = _error_bars(table)
-    ax.barh(y, rate, height=0.68, color=AGENT_COLOR)
+    colors = [HELDOUT_COLOR if bot in heldout else AGENT_COLOR for bot in table["opponent"]]
+    ax.barh(y, rate, height=0.68, color=colors)
+    if heldout:
+        handles = [plt.Rectangle((0, 0), 1, 1, color=AGENT_COLOR, label="training bot"),
+                   plt.Rectangle((0, 0), 1, 1, color=HELDOUT_COLOR, label="held-out bot")]
+        ax.legend(handles=handles, loc="lower right", fontsize=8.5, title="Opponent")
     ax.errorbar(rate, y, xerr=errors, fmt="none", ecolor=INK, elinewidth=1, capsize=2)
     ax.axvline(50, color=INK_SECONDARY, lw=1)
     ax.set_yticks(y, table["opponent"], fontsize=9)
@@ -332,7 +369,8 @@ def agent_comparison(
     """
     apply_style()
     fig, axes = plt.subplots(
-        1, 2, figsize=(13, 8.2), layout="constrained", width_ratios=(1.15, 1)
+        1, 2, figsize=(13, _row_height(len(next(iter(tables.values()))))),
+        layout="constrained", width_ratios=(1.15, 1),
     )
     colors = dict(zip(curves, (SERIES[1], SERIES[2]), strict=False))
     curve_ax, opponent_ax = axes
@@ -374,5 +412,6 @@ def agent_comparison(
     _percent_axis(opponent_ax.xaxis)
     opponent_ax.set_xlabel("Win rate on fresh held-out seeds, with 95% interval")
     opponent_ax.legend(loc="lower left")
-    opponent_ax.set_title("Against each bot, 400 games each", pad=12)
+    per_bot = int(next(iter(tables.values()))["games"].median())
+    opponent_ax.set_title(f"Against each bot, {per_bot:,} games each", pad=12)
     _save(fig, path)

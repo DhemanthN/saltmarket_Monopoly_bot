@@ -7,7 +7,8 @@ import numpy as np
 import pandas as pd
 
 from saltmarket.bots.base import Strategy
-from saltmarket.bots.catalog import BOTS, make_bot
+from saltmarket.bots.catalog import BOTS
+from saltmarket.bots.registry import make_any_bot
 from saltmarket.engine.actions import BrigChoice, Liquidation
 from saltmarket.engine.board import SpaceKind
 from saltmarket.engine.game import Game
@@ -99,7 +100,7 @@ def measure_tendencies(
     for offset in range(games):
         seed = first_seed + offset
         probe = TendencyProbe(make_player(), counts)
-        opponent = make_bot(pool[offset % len(pool)])
+        opponent = make_any_bot(pool[offset % len(pool)])
         seats = [probe, opponent] if offset % 2 == 0 else [opponent, probe]
         Game(seats, seed=seed).play()
     categories = sorted({category for category, _ in counts})
@@ -133,7 +134,7 @@ def auction_prices(name: str, table_size: int, games: int, first_seed: int) -> d
         names = [str(n) for n in rng.choice(pool, size=table_size - 1, replace=False)]
         seat = offset % table_size
         names.insert(seat, name)
-        game = Game([make_bot(n) for n in names], seed=seed, record_log=True)
+        game = Game([make_any_bot(n) for n in names], seed=seed, record_log=True)
         game.play()
         for event in game.log:
             if event[0] == "auction" and event[2] == seat:

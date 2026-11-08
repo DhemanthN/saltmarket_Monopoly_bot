@@ -89,3 +89,23 @@ def steps_to_reach(curve: pd.DataFrame, threshold: float, after: int = 0) -> int
     """
     reached = curve[(curve["steps"] > after) & (curve["win_rate"] >= threshold)]
     return int(reached["steps"].iloc[0]) if len(reached) else None
+
+
+def mcnemar_test(only_a: int, only_b: int) -> dict[str, float]:
+    """Test whether two agents differ on the same games, using McNemar's test.
+
+    When both agents play an identical schedule, each game gives a pair of outcomes, so
+    the samples are paired rather than independent. Only games that one agent won and the
+    other lost carry information. ``only_a`` and ``only_b`` count those games. This uses
+    the chi-square form with a continuity correction, which suits counts in the hundreds.
+    """
+    discordant = only_a + only_b
+    if discordant == 0:
+        return {"only_a": only_a, "only_b": only_b, "chi2": 0.0, "p_value": 1.0}
+    chi2 = (abs(only_a - only_b) - 1) ** 2 / discordant
+    return {
+        "only_a": only_a,
+        "only_b": only_b,
+        "chi2": chi2,
+        "p_value": math.erfc(math.sqrt(chi2 / 2)),
+    }

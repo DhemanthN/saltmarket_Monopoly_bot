@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -5,6 +7,7 @@ import pytest
 from saltmarket.analysis.compare import (
     bootstrap_difference,
     learning_curve,
+    mcnemar_test,
     stage_win_rates,
     steps_to_reach,
     two_proportion_z_test,
@@ -94,3 +97,15 @@ def test_learning_curve_drops_a_final_partial_bin():
         ignore_index=True,
     )
     assert learning_curve(partial, 200)["steps"].tolist() == [200, 400]
+
+
+def test_mcnemar_matches_a_hand_computed_example():
+    result = mcnemar_test(30, 10)
+    assert result["chi2"] == pytest.approx(19**2 / 40)
+    assert result["p_value"] == pytest.approx(math.erfc(math.sqrt(19**2 / 40 / 2)))
+
+
+def test_mcnemar_is_symmetric_and_handles_no_disagreements():
+    assert mcnemar_test(7, 3)["p_value"] == mcnemar_test(3, 7)["p_value"]
+    assert mcnemar_test(0, 0)["p_value"] == 1.0
+    assert mcnemar_test(5, 5)["p_value"] > 0.7

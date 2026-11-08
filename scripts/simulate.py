@@ -1,8 +1,10 @@
 """Run the bot tournaments and save summary tables to results/.
 
 Usage: python scripts/simulate.py --games-per-pair 400 --tables 12500
+       python scripts/simulate.py --pool all --games-per-pair 1000 --tables 75000
 Stopping and rerunning resumes where it left off, and larger numbers extend the run.
-Raw per-game chunks go to results/raw/, and summaries go to results/.
+Raw per-game chunks go to results/raw/, and summaries go to results/. ``--pool all`` adds
+the 14 held-out bots, for 40 in all, and keeps its raw games in separate folders.
 """
 
 import argparse
@@ -15,6 +17,7 @@ import pandas as pd
 
 from saltmarket.analysis import tournament_stats as stats
 from saltmarket.bots.catalog import BOTS
+from saltmarket.bots.registry import ALL_NAMED_BOTS
 from saltmarket.paths import RESULTS
 from saltmarket.sim.tournament import (
     random_table_schedule,
@@ -26,6 +29,8 @@ RAW = RESULTS / "raw"
 ROUND_ROBIN_SEED = 1_000_000_000
 TABLE_SEED = 2_000_000_000
 TABLE_SIZE = 4
+POOLS = {"training": BOTS, "all": ALL_NAMED_BOTS}
+RAW_SUFFIX = {"training": "", "all": "_all"}
 
 
 def summarize(name: str, directory: Path) -> dict:
@@ -46,6 +51,7 @@ def summarize(name: str, directory: Path) -> dict:
     decided_widths = (rates["decided_ci_high"] - rates["decided_ci_low"]) / 2
     return {
         **stats.game_lengths(rows),
+        "total_turns": int(rows.drop_duplicates("game_id")["turns"].sum()),
         "stall_comparison": stats.stall_comparison(rows),
         "min_games_per_bot": int(rates["games"].min()),
         "max_ci_half_width": float(half_widths.max()),
@@ -74,12 +80,15 @@ def main() -> None:
     parser.add_argument("--games-per-pair", type=int, default=400)
     parser.add_argument("--tables", type=int, default=12_500)
     parser.add_argument("--workers", type=int, default=os.cpu_count() or 1)
+    parser.add_argument("--pool", choices=sorted(POOLS), default="training",
+                        help="training: the 26 training bots. all: those plus the 14 held out.")
     parser.add_argument("--name-suffix", default="", help="Keep a separate raw directory.")
     args = parser.parse_args()
 
-    bots = sorted(BOTS)
-    pairs_dir = RAW / f"round_robin{args.name_suffix}"
-    tables_dir = RAW / f"tables{args.name_suffix}"
+    bots = sorted(POOLS[args.pool])
+    suffix = RAW_SUFFIX[args.pool] + args.name_suffix
+    pairs_dir = RAW / f"round_robin{suffix}"
+    tables_dir = RAW / f"tables{suffix}"
     started = time.perf_counter()
     run_tournament(
         round_robin_schedule(bots, args.games_per_pair, ROUND_ROBIN_SEED),
@@ -96,7 +105,9 @@ def main() -> None:
     elapsed = time.perf_counter() - started
 
     summary = {
+        "pool": args.pool,
         "bots": len(bots),
+        "raw_suffix": suffix,
         "games_per_pair": args.games_per_pair,
         "tables": args.tables,
         "this_run_seconds": elapsed,

@@ -18,7 +18,7 @@ from pathlib import Path
 import numpy as np
 from tqdm import tqdm
 
-from saltmarket.bots.catalog import make_bot
+from saltmarket.bots.registry import make_any_bot
 from saltmarket.engine import rules
 from saltmarket.engine.game import Game
 from saltmarket.engine.state import GameState
@@ -79,7 +79,7 @@ def _bankrupt_causes(state: GameState) -> dict[int, str]:
 
 def play_matchup(matchup: Matchup) -> tuple[list[dict], dict[str, list[int]]]:
     """Play one game. Return a row per seat and rent, spend, and completion by group."""
-    game = Game([make_bot(name) for name in matchup.names], seed=matchup.seed)
+    game = Game([make_any_bot(name) for name in matchup.names], seed=matchup.seed)
     result = game.play()
     state = game.state
     causes = _bankrupt_causes(state)

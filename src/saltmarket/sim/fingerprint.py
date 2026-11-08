@@ -9,7 +9,7 @@ from collections.abc import Sequence
 
 import numpy as np
 
-from saltmarket.bots.catalog import make_bot
+from saltmarket.bots.registry import make_any_bot
 from saltmarket.engine.game import Game
 from saltmarket.sim.tournament import Matchup
 
@@ -29,7 +29,7 @@ def fingerprint_schedule(bots: Sequence[str], games: int, table_size: int) -> li
 
 def game_fingerprint(matchup: Matchup) -> dict:
     """Play one game with its event log on and return its outcome and a hash of everything."""
-    game = Game([make_bot(name) for name in matchup.names], seed=matchup.seed, record_log=True)
+    game = Game([make_any_bot(name) for name in matchup.names], seed=matchup.seed, record_log=True)
     result = game.play()
     state = game.state
     digest = hashlib.sha256()

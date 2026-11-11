@@ -1,0 +1,5 @@
+agent,group,bots,games,wins,win_rate,ci_low,ci_high
+ppo,distinct,11,11000,8175,0.74318,0.73493,0.75126
+ppo,close_variant,3,3000,2384,0.79467,0.77984,0.80874
+dqn,distinct,11,11000,7919,0.71991,0.71144,0.72822
+dqn,close_variant,3,3000,2234,0.74467,0.72876,0.75995

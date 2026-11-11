@@ -1,0 +1,55 @@
+{
+  "tournament": {
+    "pool": "all",
+    "bots": 40,
+    "games": 2060000,
+    "turns": 861572594,
+    "by_table_size": {
+      "two_player": {
+        "games": 1560000,
+        "turns": 406465039
+      },
+      "four_player": {
+        "games": 500000,
+        "turns": 455107555
+      }
+    }
+  },
+  "evaluation_games": {
+    "total": 253200,
+    "by_file": {
+      "rl_eval_summary_dqn_two_player_fresh.json": 20400,
+      "rl_eval_summary_dqn_two_player_v2_all.json": 40000,
+      "rl_eval_summary_main.json": 20400,
+      "rl_eval_summary_main_fresh.json": 20400,
+      "rl_eval_summary_main_v2_all.json": 60000,
+      "rl_eval_summary_two_player.json": 20400,
+      "rl_eval_summary_two_player_fresh.json": 20400,
+      "rl_eval_summary_two_player_v2_all.json": 40000,
+      "rl_eval_heldout_bots.json": 11200
+    }
+  },
+  "fuzz": {
+    "games": 50000,
+    "turns": 24279478
+  },
+  "training_games": {
+    "total": 115689,
+    "by_log": {
+      "training_log_dqn_two_player.csv": 46001,
+      "training_log_dqn_two_player_attempt1.csv": 2257,
+      "training_log_main.csv": 25336,
+      "training_log_two_player.csv": 42095
+    }
+  },
+  "games_simulated_total": 2478889,
+  "turns_in_tournament_and_fuzz": 885852072,
+  "python_lines_non_blank": {
+    "total": 9716,
+    "src": 5404,
+    "scripts": 1323,
+    "tests": 2989
+  },
+  "tests_collected": 458,
+  "note": "Games simulated counts the latest tournament, every saved evaluation, the fuzz tests, and games finished in training. Turns are counted only where results save them: the tournament and the fuzz tests."
+}

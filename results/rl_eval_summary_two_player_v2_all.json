@@ -1,0 +1,51 @@
+{
+  "run": "two_player",
+  "greedy": true,
+  "seed_set": "v2",
+  "seed_offset": 300000000,
+  "pool": "all",
+  "bots": 40,
+  "games_per_bot": 1000,
+  "tables": 0,
+  "two_player": {
+    "games": 40000,
+    "wins": 32802,
+    "win_rate": 0.82005,
+    "ci_low": 0.8162547620893222,
+    "ci_high": 0.8237837708689771,
+    "decided_games": 37883,
+    "decided_wins": 31745,
+    "decided_win_rate": 0.8379748172003273,
+    "decided_ci_low": 0.8342300769495615,
+    "decided_ci_high": 0.8416510209200593,
+    "cap_rate": 0.052925
+  },
+  "two_player_by_pool": {
+    "training": {
+      "games": 26000,
+      "wins": 22243,
+      "win_rate": 0.8555,
+      "ci_low": 0.8511737632585178,
+      "ci_high": 0.8597212031361269,
+      "decided_games": 24819,
+      "decided_wins": 21626,
+      "decided_win_rate": 0.8713485636004674,
+      "decided_ci_low": 0.8671255972829652,
+      "decided_ci_high": 0.8754565938243268,
+      "cap_rate": 0.04542307692307692
+    },
+    "heldout": {
+      "games": 14000,
+      "wins": 10559,
+      "win_rate": 0.7542142857142857,
+      "ci_low": 0.7470132140316482,
+      "ci_high": 0.7612758879930351,
+      "decided_games": 13064,
+      "decided_wins": 10119,
+      "decided_win_rate": 0.7745713410900184,
+      "decided_ci_low": 0.7673257460853734,
+      "decided_ci_high": 0.781655508592889,
+      "cap_rate": 0.06685714285714285
+    }
+  }
+}

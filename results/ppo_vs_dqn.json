@@ -3,48 +3,173 @@
     "PPO": "two_player",
     "DQN": "dqn_two_player"
   },
+  "evaluation_suffix": "v2_all",
   "difference_is": "PPO minus DQN",
   "evaluation": {
     "PPO": {
-      "games": 10400,
-      "wins": 8899,
-      "win_rate": 0.8556730769230769,
-      "ci_low": 0.8487877516990088,
-      "ci_high": 0.8622957484948308,
-      "decided_games": 9947,
-      "decided_wins": 8666,
-      "decided_win_rate": 0.8712174524982407,
-      "decided_ci_low": 0.8644913122529739,
-      "decided_ci_high": 0.877656980488012,
-      "cap_rate": 0.04355769230769231
+      "games": 40000,
+      "wins": 32802,
+      "win_rate": 0.82005,
+      "ci_low": 0.8162547620893222,
+      "ci_high": 0.8237837708689771,
+      "decided_games": 37883,
+      "decided_wins": 31745,
+      "decided_win_rate": 0.8379748172003273,
+      "decided_ci_low": 0.8342300769495615,
+      "decided_ci_high": 0.8416510209200593,
+      "cap_rate": 0.052925
     },
     "DQN": {
-      "games": 10400,
-      "wins": 8506,
-      "win_rate": 0.8178846153846154,
-      "ci_low": 0.8103502981625718,
-      "ci_high": 0.8251841845735283,
-      "decided_games": 9997,
-      "decided_wins": 8352,
-      "decided_win_rate": 0.8354506351905572,
-      "decided_ci_low": 0.8280539235214643,
-      "decided_ci_high": 0.8425896445839434,
-      "cap_rate": 0.03875
+      "games": 40000,
+      "wins": 31325,
+      "win_rate": 0.783125,
+      "ci_low": 0.7790592445260087,
+      "ci_high": 0.787136380044585,
+      "decided_games": 38357,
+      "decided_wins": 30734,
+      "decided_win_rate": 0.8012618296529969,
+      "decided_ci_low": 0.7972382476619346,
+      "decided_ci_high": 0.8052250748595231,
+      "cap_rate": 0.041075
     }
   },
-  "all_games": {
-    "difference": 0.03778846153846149,
-    "z": 7.373391852827571,
-    "p_value": 1.6634063353139178e-13,
-    "bootstrap_ci_low": 0.028173076923076912,
-    "bootstrap_ci_high": 0.047403846153846185
+  "evaluation_by_pool": {
+    "PPO": {
+      "training": {
+        "games": 26000,
+        "wins": 22243,
+        "win_rate": 0.8555,
+        "ci_low": 0.8511737632585178,
+        "ci_high": 0.8597212031361269,
+        "decided_games": 24819,
+        "decided_wins": 21626,
+        "decided_win_rate": 0.8713485636004674,
+        "decided_ci_low": 0.8671255972829652,
+        "decided_ci_high": 0.8754565938243268,
+        "cap_rate": 0.04542307692307692
+      },
+      "heldout": {
+        "games": 14000,
+        "wins": 10559,
+        "win_rate": 0.7542142857142857,
+        "ci_low": 0.7470132140316482,
+        "ci_high": 0.7612758879930351,
+        "decided_games": 13064,
+        "decided_wins": 10119,
+        "decided_win_rate": 0.7745713410900184,
+        "decided_ci_low": 0.7673257460853734,
+        "decided_ci_high": 0.781655508592889,
+        "cap_rate": 0.06685714285714285
+      }
+    },
+    "DQN": {
+      "training": {
+        "games": 26000,
+        "wins": 21172,
+        "win_rate": 0.8143076923076923,
+        "ci_low": 0.809534740505427,
+        "ci_high": 0.8189877809028858,
+        "decided_games": 25075,
+        "decided_wins": 20842,
+        "decided_win_rate": 0.8311864406779661,
+        "decided_ci_low": 0.8264993928079385,
+        "decided_ci_high": 0.8357720293896089,
+        "cap_rate": 0.035576923076923075
+      },
+      "heldout": {
+        "games": 14000,
+        "wins": 10153,
+        "win_rate": 0.7252142857142857,
+        "ci_low": 0.7177586684992564,
+        "ci_high": 0.732546343774929,
+        "decided_games": 13282,
+        "decided_wins": 9892,
+        "decided_win_rate": 0.7447673543141093,
+        "decided_ci_low": 0.7372825962634488,
+        "decided_ci_high": 0.7521105686446883,
+        "cap_rate": 0.05128571428571429
+      }
+    }
   },
-  "decided_games": {
-    "difference": 0.035766817307683496,
-    "z": 7.137989645249843,
-    "p_value": 9.470576380264434e-13,
-    "bootstrap_ci_low": 0.02643682418086244,
-    "bootstrap_ci_high": 0.04506827568527928
+  "pools": {
+    "all": {
+      "opponents": 40,
+      "all_games": {
+        "difference": 0.036924999999999986,
+        "z": 13.094095953433765,
+        "p_value": 3.5588650497329554e-39,
+        "bootstrap_ci_low": 0.03169937499999996,
+        "bootstrap_ci_high": 0.04227499999999995
+      },
+      "decided_games": {
+        "difference": 0.03671298754733043,
+        "z": 13.17842886600345,
+        "p_value": 1.1679789713372926e-39,
+        "bootstrap_ci_low": 0.03152085730682178,
+        "bootstrap_ci_high": 0.041948460154861415
+      },
+      "paired_mcnemar": {
+        "games": 40000,
+        "both_won": 27269,
+        "neither_won": 3142,
+        "only_a": 5533,
+        "only_b": 4056,
+        "chi2": 227.19532797997707,
+        "p_value": 2.43787132966252e-51
+      }
+    },
+    "training": {
+      "opponents": 26,
+      "all_games": {
+        "difference": 0.04119230769230775,
+        "z": 12.650307729449876,
+        "p_value": 1.1143748209509816e-36,
+        "bootstrap_ci_low": 0.035192307692307634,
+        "bootstrap_ci_high": 0.04723076923076919
+      },
+      "decided_games": {
+        "difference": 0.04016212292250132,
+        "z": 12.602161937042597,
+        "p_value": 2.0543518296943718e-36,
+        "bootstrap_ci_low": 0.03420782481115414,
+        "bootstrap_ci_high": 0.046244988472271986
+      },
+      "paired_mcnemar": {
+        "games": 26000,
+        "both_won": 19021,
+        "neither_won": 1606,
+        "only_a": 3222,
+        "only_b": 2151,
+        "chi2": 213.08393820956636,
+        "p_value": 2.9178345960765674e-48
+      }
+    },
+    "heldout": {
+      "opponents": 14,
+      "all_games": {
+        "difference": 0.029000000000000026,
+        "z": 5.529550752536014,
+        "p_value": 3.2105190883725934e-08,
+        "bootstrap_ci_low": 0.01906964285714282,
+        "bootstrap_ci_high": 0.03885892857142861
+      },
+      "decided_games": {
+        "difference": 0.029803986775909008,
+        "z": 5.659705376448939,
+        "p_value": 1.5163308735547464e-08,
+        "bootstrap_ci_low": 0.019727582488508557,
+        "bootstrap_ci_high": 0.03997085157218428
+      },
+      "paired_mcnemar": {
+        "games": 14000,
+        "both_won": 8248,
+        "neither_won": 1536,
+        "only_a": 2311,
+        "only_b": 1905,
+        "chi2": 38.9053605313093,
+        "p_value": 4.4485734658769705e-10
+      }
+    }
   },
   "training": {
     "PPO": {
@@ -85,8 +210,8 @@
     }
   },
   "opponents_where_better": {
-    "PPO": 11,
+    "PPO": 24,
     "DQN": 0,
-    "note": "Per-opponent z-tests at p < 0.05, not corrected for 26 comparisons."
+    "note": "Per-opponent z-tests at p < 0.05, not corrected for 40 comparisons."
   }
 }

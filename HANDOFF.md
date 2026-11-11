@@ -2,60 +2,26 @@
 
 Living progress file. A fresh session should read `CLAUDE.md`, then this file.
 
-## Paused (Session 4, 2026-11-08)
+## Session 4: version 2.0 (2026-11-08 to 2026-11-11)
 
-The owner paused Session 4 partway through the v2 task list. Nothing has been pushed.
-`main` is 41 commits ahead of `origin/main` (counting this one), the working tree is clean, and every commit
-passes ruff and the tests listed below.
+Done. Steps 1–10 of the owner's v2 task list are complete. The session was paused on
+2026-11-08 at 785 of 2,500 four-player chunks and resumed on 2026-11-11. Nothing has
+been pushed. The owner pushes.
 
 ### Task list status
 
 | Step | Task | Status |
 | --- | --- | --- |
-| 1 | Subagent review of the three branches, fixes on each branch | **Done** |
-| 2 | Merge feat/perf, feat/new-bots, feat/dqn, docs/v2-roadmap, origin/main | **Done** |
-| 3 | 40-bot tournament, 1M+ games | **Partly done**: 2-player finished, 4-player 785 of 2,500 chunks |
-| 4 | PPO and DQN evaluation, 1,000 games per opponent, v2 seeds | Not started (code ready and tested) |
-| 5 | Regenerate charts, update docs, fact-check subagent | Not started (analyze.py ready) |
-| 6 | CHANGELOG [2.0.0] and ROADMAP marked done | Not started |
-| 7 | reproduce_all.py (and --quick) end to end, commit | Partly: steps updated and unit-tested, `--quick` not yet run |
-| 8 | Remove the three worktrees | Not started. All three still exist |
-| 9 | History cleanup with git filter-repo | **Not started.** Only installed `git-filter-repo` into `.venv` |
-| 10 | Update docs/RESUME_UPDATE.md | Not started, and needs an owner decision (see below) |
-
-After step 2, the full suite passed 450 tests with 97% coverage, ruff was clean, and the
-smoke suite ran in 24.7 s. Later commits added 8 tests, and each targeted test file
-passed. Run the full suite again before resuming.
-
-### Run state and how to resume
-
-The 40-bot tournament, `simulate.py --pool all --games-per-pair 2000 --tables 125000`:
-
-- 2-player, `results/raw/round_robin_all/`: 7,800 of 7,800 chunks (1,560,000 games).
-- 4-player, `results/raw/tables_all/`: 785 of 2,500 chunks (157,000 of 500,000 games).
-  No partial chunk files.
-- Summary tables in `results/` are still the v1, 26-bot ones. The script writes them only
-  after both phases finish.
-
-Resume in this order. Each command picks up where it stopped:
-
-```powershell
-python scripts/simulate.py --pool all --games-per-pair 2000 --tables 125000
-python scripts/evaluate.py --run two_player --seed-set v2 --pool all --games-per-bot 1000 --tables 0
-python scripts/evaluate.py --run dqn_two_player --seed-set v2 --pool all --games-per-bot 1000 --tables 0 --label dqn
-python scripts/evaluate.py --run main --seed-set v2 --pool all --games-per-bot 1000 --tables 5000
-python scripts/compare_agents.py --suffix v2_all
-python scripts/analyze.py --runs main two_player --best-run two_player --suffix _v2_all --raw-suffix _all --dqn-run dqn_two_player
-python scripts/project_stats.py
-```
-
-Throughput notes:
-- A probe ran 11,800 40-bot games in 33 s. The 2-player phase ran at 700–970 games/s.
-- The 4-player phase dropped to about 280 games/s, at times 15. The laptop was on battery
-  (discharging, 71%), so keep it plugged in for the rest.
-- The first launch hit `BrokenProcessPool` after 10 s. There was no Smart App Control
-  event and no error in the application log, so the cause is unknown. A plain rerun
-  resumed and worked.
+| 1 | Subagent review of feat/perf, feat/new-bots, feat/dqn, with fixes on each branch | Done |
+| 2 | Merge feat/perf, feat/new-bots, feat/dqn, docs/v2-roadmap, and origin/main | Done |
+| 3 | 40-bot tournament: 2,060,000 games, 861,572,594 turns | Done |
+| 4 | PPO, DQN, and mixed-agent evaluation on v2 seeds, 1,000 games per bot | Done |
+| 5 | Charts and tables regenerated, docs updated, fact-check subagent run and its findings fixed | Done |
+| 6 | CHANGELOG [2.0.0], ROADMAP marked done, both linked from README | Done |
+| 7 | `reproduce_all.py --quick` passes end to end (4.6 minutes) | Done |
+| 8 | Worktrees removed, branches kept | Done |
+| 9 | History cleanup with git filter-repo, including the `v1.0.0` tag, verified by a subagent | Done |
+| 10 | `docs/RESUME_UPDATE.md` updated, local only and gitignored, per owner | Done |
 
 ### What the review subagents found, and what was fixed
 
@@ -95,24 +61,62 @@ Throughput notes:
     identical to an uninterrupted one (now documented). The collector seeds its generator
     and env with the same integer. The replay buffer is saved before `latest.pt`.
 
-### Other decisions this session
+### Fact-check (step 5)
 
-- **`docs/RESUME_UPDATE.md` was deleted by the owner** on GitHub on 2026-11-06 (commit
-  `4390d76`, merged from origin/main). Task step 10 asks to update it.
-  - Proposed: honor the deletion in git and keep the updated file locally, gitignored.
-  - **Owner to confirm.** The old version is still in git history and in tag `v1.0.0`.
-- **Local tag `v1.0.0`** on `15e5cbf` keeps the 26-bot results easy to find. Not pushed.
-- **v2 seed set:** offset 300,000,000 (`rl/evaluate.V2_SEED_OFFSET`). A test checks it
-  shares no seed with any earlier evaluation.
-- **v2 output names** follow the pattern `rl_eval_*_<run>_v2_all.*`. Per-game rows go to
-  `results/raw/eval/` (gitignored).
-- **Tournament size:** 2,000 games per pair (780 pairs) plus 125,000 4-player tables in
-  all four rotations, 2,060,000 games in all. That is chosen from the probe to fit about
-  85 minutes on mains power.
-- **Worktrees:** `../monopoly-ai-perf`, `../monopoly-ai-bots`, and `../monopoly-ai-dqn`
-  still exist, each clean at its fixed branch tip. Step 8 removes them.
-- **History cleanup** (step 9) has not run, so the remote is unchanged:
-  `origin https://github.com/DhemanthN/saltmarket-ai.git`.
+A subagent checked about 290 numbers in README, RESULTS, CHANGELOG, docs/*.md, and the
+local RESUME_UPDATE against `results/`. It found three mismatches, all fixed:
+
+- RESULTS said DQN's first run had Q-values "near 0.7" at the start. The log starts at
+  0.43 and reaches 0.79 by 4.1M decisions.
+- RESULTS and CHANGELOG called `mortgage_flipper` the strongest bot at 2 players. It is
+  tied with `auction_sniper`.
+- strategies.md said "at most 28.8%", but the source value is 28.85%.
+
+Its minor notes were also addressed:
+- dropped the unsaved DQN trial claims and the unsaved "89%" figure
+- kept "333 tests" for v1, from this file's v1 record
+
+### Bugs found by `reproduce_all.py --quick`
+
+Two bugs were found, each with a reproducing test added first. Neither changes the real
+results:
+- the bootstrap divided 0 by 0 when an opponent had no decided games
+- `compare_agents.py` failed on runs shorter than one learning-curve bin
+
+### Decisions this session
+
+- **Owner decisions (2026-11-11):**
+  - honor the deletion of `docs/RESUME_UPDATE.md` in git and keep the updated file local
+    and gitignored
+  - add `.claude/` to `.gitignore`
+  - the history cleanup is approved and must cover the `v1.0.0` tag
+- **Tournament size:** 2,000 games per pair across 780 pairs, plus 125,000 4-player tables
+  in all four rotations. That is double the 1,000,000 minimum, and was chosen from a
+  throughput probe.
+  - The 4-player phase was slower than probed, at 150–380 games/s. The laptop was on
+    battery for part of it.
+  - The first launch hit `BrokenProcessPool` with no logged cause. A rerun resumed
+    cleanly.
+- **v2 seed set:** offset 300,000,000. A test checks it overlaps no earlier set. Per-game
+  rows go to `results/raw/eval/` (gitignored) for McNemar's paired test.
+- **Held-out near-copies:** measured with `scripts/heldout_overlap.py` and reported
+  separately (`heldout_split.csv`) rather than changing the bots after the fact.
+- **Baseline for unseen bots:** `pool_win_rates.csv`, each bot's tournament win rate
+  against each pool. It replaces the v1 paired `auction_sniper` schedule, whose
+  results are kept in `rl_eval_heldout_bots.json`.
+- **Behavior tables** (`rl_tendencies.csv`, `auction_prices.csv`) compare the agent with
+  the top 2-player bot, now `mortgage_flipper`, against the 26 training bots, as before.
+- **DQN at 4 players** was not rerun for v2. The v1 figure is quoted and marked as v1.
+- **v1 results** stay in the `v1.0.0` tag (rewritten by filter-repo, same content).
+
+### Headline v2 numbers
+
+| | Source |
+| --- | --- |
+| PPO: 85.6% vs. 26 training bots, 75.4% vs. 14 held-out bots, 82.0% vs. all 40 (1st of 41) | `rl_eval_summary_two_player_v2_all.json` |
+| DQN: 81.4%, 72.5%, and 78.3% | `rl_eval_summary_dqn_two_player_v2_all.json` |
+| PPO − DQN = 3.7 points, McNemar p = 2.4e-51 | `ppo_vs_dqn.json` |
+| 2,478,889 games simulated in all, 461 tests, 9,773 non-blank lines of Python | `project_stats.json` |
 
 ## Status
 
@@ -125,7 +129,8 @@ Throughput notes:
 | M5 | RL agent (PPO) | Done |
 | M6 | Data analysis and charts | Done |
 | M7 | Documentation and polish | Done |
-| Final | `docs/RESUME_UPDATE.md` | Done |
+| Final | `docs/RESUME_UPDATE.md` (local only since v2) | Done |
+| v2 | Held-out bots, DQN, speedups, 40-bot tournament | Done |
 
 ## Done so far
 
@@ -205,7 +210,7 @@ steps, 2,467 s of training time).
 
 ## In progress
 
-v2 work, paused. See "Paused (Session 4)" at the top.
+Nothing. Version 2.0 is finished. See "Session 4" at the top.
 
 ## Branch feat/perf (simulator speed, 2026-11-08, merged in Session 4)
 
@@ -230,6 +235,10 @@ v2 work, paused. See "Paused (Session 4)" at the top.
 
 ## Next steps
 
+1. The owner reviews and pushes. History was rewritten, so the push must be forced:
+   `git push --force origin main`. Add `git push --force origin v1.0.0` to publish the tag.
+   The remote branches `docs/v2-roadmap` and the old `main` still hold the old history
+   until they are overwritten or deleted.
 2. The owner makes the repo public, never Claude.
 3. Ideas left open: reward capped wins less, repeat training with more seeds, train with
    some held-out-style bots and test on a further unseen set, and test the 4-player agent
@@ -256,7 +265,7 @@ v2 work, paused. See "Paused (Session 4)" at the top.
   - No hyperparameter search on Saltmarket, to match PPO. Defaults: n-step 8, batch 512,
     buffer 500k, replay ratio 4, target refresh every 250 gradient steps, epsilon 1.0 to
     0.02 over 10%.
-  - Attempt 1 stalled. The value head started at about 0.7 and the target refreshed only
+  - Attempt 1 stalled. The value head started with large made-up values and the target refreshed only
     every 2,000 steps. It was diagnosed from its state at 4.1M decisions and stopped at
     4.88M, and its log and checkpoint were renamed `_attempt1`, not deleted. Attempt 2 fixes both settings and is the reported run.
   - CartPole training rewards are scaled by 0.01 so Q lies in [0, 1], the same range as
@@ -353,10 +362,15 @@ v2 work, paused. See "Paused (Session 4)" at the top.
 | Keep the rules and report win rates with and without capped games | Done |
 | M5 option 2: train a 2-player specialist | Done |
 | Run GPU work on the RTX 5070 Ti, not the integrated GPU, now and in future | Done |
-| Remove the accidentally committed personal folder and ignore it | Done (still in older commits; rewriting history needs owner approval) |
+| Remove the accidentally committed personal folder and ignore it | Done, and erased from history with git filter-repo in Session 4 |
 | Grow the pool with 14 held-out bots and evaluate the agent against them (2026-11-08) | Done |
 | Skip review gates through M5, M6, M7, and the resume update, log decisions here, and give one final summary. Stop only for a blocker, two failed attempts, or a Smart App Control block | Active |
-| Remove the accidentally committed `Claude outputs/` folder and ignore it (files not read). It still exists in earlier commits, and only a history rewrite, which the owner decides on, would remove it | Done |
-| Add a DQN agent and compare it fairly with PPO, on branch `feat/dqn`, without merging to main | Done, not merged |
+| Remove the accidentally committed `Claude outputs/` folder and ignore it (files not read) | Done, and erased from history in Session 4 |
+| Add a DQN agent and compare it fairly with PPO, on branch `feat/dqn` | Done, merged in Session 4 after review |
 | Resume DQN training from the checkpoint and finish the task list | Done |
 | Pause cleanly for the day: checkpoint, stop everything, commit, update this file | Done |
+| Session 4 v2 task list: review branches with subagents, merge, 1M+ game 40-bot tournament, re-evaluate PPO and DQN, update docs with a fact-check, CHANGELOG 2.0.0, remove worktrees, erase `Claude outputs` from history, update the resume doc, do not push | Done |
+| Pause and resume Session 4 (2026-11-08, resumed 2026-11-11) | Done |
+| Honor the deletion of `docs/RESUME_UPDATE.md`; keep it local and gitignored (2026-11-11) | Done |
+| Add `.claude/` to `.gitignore` (2026-11-11) | Done |
+| History cleanup must also cover the local `v1.0.0` tag (2026-11-11) | Done |

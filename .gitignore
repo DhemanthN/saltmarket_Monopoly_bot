@@ -30,6 +30,7 @@ checkpoints/
 *.pt
 *.parquet
 
-# Personal files
+# Personal files (RESUME_UPDATE.md is kept local only, owner decision 2026-11-11)
 Claude outputs/
 .claude/
+docs/RESUME_UPDATE.md

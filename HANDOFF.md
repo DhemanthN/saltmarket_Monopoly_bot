@@ -20,7 +20,7 @@ been pushed. The owner pushes.
 | 6 | CHANGELOG [2.0.0], ROADMAP marked done, both linked from README | Done |
 | 7 | `reproduce_all.py --quick` passes end to end (4.6 minutes) | Done |
 | 8 | Worktrees removed, branches kept | Done |
-| 9 | History cleanup with git filter-repo, including the `v1.0.0` tag, verified by a subagent | Done |
+| 9 | History cleanup with git filter-repo, including the `v1.0.0` tag, verified by a subagent: no path, no contact data, no unreachable objects, remote re-added, 461 tests pass | Done |
 | 10 | `docs/RESUME_UPDATE.md` updated, local only and gitignored, per owner | Done |
 
 ### What the review subagents found, and what was fixed
@@ -235,10 +235,15 @@ Nothing. Version 2.0 is finished. See "Session 4" at the top.
 
 ## Next steps
 
-1. The owner reviews and pushes. History was rewritten, so the push must be forced:
-   `git push --force origin main`. Add `git push --force origin v1.0.0` to publish the tag.
-   The remote branches `docs/v2-roadmap` and the old `main` still hold the old history
-   until they are overwritten or deleted.
+1. The owner reviews and pushes:
+   `git push --force-with-lease origin main`.
+   - The force is needed only because filter-repo drops commit signatures. The owner's
+     GitHub web commit `4390d76` (deleting `docs/RESUME_UPDATE.md`) became `d9d42a3`, with
+     the same tree and no signature.
+   - The personal-files commit was never on GitHub. No remote ref contained it, as
+     checked before the rewrite.
+   - `origin/docs/v2-roadmap` is already part of the new `main` and needs nothing.
+   - Optional: `git push origin v1.0.0` publishes the tag.
 2. The owner makes the repo public, never Claude.
 3. Ideas left open: reward capped wins less, repeat training with more seeds, train with
    some held-out-style bots and test on a further unseen set, and test the 4-player agent

@@ -45,11 +45,11 @@
   "games_simulated_total": 2478889,
   "turns_in_tournament_and_fuzz": 885852072,
   "python_lines_non_blank": {
-    "total": 9751,
-    "src": 5425,
-    "scripts": 1328,
-    "tests": 2998
+    "total": 9773,
+    "src": 5427,
+    "scripts": 1329,
+    "tests": 3017
   },
-  "tests_collected": 459,
+  "tests_collected": 461,
   "note": "Games simulated counts the latest tournament, every saved evaluation, the fuzz tests, and games finished in training. Turns are counted only where results save them: the tournament and the fuzz tests."
 }

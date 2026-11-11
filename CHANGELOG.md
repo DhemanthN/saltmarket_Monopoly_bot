@@ -52,8 +52,8 @@ times larger. See [RESULTS.md](RESULTS.md) for the full findings and
   engine still plays every game bit for bit the same (`tests/test_performance.py`).
 - `scripts/project_stats.py` totals games, turns, lines of code, and tests
   (`project_stats.json`). The project has now simulated 2,478,889 games across the
-  tournament, evaluations, fuzz tests, and training. It has 9,751 non-blank lines of
-  Python and 459 tests, up from 333.
+  tournament, evaluations, fuzz tests, and training. It has 9,773 non-blank lines of
+  Python and 461 tests, up from 333.
 
 ### Changed
 

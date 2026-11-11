@@ -96,7 +96,7 @@ src/saltmarket/
   rl/        action and observation encoding, environment, PPO, DQN, training, evaluation
   analysis/  statistics, behavior probes, charts
 scripts/     command-line entry points
-tests/       459 tests
+tests/       461 tests
 data/        the original board and cards
 results/     summary tables and figures
 models/      trained agent weights

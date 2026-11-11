@@ -1,23 +1,25 @@
 # Roadmap
 
-Version 1.0 is complete (see [CHANGELOG.md](../CHANGELOG.md)). This file plans version
-2.0, which targets the limitations listed in [RESULTS.md](../RESULTS.md).
+Version 2.0 is complete. Every workstream below is done, and its measured results are
+in [CHANGELOG.md](../CHANGELOG.md) under [2.0.0] and in [RESULTS.md](../RESULTS.md).
+This file keeps the plan as it was written, with each workstream's status, and the ideas
+left for later.
 
 No result appears here. Numbers go into `RESULTS.md` only after a script has run and
 saved its output to `results/`.
 
 ## Goals
 
-| Limitation in v1.0 | v2.0 workstream | Branch |
-| --- | --- | --- |
-| Opponents are not held out: the agent trained against the same 26 bots it was tested on | Unseen opponents | `feat/new-bots` |
-| Only one RL algorithm, so there is no baseline to compare PPO against | DQN comparison | `feat/dqn` |
-| Tournament size is limited by single-game speed | Performance | `feat/perf` |
-| 180,000 games across 26 bots | Larger tournament | after merge |
+| Limitation in v1.0 | v2.0 workstream | Branch | Status |
+| --- | --- | --- | --- |
+| Opponents are not held out: the agent trained against the same 26 bots it was tested on | Unseen opponents | `feat/new-bots` | Done |
+| Only one RL algorithm, so there is no baseline to compare PPO against | DQN comparison | `feat/dqn` | Done |
+| Tournament size is limited by single-game speed | Performance | `feat/perf` | Done |
+| 180,000 games across 26 bots | Larger tournament | after merge | Done |
 
 ## Workstreams
 
-### Unseen opponents
+### Unseen opponents (done)
 
 - **Goal:** measure how well the 2-player PPO agent plays against strategies it never
   trained against.
@@ -29,7 +31,7 @@ saved its output to `results/`.
   compared with the 85.6% against the training bots. The best existing bot is the
   baseline.
 
-### DQN comparison
+### DQN comparison (done)
 
 - **Goal:** find out whether PPO or DQN plays Saltmarket better.
 - **Approach:** implement Double DQN with dueling heads, experience replay, a target
@@ -39,7 +41,7 @@ saved its output to `results/`.
   bootstrap interval on the difference, wall-clock training time, and win rate against
   training steps.
 
-### Performance
+### Performance (done)
 
 - **Goal:** make large tournaments faster without changing any result.
 - **Approach:** profile the engine, optimize the hot paths, and scale tournaments
@@ -48,7 +50,7 @@ saved its output to `results/`.
   regression tests showing that seeded games produce identical outcomes and that worker
   count does not change results.
 
-### Larger tournament
+### Larger tournament (done)
 
 - **Goal:** tighter estimates across a bigger bot pool.
 - **Approach:** after the three branches merge, rerun the tournament with all 40 bots,
@@ -58,10 +60,14 @@ saved its output to `results/`.
 
 ## Later
 
-Ideas kept from v1.0 that are not scheduled yet:
+Ideas not scheduled yet:
 
 - Count turn-cap wins as less than real wins in training, to address the 4-player
   stalled-game effect.
 - Repeat training with several seeds and report the spread between runs.
 - Search hyperparameters instead of using one fixed setting.
 - Let the agent propose property swaps, not only cash offers.
+- Make the close-variant held-out bots more distinct, or write a new unseen set.
+- Fix the trade valuation that `mortgage_flipper` exploits (mortgaged spaces valued at
+  list price), then rerun the tournament.
+- Evaluate the DQN agent at 4 players on the v2 seeds.

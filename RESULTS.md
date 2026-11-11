@@ -4,112 +4,120 @@ Saltmarket is an original Monopoly-style game, so these findings apply to Saltma
 should not be read as findings about Monopoly. Every number below comes from a file in
 `results/`, named next to the claim.
 
+This is version 2.0. The tournament now has 40 bots: the 26 the agents trained against
+and 14 held-out bots that no agent ever saw. The agents were evaluated again on a new seed
+set (v2) with 1,000 games against each bot. Version 1.0 results, with 26 bots and 400
+games per bot, are summarized in [CHANGELOG.md](CHANGELOG.md) and kept in the `v1.0.0`
+tag. A few v1 files are still cited below where nothing replaced them, and each one is
+marked as v1.
+
 ## Key findings
 
-1. **The specialist agent is the strongest 2-player entrant.** On fresh held-out seeds it
-   won 85.6% of 10,400 games (95% CI 84.9–86.2), ahead of the best bot at 83.4% (CI
-   82.6–84.1). It beat all 26 bots head-to-head, with a lowest result of 61.5% (CI
-   56.6–66.1) against `auction_sniper`. It missed the 90% target.
-   `rl_eval_summary_two_player_fresh.json`, `rl_vs_bots_two_player_two_player_fresh.csv`,
-   `figures/agent_vs_opponents.png`
-2. **No agent clearly leads at 4 players.** The mixed agent won 40.7% of 10,000 games (CI
-   39.8–41.7), level with `always_buy` at 41.0% (CI 39.9–42.1). On decided games it falls
-   to 11th, at 37.1%. `rl_vs_bots_four_player_main_fresh.csv`
-3. **The best strategy depends on table size.** `auction_sniper` is 1st at 2 players
-   (83.4%) and 17th at 4 (19.7%). `two_player_win_rates.csv`,
+1. **The PPO specialist is the strongest 2-player entrant of 41.** It won 82.0% of
+   40,000 games against all 40 bots (95% CI 81.6–82.4), ahead of the best bots,
+   `mortgage_flipper` at 78.5% (CI 78.2–78.8) and `auction_sniper` at 78.4% (CI
+   78.1–78.7). It beat every bot head-to-head. Its lowest result is 57.7% (CI 54.6–60.7),
+   against the held-out `leveraged_buyer`. It missed its original 90% target.
+   `rl_eval_summary_two_player_v2_all.json`, `rl_vs_bots_two_player_two_player_v2_all.csv`,
+   `rl_eval_two_player_two_player_v2_all.csv`, `figures/agent_vs_opponents.png`
+2. **Against bots it never trained against, PPO's win rate falls by 10 points,** from
+   85.6% (CI 85.1–86.0) against the 26 training bots to 75.4% (CI 74.7–76.1) against the
+   14 held-out bots. The best training bot falls further on the same opponents, by 13.2
+   points, so much of the drop is a harder pool. See "Unseen opponents".
+   `rl_eval_summary_two_player_v2_all.json`, `pool_win_rates.csv`
+3. **PPO beat DQN under identical training conditions.** A Double DQN agent trained the
+   same way won 78.3% (CI 77.9–78.7), 3.7 points behind PPO. Both played the identical
+   40,000 games, and a paired McNemar test gives p = 2.4 × 10⁻⁵¹. PPO also leads against
+   the held-out bots alone, by 2.9 points (p = 4.4 × 10⁻¹⁰). See "PPO vs. DQN".
+   `ppo_vs_dqn.json`, `figures/ppo_vs_dqn.png`
+4. **A held-out bot is the strongest bot at 4 players and tied for first at 2.**
+   `mortgage_flipper` won 49.6% at 4 players (CI 49.1–50.0), almost twice an even 25%
+   share. At 2 players it won 78.5%, level with `auction_sniper` at 78.4%, and the
+   intervals overlap. Held-out bots take the top three places at 4 players. `two_player_win_rates.csv`,
    `four_player_win_rates.csv`, `figures/win_rates.png`
-4. **Specializing mattered far more than anything else tried.** The same training code on
-   2-player tables only raised the 2-player win rate from 71.2% to 85.6%.
-   `rl_eval_summary_main_fresh.json`, `rl_eval_summary_two_player_fresh.json`,
-   `figures/training_curves.png`
-5. **The agent found the auction trick on its own.** It accepts list price rarely, as low
-   as about 1% on driftwood, cinder, jade, and crown, yet it bids 85–166% of list price
+5. **The best strategy depends on table size.** `auction_sniper` is 2nd at 2 players
+   (78.4%) and 33rd of 40 at 4 (12.0%). `expert`, the bot designed to be best, is 24th at
+   2 players (56.8%) but 4th at 4 (37.3%). `two_player_win_rates.csv`,
+   `four_player_win_rates.csv`
+6. **No agent clearly leads at 4 players.** The mixed PPO agent won 35.2% of 20,000
+   4-player games (CI 34.5–35.8), 6th of 41. On decided games it falls to 20th, at 30.9%.
+   `rl_vs_bots_four_player_main_v2_all.csv`
+7. **Specializing mattered more than anything else tried.** The same PPO code trained on
+   2-player tables only won 85.6% against the training bots at 2 players, against 70.5% for
+   the mixed agent. Against the held-out bots the gap is 75.4% against 51.7%.
+   `rl_eval_summary_two_player_v2_all.json`, `rl_eval_summary_main_v2_all.json`
+8. **The agent found the auction trick on its own.** It accepts list price rarely, about
+   1% of the time on cinder, crown, jade, and driftwood, yet it bids 85–166% of list price
    on average at auction. Winners only pay just over the runner-up's bid, so high bids can
    still be cheap. `rl_tendencies.csv`, `figures/agent_tendencies.png`
-6. **Buying everything is a strong simple strategy.** `always_buy` is 2nd at 2 players
-   (72.0%) and 1st at 4 (41.0%). `expert`, the bot designed to be best, is 14th of the
-   26 bots at 2 players (60.7%). `two_player_win_rates.csv`, `four_player_win_rates.csv`
-7. **Against 14 unseen bots the agent's win rate falls to 75.8%** (CI 74.7–76.9), from
-   85.6% against its training bots. The `auction_sniper` baseline falls further on the
-   same games, to 71.2%, so the new pool is harder overall, and the agent still leads by
-   4.7 points. Its hardest new opponent is `leveraged_buyer` at 58.5% (CI 53.6–63.2).
-   `rl_eval_heldout_bots.json`
 
 ## Unseen opponents
 
-The agent trained against the same 26 bots it was evaluated on, so I wrote 14 new bots
-afterwards and kept them out of every training stage (`docs/strategies.md`, "Held-out
-bots"). The `two_player` specialist was not retrained. It played each new bot 400 times
-at 2 players, alternating seats, on seeds no other evaluation uses. `auction_sniper`, the
-best training bot, played the identical schedule as a baseline.
-`rl_eval_heldout_bots.json`, `rl_eval_heldout_bots.csv`
+The agents trained against 26 bots, so beating those bots does not show they can handle
+new strategies. Fourteen more bots were written after training and kept out of every
+training stage (`docs/strategies.md`, "Held-out bots"). No agent was retrained.
 
-| Pool | Agent | Agent, decided games | `auction_sniper` |
-| --- | --- | --- | --- |
-| 26 training bots | 85.6% (CI 84.9–86.2) | 87.1% | 83.4% (CI 82.6–84.1) |
-| 14 held-out bots | **75.8% (CI 74.7–76.9)** | 78.1% (CI 77.0–79.2) | 71.2% (CI 70.0–72.3) |
+| Opponents | PPO | DQN | `auction_sniper` | `mortgage_flipper` |
+| --- | --- | --- | --- | --- |
+| 26 training bots | 85.6% (CI 85.1–86.0) | 81.4% (CI 81.0–81.9) | 83.2% (CI 82.8–83.5) | 80.4% (CI 80.1–80.8) |
+| 14 held-out bots | **75.4% (CI 74.7–76.1)** | 72.5% (CI 71.8–73.3) | 70.0% (CI 69.4–70.5) | 74.7% (CI 74.1–75.2) |
 
-**The win rate fell by about 10 points against unseen bots.** That drop is the honest
-headline. Two things suggest it is mostly a harder pool rather than the agent failing
-to generalize:
+Agents: 1,000 v2-seed games per bot (`rl_eval_summary_two_player_v2_all.json`,
+`rl_eval_summary_dqn_two_player_v2_all.json`). Bots: 2,000 tournament games per pair
+(`pool_win_rates.csv`). A bot's row leaves out its games against itself, which never
+happen.
 
-- **The baseline fell by more.** `auction_sniper` dropped about 12 points, from 83.4% to
-  71.2%. Its training-pool figure comes from the tournament, which used different seeds
-  and excluded itself, so the two rows are close but not identical comparisons.
-- **The held-out pool has no easy opponents.** Against the training pool the agent won
-  at least 95% against 8 of the 26 bots, including 100% against `random` and `never_buy`
-  (`rl_eval_two_player_two_player_fresh.csv`). Its easiest held-out matchup is 86.5%,
-  against `finisher`.
+**The drop is real, but the pool is harder too.** PPO loses 10.1 points against unseen
+bots. `auction_sniper`, the best training bot, loses 13.2 points against the same 14
+bots. `mortgage_flipper` is itself held out, so its second row covers 13 bots.
 
-**The agent still beats the baseline on the same games.** On the 5,600 shared seeds the
-agent won 917 games that `auction_sniper` lost, and lost 656 that it won. Overall it is
-4.7 points ahead, and the intervals do not overlap. It won more than half its games
-against every held-out bot.
+**PPO did not win just because some held-out bots resemble training bots.** Three
+held-out bots often play exactly like a training bot (`heldout_overlap.csv`, see
+`docs/strategies.md`). Against those three PPO won 79.5% (CI 78.0–80.9). Against the
+other eleven it won 74.3% (CI 73.5–75.1). The eleven distinct bots are harder, and PPO
+still won more than half its games against every one of them. `heldout_split.csv`
 
-**Hardest new opponents for the agent:**
+**Hardest opponents for PPO** (`rl_eval_two_player_two_player_v2_all.csv`):
 
-| Bot | Agent win rate | `auction_sniper` win rate |
+| Bot | Pool | PPO win rate |
 | --- | --- | --- |
-| `leveraged_buyer` | 58.5% (CI 53.6–63.2) | 57.3% (CI 52.4–62.0) |
-| `phase_shifter` | 63.8% (CI 58.9–68.3) | 64.5% (CI 59.7–69.0) |
-| `mortgage_flipper` | 65.3% (CI 60.5–69.8) | 41.5% (CI 36.8–46.4) |
-| `score_aware` | 67.8% (CI 63.0–72.1) | 64.8% (CI 59.9–69.3) |
+| `leveraged_buyer` | held out | 57.7% (CI 54.6–60.7) |
+| `mortgage_flipper` | held out | 59.8% (CI 56.7–62.8) |
+| `aggressive_builder` | training | 60.0% (CI 56.9–63.0) |
+| `phase_shifter` | held out | 64.4% (CI 61.4–67.3) |
+| `always_buy` | training | 67.2% (CI 64.2–70.0) |
 
-The four hardest bots all spend aggressively in the land grab, by mortgaging, by
-dropping their cash cushion, or by recycling dead lots into cash. A likely reason, not
-tested here, is that cash-rich rivals make auctions less cheap, and both the agent and
-`auction_sniper` rely on cheap auctions (Key finding 5). `mortgage_flipper`
-is the clearest case: it beats `auction_sniper` 58.5% of the time, but the agent holds it
-to 34.8%. With 400 games per bot, each per-opponent interval is about ±4.5 points, so
-neighboring bots in this ranking are not clearly different.
-
-7. **PPO beat DQN under identical training conditions.** A Double DQN agent trained the
-   same way won 81.8% (CI 81.0–82.5), 3.8 points behind PPO (bootstrap CI 2.8–4.7,
-   p < 10⁻¹²), and took twice as long to train. See "PPO vs. DQN" below.
-   `ppo_vs_dqn.json`, `figures/ppo_vs_dqn.png`
+Most of them spend aggressively in the land grab: they buy without a cash cushion,
+mortgage to keep buying, or turn unusable lots into cash. A likely reason, not tested here, is
+that cash-rich rivals make auctions less cheap, and PPO relies on cheap auctions (Key
+finding 8).
 
 ## Which strategies win, and why
 
-**Auctions are cheap at 2 players.** With one rival, a space often goes for little because
-that rival has already spent its cash. `auction_sniper` wins 14.7 auctions per game at
-16.3% of list price. `balanced` pays a similar 15.5% but wins only 7.7. At 4 players
-competing bidders raise the sniper's price to 34.0% and cut its wins to 4.4 per game.
-`auction_prices.csv`
+**`mortgage_flipper` exploits how other bots value spaces.** It mortgages lots it cannot
+use and sells them to rivals near full price, because most bots value a space at list
+price whether or not it is mortgaged. It beats `auction_sniper` in 60.9% of their
+2-player games (`head_to_head.csv`). Unlike the sniper, it also wins at 4 players. This
+is a flaw in the other bots' trade valuation, not a property of the game.
 
-**Stalled games are common at 4 players.** 26.1% of 4-player games hit the 2,000-turn cap,
-against 4.2% of 2-player games. At 4 players, 70.6% of capped games had no group earned,
-against 0.2% of decided games. Spaces end up split between players, few bots trade, and
+**Auctions are cheap at 2 players.** With one rival, a space often goes for little because
+that rival has already spent its cash. At 2 players `mortgage_flipper` wins 8.8 auctions
+per game at 15.8% of list price, and `balanced` wins 7.8 at 15.5%. At 4 players competing
+bidders push both to about 70% of list price: 69.1% and 69.8%. `auction_prices.csv`
+
+**Stalled games are common at 4 players.** 36.4% of 4-player games hit the 2,000-turn cap,
+against 6.0% of 2-player games. At 4 players, 76.4% of capped games had no group earned,
+against 0.25% of decided games. Spaces end up split between players, few bots trade, and
 nobody builds. `tournament_summary.json`, `figures/game_length.png`
 
-**The mixed agent gains from stalled games.** It reaches the cap in 41.5% of its 4-player
-games and wins 45.9% of those, which lifts its overall rank from 11th to 2nd. Training
-counts a capped win as a full win, which is a likely cause, but this was not tested. The
-specialist does not show the pattern, with a 2-player cap rate of 4.4%.
-`rl_vs_bots_four_player_main_fresh.csv`, `rl_eval_summary_two_player_fresh.json`
+**The mixed agent gains from stalled games.** It reaches the cap in 48.5% of its 4-player
+games and wins 39.7% of those, which lifts it from 20th on decided games to 6th overall.
+Training counts a capped win as a full win, which is a likely cause, but this was not
+tested. `rl_vs_bots_four_player_main_v2_all.csv`
 
-**Building is strongly linked to winning.** At 2 players, win rate rises from 18.2% for
-players who peaked at two depots to 60.0% at three and 80.7% at a port. At 4 players the
-same steps are 0.9%, 19.5%, and 72.0%. This is an association, since players who are
+**Building is strongly linked to winning.** At 2 players, win rate rises from 16.8% for
+players who peaked at two depots to 57.4% at three and 79.4% at a port. At 4 players the
+same steps are 0.6%, 15.8%, and 72.8%. This is an association, since players who are
 already ahead can afford to build. `peak_level_win_rates.csv`,
 `figures/building_level.png`
 
@@ -117,8 +125,8 @@ already ahead can afford to build. `peak_level_win_rates.csv`,
 
 | Table size | Largest win-rate gap for earning a group | Highest rent per coin spent |
 | --- | --- | --- |
-| 2 players | driftwood, +41.7 points | reef, 1.90 |
-| 4 players | crown, +47.2, and driftwood, +47.1 | reef, 5.74 |
+| 2 players | driftwood, +36.1 points, and crown, +35.6 | reef, 2.27 |
+| 4 players | crown, +51.0 points | reef, 6.74 |
 
 Reef returns the most by a wide margin, which suggests it is underpriced in this board
 design. Four-player returns run higher partly because long stalled games keep collecting
@@ -132,35 +140,50 @@ groups, so this does not prove the group caused the win. `two_player_group_value
 A second agent was trained with Double DQN (dueling heads, experience replay, a target
 network, epsilon-greedy exploration) to test whether the choice of algorithm matters.
 It trained under the same conditions as the PPO specialist: 2-player tables, the same
-curriculum and opponents, 20 million decisions, the same reward, and seed 0. Both were
-evaluated on the same 10,400 fresh-seed games. Setup details are in `docs/rl.md`.
-Source: `ppo_vs_dqn.json` unless another file is named.
+curriculum and opponents, 20 million decisions, the same reward, and seed 0. Both played
+the identical v2 schedule of 40,000 games, 1,000 against each of the 40 bots. Setup
+details are in `docs/rl.md`. Source: `ppo_vs_dqn.json` unless another file is named.
 
 **PPO is better.** The gap is small but clear.
 
 | | PPO | DQN |
 | --- | --- | --- |
-| Win rate, all games | 85.6% (CI 84.9–86.2) | 81.8% (CI 81.0–82.5) |
-| Win rate, decided games | 87.1% (CI 86.4–87.8) | 83.5% (CI 82.8–84.3) |
-| Games reaching the turn cap | 4.4% | 3.9% |
-| Rank among the 26 bots | 1st | 2nd, behind `auction_sniper` (83.4%) |
-| Bots it beats significantly more often than the other agent does (p < 0.05) | 11 of 26 | 0 of 26 |
+| Win rate, all 40 bots | 82.0% (CI 81.6–82.4) | 78.3% (CI 77.9–78.7) |
+| Win rate, decided games | 83.8% (CI 83.4–84.2) | 80.1% (CI 79.7–80.5) |
+| Win rate, 26 training bots | 85.6% (CI 85.1–86.0) | 81.4% (CI 81.0–81.9) |
+| Win rate, 14 held-out bots | 75.4% (CI 74.7–76.1) | 72.5% (CI 71.8–73.3) |
+| Games reaching the turn cap | 5.3% | 4.1% |
+| Rank among the 40 bots plus itself | 1st | 3rd, close behind `mortgage_flipper` and `auction_sniper` |
+| Bots it beats significantly more often than the other agent does (p < 0.05) | 24 of 40 | 0 of 40 |
 | Training time | 1,206 s | 2,467 s |
 | Decisions per second | 16,606 | 8,109 |
 
-- **Difference, all games:** PPO is ahead by 3.8 points. The two-proportion z-test gives
-  z = 7.37, p = 1.7 × 10⁻¹³. A bootstrap that resamples games within each opponent (10,000
-  replicates) gives a 95% interval of 2.8 to 4.7 points.
-- **Difference, decided games:** 3.6 points, z = 7.14, p = 9.5 × 10⁻¹³, bootstrap interval
-  2.6 to 4.5.
-- **Per opponent:** DQN's largest gaps are against `expert` (81.3% vs. 89.5%),
-  `coral_specialist` (91.8% vs. 99.0%), and `random` (93.8% vs. 100%). All 25 losses to
-  `random` were decided games, not capped ones. DQN's best result relative to PPO is
-  against `auction_sniper`, 65.3% vs. 61.5%, which is not significant (p = 0.27).
-  `ppo_vs_dqn_per_opponent.csv`, `rl_eval_two_player_dqn_two_player_fresh.csv`
-- **At 4 players,** where neither agent trained, DQN wins 17.9% (CI 17.2–18.7) against
-  PPO's 37.1%. DQN carries over to a new table size much worse.
-  `rl_eval_summary_dqn_two_player_fresh.json`, `rl_eval_summary_two_player_fresh.json`
+**Significance.** The two agents played the same games, so each game gives a pair of
+outcomes. McNemar's test uses only games the agents split. PPO won 5,533 games that DQN
+lost, and DQN won 4,056 that PPO lost.
+
+| Opponents | Difference (PPO − DQN) | Bootstrap 95% interval | McNemar p | z-test p |
+| --- | --- | --- | --- | --- |
+| All 40 bots | 3.7 points | 3.2 to 4.2 | 2.4 × 10⁻⁵¹ | 3.6 × 10⁻³⁹ |
+| 26 training bots | 4.1 points | 3.5 to 4.7 | 2.9 × 10⁻⁴⁸ | 1.1 × 10⁻³⁶ |
+| 14 held-out bots | 2.9 points | 1.9 to 3.9 | 4.4 × 10⁻¹⁰ | 3.2 × 10⁻⁸ |
+
+The z-test and the bootstrap treat the two samples as independent, which ignores the
+pairing, so they are conservative here. On decided games only, PPO leads by 3.7 points
+(bootstrap 3.2 to 4.2).
+
+**Per opponent** (`ppo_vs_dqn_per_opponent.csv`): PPO's largest advantages are against
+`stalemate_seeker` (78.5% vs. 69.0%), `aggressive_builder` (60.0% vs. 52.1%), and
+`no_utilities` (82.0% vs. 74.3%). DQN's best result relative to PPO is against
+`mortgage_flipper`, 63.4% vs. 59.8%, which is not significant (p = 0.098). DQN's lowest
+result, 52.1% against `aggressive_builder` (CI 49.0–55.2), is the only one whose interval
+reaches 50%. `rl_eval_two_player_dqn_two_player_v2_all.csv`. These 40 per-opponent tests
+are not corrected for multiple comparisons.
+
+**At 4 players,** where neither agent trained, the v1 evaluation (26 bots, 10,000 games)
+found DQN won 17.9% (CI 17.2–18.7) against PPO's 37.1%. DQN carries over to a new table
+size much worse. This was not rerun for v2. `rl_eval_summary_dqn_two_player_fresh.json`,
+`rl_eval_summary_two_player_fresh.json` (v1)
 
 ![PPO vs. DQN](results/figures/ppo_vs_dqn.png)
 
@@ -197,8 +220,8 @@ stopped (see below). `training_log_dqn_two_player.csv`
   at the end. DQN passes value back 8 decisions per bootstrap step. PPO's advantage estimate
   looks over long stretches of real outcomes at once.
 - **Close Q-values may make greedy play brittle.** If the legal actions in a state have
-  similar Q-values, small errors can flip the argmax. This may explain the losses to
-  `random`, whose play creates unusual states, but neither idea was measured.
+  similar Q-values, small errors can flip the argmax. Neither this nor the other reasons
+  here were measured.
 - **Shifting opponents.** The curriculum and self-play change the opponents, so replayed
   experience goes stale. PPO learns only from fresh data.
 - **Exploration.** Epsilon-greedy explores with uniformly random legal moves, such as
@@ -207,8 +230,8 @@ stopped (see below). `training_log_dqn_two_player.csv`
 **This compares two trained agents, not two algorithms in general.** Each was trained
 once with seed 0, and neither had its settings searched, so the variation between runs
 is unknown. DQN also needed one fix. Its first run stalled at an 11–25% training win rate,
-because Q-values started near 0.7 and the target network refreshed too rarely to correct
-them. Those two settings were fixed, and the second run is the one reported.
+because the value head started with large made-up values (the average Q-value was still
+0.79 at 4.1M decisions) and the target network refreshed too rarely to correct them. Those two settings were fixed, and the second run is the one reported.
 `training_log_dqn_two_player_attempt1.csv`, `docs/rl.md`
 
 ## Methodology
@@ -218,36 +241,44 @@ them. Those two settings were fixed, and the second run is the one reported.
 | Rules fuzz test | 10,000 random-bot games, invariants checked every turn | `fuzz_summary.json` |
 | Bot fuzz test | 26 bots × 1,000 mixed-table games | `bot_fuzz.csv` |
 | Held-out bot fuzz test | 14 bots × 1,000 games at tables drawn from all 40 bots | `bot_fuzz_heldout.csv` |
-| Held-out evaluation | 5,600 games each for the agent and `auction_sniper`, 400 per held-out bot | `rl_eval_heldout_bots.json` |
+| Held-out overlap check | 40 bots × 520 games, compared by full event log | `heldout_overlap.csv` |
 | Landing check | 1,863,535 rolls against an exact Markov chain, 0.16% total variation distance | `landing_summary.json` |
-| 2-player tournament | 130,000 games, 400 per pair, seats alternated | `tournament_summary.json` |
-| 4-player tournament | 50,000 games, 12,500 tables in all four rotations | `tournament_summary.json` |
+| 2-player tournament | 1,560,000 games: 40 bots, 780 pairs, 2,000 per pair, seats alternated | `tournament_summary.json` |
+| 4-player tournament | 500,000 games: 125,000 tables of 4 of the 40 bots, in all four rotations | `tournament_summary.json` |
 | Agent training | Two PPO runs and one DQN run of 20 million decisions | `training_log_main.csv`, `training_log_two_player.csv`, `training_log_dqn_two_player.csv` |
-| Agent evaluation | 10,400 two-player and 10,000 four-player games per agent, per seed set | `rl_eval_summary_*.json` |
+| Agent evaluation, v2 | 40,000 2-player games per agent, 1,000 against each bot. The mixed agent also played 20,000 4-player games | `rl_eval_summary_*_v2_all.json` |
 
-Tournament win rates have 95% Wilson intervals no wider than ±1.1 points over all games
-(`tournament_summary.json`). Ratings use a Bradley-Terry fit on an Elo scale, from 2-player
-games only (`ratings.csv`, `figures/ratings.png`). Rotating seats matters: the 4-player
-first seat wins 26.3% and the last 23.4% (`four_player_seats.csv`).
+The tournament played 2,060,000 games and 861,572,594 player turns
+(`tournament_summary.json`). Its win rates have 95% Wilson intervals no wider than
+±0.35 points at 2 players and ±0.44 points at 4 players. Ratings use a Bradley-Terry fit
+on an Elo scale, from 2-player games only (`ratings.csv`, `figures/ratings.png`).
+`mortgage_flipper` (1810.2) and `auction_sniper` (1809.6) are effectively tied at the top.
+Rotating seats matters: the 4-player first seat wins 27.0% and the last 22.9%
+(`four_player_seats.csv`).
 
-**A matchup is one complete game.** The agent takes its most likely legal action, and its
-evaluation seeds cannot occur in training. The quoted agent figures use a fresh seed set
-that was not used to compare runs. See `docs/rl.md`.
+**A matchup is one complete game.** The agent takes its most likely legal action. The v2
+evaluation seeds start at 9,300,000,000. They cannot occur in training, and a test checks
+that they overlap no earlier evaluation set. See `docs/rl.md`.
 
 ## Limitations and threats to validity
 
 - **Held-out opponents are a small, hand-written set.** The 14 unseen bots were written
   by the same author as the training bots, after training, and were not tuned against
-  the agent. Truly different opponents, such as people, could do better against it.
-  Only the 2-player specialist was tested against them.
+  the agents. Three of them often play exactly like a training bot
+  (`heldout_overlap.csv`), and results are also reported without them. Truly different
+  opponents, such as people, could do better against the agents. At 4 players the only
+  test against unseen bots is the mixed agent's random tables, which mix both pools.
 - **One training run per setup.** Each agent comes from a single seed, so how much results
   vary between training runs is not measured. This includes the PPO vs. DQN comparison.
 - **Little tuning.** Hyperparameters were not searched, and I did not test whether reward
   changes or longer training would help.
 - **The bot pool shapes every ranking.** Win rates depend on which bots are in the pool,
-  and the bots were hand-written for this project.
+  and the bots were hand-written for this project. Adding the 14 held-out bots changed
+  the rankings a lot. For example, `auction_sniper` was 17th of 26 at 4 players in v1
+  (CHANGELOG.md) and is 33rd of 40 now.
 - **Agent and bot figures are close but not identical comparisons.** A bot's tournament
-  games exclude itself and the agent, while the agent faces all 26 bots.
+  games exclude itself, while the agent faces all 40 bots, and the agent's games use
+  their own seeds.
 - **Capped games are decided by net worth.** Results are reported with and without them
   for this reason.
 - **The agent has a limited action set.** It proposes only cash offers for a group's

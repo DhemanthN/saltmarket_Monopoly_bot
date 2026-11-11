@@ -1,20 +1,29 @@
 # Saltmarket AI
 
-A Monte Carlo strategy simulator and reinforcement-learning agent for Saltmarket, an
+A Monte Carlo strategy simulator and reinforcement-learning agents for Saltmarket, an
 original Monopoly-style island-trading board game. A tested Python rules engine runs
-180,000 games between 26 strategy bots to measure which strategies win and why. A PPO agent
-written from scratch in PyTorch then learns to play from its own experience.
+2,060,000 games between 40 strategy bots to measure which strategies win and why. PPO and
+Double DQN agents, written from scratch in PyTorch, then learn to play from their own
+experience. 14 of the 40 bots are held out: no agent ever trained against them.
 
-**Headline result:** the 2-player agent won **85.6%** of 10,400 held-out games (95% CI
-84.9–86.2) against the 26 bots, ahead of the best bot at 83.4% and winning head-to-head
-against all of them. It missed its 90% target. Against 14 bots it never trained against,
-it won **75.8%** (CI 74.7–76.9). That is lower, but still ahead of `auction_sniper`, the best
-training bot, at 71.2% on the same games. At 4 players no agent clearly leads. Full findings and limitations are in
-[RESULTS.md](RESULTS.md).
+**Headline results** at 2 players, with 95% intervals. Agents played 1,000 games against
+each bot. The bot row comes from the tournament, 2,000 games per pair:
 
-A Double DQN agent, also written from scratch and trained under the same conditions, won
-81.8% (CI 81.0–82.5). PPO's lead of 3.8 points is significant (p < 10⁻¹²), and DQN took
-twice as long to train. See [PPO vs. DQN](RESULTS.md#ppo-vs-dqn).
+| | Against the 26 training bots | Against the 14 unseen bots |
+| --- | --- | --- |
+| PPO agent | **85.6%** (CI 85.1–86.0) | **75.4%** (CI 74.7–76.1) |
+| DQN agent | 81.4% (CI 81.0–81.9) | 72.5% (CI 71.8–73.3) |
+| Best training bot, `auction_sniper` | 83.2% (CI 82.8–83.5) | 70.0% (CI 69.4–70.5) |
+
+- PPO is the strongest of 41 entrants at 2 players and beats every bot head-to-head. It
+  missed its original 90% target.
+- PPO beats DQN by 3.7 points on the identical 40,000 games (paired McNemar test,
+  p = 2.4 × 10⁻⁵¹), and DQN took twice as long to train.
+- At 4 players no agent clearly leads.
+
+Full findings and limitations are in [RESULTS.md](RESULTS.md). Changes since version 1.0
+are in [CHANGELOG.md](CHANGELOG.md), and the plan they followed is in
+[docs/ROADMAP.md](docs/ROADMAP.md).
 
 ![Win rates at both table sizes](results/figures/win_rates.png)
 
@@ -37,18 +46,18 @@ pip install -e ".[dev]"
 
 ruff check .                                          # lint
 pytest -m smoke                                       # fast tests
-pytest                                                # everything, about 5 minutes
+pytest                                                # everything, about 10 minutes
 
-python scripts/simulate.py                            # 180,000-game tournament
-python scripts/train.py --steps 20000000 --run main   # train an agent
-python scripts/evaluate.py --run main                 # held-out evaluation
-python scripts/evaluate_heldout.py --run two_player   # against the 14 unseen bots
-python scripts/train_dqn.py --steps 20000000           # train the DQN agent
-python scripts/analyze.py --runs main --best-run main # charts and tables
-python scripts/benchmark.py                           # simulator speed and scaling
+python scripts/simulate.py --pool all --games-per-pair 2000 --tables 125000   # 40-bot tournament
+python scripts/train.py --steps 20000000 --run two_player --opponents 1      # train PPO
+python scripts/train_dqn.py --steps 20000000                                  # train DQN
+python scripts/evaluate.py --run two_player --seed-set v2 --pool all --games-per-bot 1000 --tables 0
+python scripts/compare_agents.py --suffix v2_all                              # PPO vs. DQN
+python scripts/analyze.py --runs main two_player --best-run two_player --suffix _v2_all --raw-suffix _all --dqn-run dqn_two_player
+python scripts/benchmark.py                                                   # simulator speed
 
-python scripts/reproduce_all.py --quick               # whole pipeline, about 3 minutes
-python scripts/reproduce_all.py                       # all results, over an hour
+python scripts/reproduce_all.py --quick               # whole pipeline, a few minutes
+python scripts/reproduce_all.py                       # all results, several hours
 ```
 
 `--quick` writes to `quick_output/`, so it never changes the real results. Its numbers are
@@ -59,7 +68,7 @@ too small to mean anything. It only proves the pipeline runs.
 ```mermaid
 flowchart LR
     data[board.json and cards.json] --> engine[Rules engine]
-    bots[26 strategy bots] --> engine
+    bots[40 strategy bots] --> engine
     engine --> sim[Tournament runner]
     engine --> env[Gymnasium environment]
     env --> ppo[PPO training]
@@ -87,11 +96,11 @@ src/saltmarket/
   rl/        action and observation encoding, environment, PPO, DQN, training, evaluation
   analysis/  statistics, behavior probes, charts
 scripts/     command-line entry points
-tests/       397 tests
+tests/       459 tests
 data/        the original board and cards
 results/     summary tables and figures
 models/      trained agent weights
-docs/        strategies.md, rl.md, RESUME_UPDATE.md
+docs/        strategies.md, rl.md, ROADMAP.md
 ```
 
 ## Testing
@@ -101,7 +110,8 @@ docs/        strategies.md, rl.md, RESUME_UPDATE.md
 - **Invariants** are checked after every turn in debug mode: money only moves through the
   bank, each space has one owner, building supply is conserved, and building stays even.
   Separate tests tamper with the state to prove the checks catch problems.
-- **Fuzz tests** play 10,000 random-bot games, plus 1,000 mixed-table games per bot.
+- **Fuzz tests** play 10,000 random-bot games, plus 1,000 mixed-table games for each of
+  the 40 bots.
 - **Property tests** use Hypothesis to try unusual game settings.
 - **Independent check:** simulated landing rates match an exact Markov chain calculation
   over 1.8 million rolls.
@@ -123,6 +133,8 @@ the change, still match exactly (`tests/test_performance.py`).
 | 2-player games per second | 30.9 | 59.6 | 1.93x |
 | 4-player games per second | 12.6 | 34.3 | 2.71x |
 | Tournament mix (72% 2-player) | 22.0 | 49.5 | 2.24x |
+
+These were measured with the 26 training bots, before the held-out bots existed.
 
 Tournaments split games into chunks across worker processes. Each game's seed comes from
 the schedule, so results are identical for any number of workers, which a test checks.
@@ -148,6 +160,8 @@ Actions.
 - [RESULTS.md](RESULTS.md): findings, methodology, and limitations
 - [docs/strategies.md](docs/strategies.md): what each bot tries to do
 - [docs/rl.md](docs/rl.md): observation, actions, rewards, and training
+- [CHANGELOG.md](CHANGELOG.md): what changed in each version, with measured numbers
+- [docs/ROADMAP.md](docs/ROADMAP.md): the version 2.0 plan and what is left for later
 
 ## License
 

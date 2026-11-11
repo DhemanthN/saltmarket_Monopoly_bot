@@ -107,14 +107,23 @@ likely legal action rather than sampling.
 
 **A matchup is one complete game.**
 
-- **2-player:** the agent plays each of the 26 bots an equal number of times, alternating
-  who moves first.
+- **2-player:** the agent plays each bot in the pool an equal number of times,
+  alternating who moves first.
 - **4-player:** the agent sits with three distinct bots drawn at random from the pool, and
   each table is played in all four rotations, so the agent takes every seat.
 
-Two seed sets exist. The default set was used to compare runs. `--fresh-seeds` uses a
-separate set, and those are the numbers to quote, because they played no part in choosing
-between runs.
+`--seed-set` picks one of three separate seed sets, and a test checks that none of them
+overlap:
+
+- `default` was used to compare training runs in version 1.
+- `fresh` gave the version 1 figures, with the 26 training bots.
+- `v2`, from 9,300,000,000, gives the version 2 figures. Neither `fresh` nor `v2` played
+  any part in choosing between runs.
+
+`--pool` picks the opponents: `training` (the 26 bots), `heldout` (the 14 unseen bots), or
+`all`. Version 2 uses `--pool all` with 1,000 games per bot. The summary splits the
+2-player results into training and held-out opponents. Each game's outcome is also saved
+to `results/raw/eval/`, so two agents on the same schedule can be compared game by game.
 
 Results are reported with 95% Wilson intervals, separately for each table size, overall
 and per opponent, over all games and over decided games only. Per-opponent 4-player
@@ -122,14 +131,20 @@ figures count every game that bot was at the table, so those games overlap.
 
 ### Unseen opponents
 
-The 26 bots above are also the agent's training opponents, so beating them does not show
-that the agent can handle strategies it has never met. `scripts/evaluate_heldout.py`
-plays the agent against the 14 held-out bots in `bots/heldout/`, which no training stage
-uses. Each held-out bot is played 400 times at 2 players, alternating seats, on seeds
-starting at 9,200,000,000, a range no other evaluation uses. `auction_sniper`, the best
-training-pool bot at 2 players, then plays the identical schedule as a baseline, which
-helps separate "the agent overfits" from "these bots are simply harder". Results are in
-`results/rl_eval_heldout_bots.json` and `.csv`, and are discussed in `RESULTS.md`.
+The 26 training bots are also the agents' training opponents, so beating them does not
+show that an agent can handle strategies it has never met. The 14 held-out bots in
+`bots/heldout/` are used by no training stage, which a test checks. Version 2 evaluates
+every agent against them as part of `--pool all`. They also play in the 40-bot tournament,
+so each bot's own win rate against either pool is in `results/pool_win_rates.csv` as a
+baseline. That helps separate "the agent overfits" from "these bots are simply harder".
+
+Some held-out bots play exactly like a training bot in many games.
+`scripts/heldout_overlap.py` measures this, and `results/heldout_split.csv` reports the
+agents' results against close variants and distinct bots separately.
+
+The first, smaller check (`scripts/evaluate_heldout.py`, 400 games per held-out bot on
+seeds from 9,200,000,000, with `auction_sniper` on the identical schedule) is kept in
+`results/rl_eval_heldout_bots.json` as a version 1 record.
 
 ## DQN
 
@@ -207,7 +222,8 @@ stopped. The batch sampler is seeded from the round number, so it needs no saved
 PPO's hyperparameters were not searched, so DQN's were not searched on Saltmarket either.
 They are common published defaults, adjusted only for this problem's scale: a larger
 batch and buffer because there are 20 workers, and n-step returns because the main reward
-arrives only when a game ends, often hundreds of decisions later. Before the first real run, the only check was a 300,000-decision trial to measure speed.
+arrives only when a game ends, often hundreds of decisions later. Before the first real run, the only check was a short
+trial run to measure speed.
 
 ### The first run stalled, and what changed
 
@@ -235,21 +251,21 @@ reported.
 average greedy score of at least 475 out of 500, the same bar as the PPO test. CartPole
 uses smaller settings: 64 hidden units, discount 0.99, 3-step returns, learning rate
 5e-4, and 80,000 steps. CartPole pays +1 per step, so its training reward is scaled by 0.01
-to keep Q between 0 and 1, as it is in Saltmarket. Scores count the unscaled reward. In trial runs
-that were not saved, DQN was less steady than PPO here, and the reward scaling made it
-pass more often. The test uses seed 0 and learning rate 5e-4. Fast tests cover the
+to keep Q between 0 and 1, as it is in Saltmarket. Scores count the unscaled reward. The test uses seed 0 and learning rate 5e-4. Fast tests cover the
 replay buffer, masked Double DQN targets, the dueling head, the NumPy export, n-step
 returns, and the training loop's resume.
 
 ### Results
 
-On the fresh seed set, DQN won 81.8% of 10,400 2-player games (CI 81.0–82.5), against
-85.6% for the PPO specialist. It trained in 2,467 s, against 1,206 s for PPO. The full
-comparison, with significance tests, learning curves, likely reasons, and caveats, is in
-the "PPO vs. DQN" section of `RESULTS.md`. Reproduce it with:
+On the v2 seeds against all 40 bots, DQN won 78.3% of 40,000 2-player games (CI
+77.9–78.7), against 82.0% for the PPO specialist on the identical games. It trained in
+2,467 s, against 1,206 s for PPO. The full comparison is in the "PPO vs. DQN" section of
+`RESULTS.md`, with paired and unpaired significance tests, learning curves, likely
+reasons, and caveats. Source: `results/ppo_vs_dqn.json`. Reproduce it with:
 
 ```powershell
 python scripts/train_dqn.py --steps 20000000 --run dqn_two_player
-python scripts/evaluate.py --run dqn_two_player --fresh-seeds --label dqn
-python scripts/compare_agents.py --runs two_player dqn_two_player --labels PPO DQN
+python scripts/evaluate.py --run two_player --seed-set v2 --pool all --games-per-bot 1000 --tables 0
+python scripts/evaluate.py --run dqn_two_player --seed-set v2 --pool all --games-per-bot 1000 --tables 0 --label dqn
+python scripts/compare_agents.py --suffix v2_all
 ```

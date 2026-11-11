@@ -144,7 +144,7 @@ special rule never fires. `scripts/heldout_overlap.py` measures this over 520 ga
 (`results/heldout_overlap.csv`). Three are close variants: `cash_reader` plays 71.9% of
 games exactly as `balanced` does, `rival_watcher` 49.8% as `group_blocker`, and
 `leader_denier` 48.7% as `monopoly_trader`. The other eleven match any training bot in at
-most 28.8% of games. They were written after the agent was trained and were not tuned
+most 28.9% of games. They were written after the agent was trained and were not tuned
 against it.
 
 ## Adaptive

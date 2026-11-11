@@ -117,3 +117,19 @@ def test_bootstrap_handles_an_opponent_with_no_games():
     result = bootstrap_difference(a, b, np.random.default_rng(0), replicates=200)
     assert result["difference"] == pytest.approx(3 / 4 - 1 / 6)
     assert result["ci_low"] <= result["difference"] <= result["ci_high"]
+
+
+def test_training_summary_handles_a_run_shorter_than_one_bin():
+    import importlib.util
+    from pathlib import Path
+
+    path = Path(__file__).resolve().parents[1] / "scripts" / "compare_agents.py"
+    spec = importlib.util.spec_from_file_location("compare_agents", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    log = pd.DataFrame({"steps": [10_000, 20_000], "seconds": [1.0, 2.0],
+                        "stage": ["random", "random"], "episodes": [3, 4],
+                        "win_rate": [0.5, 0.25]})
+    curve = learning_curve(log, module.BIN_STEPS)
+    summary = module._training(log, curve)
+    assert summary["total_steps"] == 20_000 and summary["final_bin_win_rate"] is None

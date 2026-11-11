@@ -76,7 +76,7 @@ def _training(log: pd.DataFrame, curve: pd.DataFrame) -> dict:
         "steps_to_reach": {
             f"{threshold:.0%}": compare.steps_to_reach(curve, threshold) for threshold in THRESHOLDS
         },
-        "final_bin_win_rate": float(curve["win_rate"].iloc[-1]),
+        "final_bin_win_rate": float(curve["win_rate"].iloc[-1]) if len(curve) else None,
     }
 
 

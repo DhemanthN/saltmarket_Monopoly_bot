@@ -1,7 +1,8 @@
 """Reproduce every result and chart with one command.
 
-Usage: python scripts/reproduce_all.py          full run, estimated at over an hour
-       python scripts/reproduce_all.py --quick  small check, about 3 minutes
+Usage: python scripts/reproduce_all.py          full run, several hours (three trainings and a
+                                                 2,060,000-game tournament)
+       python scripts/reproduce_all.py --quick  small check, about 5 minutes
 
 --quick writes to quick_output/ so it never touches the real results. Its numbers are far
 too small to mean anything. It only proves that the whole pipeline runs from start to end.

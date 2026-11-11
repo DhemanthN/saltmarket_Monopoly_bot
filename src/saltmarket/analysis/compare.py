@@ -32,7 +32,8 @@ def bootstrap_difference(
     ``a`` and ``b`` hold ``opponent``, ``wins``, and ``games`` columns. The schedule fixes
     how many games each opponent gets, so games are resampled within each opponent.
     Resampling n win-or-loss outcomes with replacement gives a binomial count, so each
-    replicate draws one binomial per agent and opponent.
+    replicate draws one binomial per agent and opponent. An opponent with no games for an
+    agent, such as no decided games, adds nothing to that agent's total.
     """
     merged = a.merge(b, on="opponent", suffixes=("_a", "_b"))
     if len(merged) != len(a) or len(merged) != len(b):
@@ -40,7 +41,8 @@ def bootstrap_difference(
     differences = []
     for side in ("a", "b"):
         games = merged[f"games_{side}"].to_numpy()
-        rates = merged[f"wins_{side}"].to_numpy() / games
+        wins = merged[f"wins_{side}"].to_numpy()
+        rates = np.divide(wins, games, out=np.zeros(len(games)), where=games > 0)
         draws = rng.binomial(games, rates, size=(replicates, len(merged)))
         differences.append(draws.sum(axis=1) / games.sum())
     replicate_differences = differences[0] - differences[1]

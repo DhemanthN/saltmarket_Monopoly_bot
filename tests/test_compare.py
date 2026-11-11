@@ -109,3 +109,11 @@ def test_mcnemar_is_symmetric_and_handles_no_disagreements():
     assert mcnemar_test(7, 3)["p_value"] == mcnemar_test(3, 7)["p_value"]
     assert mcnemar_test(0, 0)["p_value"] == 1.0
     assert mcnemar_test(5, 5)["p_value"] > 0.7
+
+
+def test_bootstrap_handles_an_opponent_with_no_games():
+    a = pd.DataFrame({"opponent": ["x", "y"], "wins": [3, 0], "games": [4, 0]})
+    b = pd.DataFrame({"opponent": ["x", "y"], "wins": [1, 0], "games": [4, 2]})
+    result = bootstrap_difference(a, b, np.random.default_rng(0), replicates=200)
+    assert result["difference"] == pytest.approx(3 / 4 - 1 / 6)
+    assert result["ci_low"] <= result["difference"] <= result["ci_high"]

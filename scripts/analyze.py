@@ -20,6 +20,7 @@ import pandas as pd
 from saltmarket.analysis import plots
 from saltmarket.analysis import tournament_stats as stats
 from saltmarket.analysis.tendencies import auction_prices, measure_tendencies
+from saltmarket.bots.catalog import BOTS
 from saltmarket.bots.heldout.catalog import HELDOUT_BOTS
 from saltmarket.bots.registry import make_any_bot
 from saltmarket.paths import FIGURES, MODELS, RESULTS
@@ -98,6 +99,10 @@ def main() -> None:
         ignore_index=True,
     )
     levels.to_csv(RESULTS / "peak_level_win_rates.csv", index=False, float_format="%.5f")
+    pools = {"training": set(BOTS), "heldout": set(HELDOUT_BOTS)}
+    stats.pool_win_rates(two_rows, pools).to_csv(
+        RESULTS / "pool_win_rates.csv", index=False, float_format="%.5f"
+    )
 
     suffix = "_fresh" if args.fresh else args.suffix
     two_table = pd.read_csv(RESULTS / f"rl_vs_bots_two_player_{args.best_run}{suffix}.csv")

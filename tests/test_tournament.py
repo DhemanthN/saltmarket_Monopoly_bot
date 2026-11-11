@@ -283,6 +283,17 @@ def test_head_to_head_is_symmetric():
     assert matrix.loc["a", "c"] == 1.0
 
 
+def test_pool_win_rates_split_opponents_by_pool():
+    rows = rows_for([("a", "b", 1, 0), ("b", "a", 0, 0), ("a", "c", 0, 0), ("c", "b", 1, 0)])
+    table = stats.pool_win_rates(rows, {"old": {"a", "b"}, "new": {"c"}})
+    table = table.set_index(["bot", "opponent_pool"])
+    assert table.loc[("a", "old"), "games"] == 2 and table.loc[("a", "old"), "wins"] == 2
+    assert table.loc[("a", "new"), "win_rate"] == 0.0
+    assert table.loc[("b", "new"), "games"] == 1 and table.loc[("b", "new"), "wins"] == 0
+    assert table.loc[("c", "old"), "wins"] == 2
+    assert ("c", "new") not in table.index
+
+
 def test_ratings_recover_known_strengths():
     rng = np.random.default_rng(0)
     truth = {"a": 1700.0, "b": 1500.0, "c": 1300.0}

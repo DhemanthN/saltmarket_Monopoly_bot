@@ -82,6 +82,30 @@ def head_to_head(rows: pd.DataFrame) -> pd.DataFrame:
     return both.pivot_table(index="a", columns="b", values="a_won", aggfunc="mean")
 
 
+def pool_win_rates(rows: pd.DataFrame, pools: dict[str, set[str]]) -> pd.DataFrame:
+    """Return each bot's 2-player win rate against each pool of opponents, with intervals.
+
+    ``pools`` maps a pool name to the bots in it. A bot's games against itself never
+    occur in a round robin, so each bot's row covers every other member of the pool.
+    """
+    first = rows[rows["seat"] == 0].set_index("game_id")
+    second = rows[rows["seat"] == 1].set_index("game_id")
+    pairs = pd.DataFrame({"bot": first["bot"], "opponent": second["bot"], "won": first["won"]})
+    mirrored = pd.DataFrame(
+        {"bot": pairs["opponent"], "opponent": pairs["bot"], "won": 1 - pairs["won"]}
+    )
+    both = pd.concat([pairs, mirrored], ignore_index=True)
+    records = []
+    for pool, members in pools.items():
+        part = both[both["opponent"].isin(members)]
+        for bot, games in part.groupby("bot"):
+            wins, count = int(games["won"].sum()), len(games)
+            low, high = wilson_interval(wins, count)
+            records.append({"bot": bot, "opponent_pool": pool, "games": count, "wins": wins,
+                            "win_rate": wins / count, "ci_low": low, "ci_high": high})
+    return pd.DataFrame(records)
+
+
 def bradley_terry_ratings(rows: pd.DataFrame, iterations: int = 2000) -> pd.Series:
     """Fit Elo-scale ratings to 2-player results with the Bradley-Terry model.
 

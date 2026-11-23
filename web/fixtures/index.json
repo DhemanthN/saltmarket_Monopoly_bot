@@ -28,17 +28,17 @@
   {
     "name": "table_4p",
     "file": "table_4p.json",
-    "shows": "a 4-player table with both agents",
+    "shows": "a 4-player table with PPO",
     "seats": [
       "human",
       "ppo",
-      "dqn",
-      "balanced"
+      "balanced",
+      "expert"
     ],
-    "seed": 12,
-    "turns": 142,
-    "events": 1564,
-    "humanDecisions": 21
+    "seed": 11,
+    "turns": 178,
+    "events": 1419,
+    "humanDecisions": 30
   },
   {
     "name": "bots_3p",

@@ -159,8 +159,13 @@ class AgentSeat(_Seat):
 
 
 def agent_model(agent: AgentName, num_seats: int) -> str:
-    """Return the weights file to use. PPO has a 2-player and a 4-player model, DQN only 2."""
+    """Return the weights file to use. PPO has a 2-player and a 4-player model.
+
+    DQN was trained for 2-player tables only, so any other table size is refused.
+    """
     if agent == "dqn":
+        if num_seats != 2:
+            raise ValueError("DQN only plays 2-player tables")
         return DQN_MODEL
     return "two_player" if num_seats == 2 else "main"
 

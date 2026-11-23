@@ -35,7 +35,7 @@ SPECS = (
     FixtureSpec("vs_ppo_2p", 23, ("human", "ppo"), "a 2-player game against PPO"),
     FixtureSpec("vs_dqn_2p", 13, ("human", "dqn"), "a 2-player game against DQN"),
     FixtureSpec(
-        "table_4p", 12, ("human", "ppo", "dqn", "balanced"), "a 4-player table with both agents"
+        "table_4p", 11, ("human", "ppo", "balanced", "expert"), "a 4-player table with PPO"
     ),
     FixtureSpec(
         "bots_3p", 11, ("human", "expert", "always_buy"),

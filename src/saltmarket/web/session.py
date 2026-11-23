@@ -20,7 +20,7 @@ from saltmarket.web.contract import (
     SubmitResult,
 )
 from saltmarket.web.observed import ObservedGame
-from saltmarket.web.seats import AwaitingHuman, make_seat
+from saltmarket.web.seats import AGENTS, AwaitingHuman, agent_model, make_seat
 
 MIN_SEATS = 2
 MAX_SEATS = 4
@@ -49,6 +49,9 @@ class GameSession:
         """Validate the table. Nothing is played until ``start``."""
         if not MIN_SEATS <= len(seats) <= MAX_SEATS:
             raise ValueError(f"A table needs {MIN_SEATS} to {MAX_SEATS} seats, got {len(seats)}")
+        for kind in seats:
+            if kind in AGENTS:
+                agent_model(kind, len(seats))
         self.config = SessionConfig(seed, tuple(seats))
         self._models_dir = models_dir
         self._answers: list[ActionId] = []

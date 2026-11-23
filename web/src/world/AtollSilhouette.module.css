@@ -1,0 +1,12 @@
+.world {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-canvas);
+}
+
+.label {
+  position: absolute;
+  z-index: var(--z-world-label);
+  transform: translate(-50%, -100%);
+  pointer-events: none;
+}

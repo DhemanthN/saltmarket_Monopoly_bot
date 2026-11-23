@@ -107,3 +107,61 @@ engineer.
 - Training must be resumable from checkpoints.
 - Final deliverable `docs/RESUME_UPDATE.md` reports real measured numbers only. The
   resume must never claim anything the repo does not back up.
+
+## Web frontend: Saltmarket 3D (added 2026-11-23)
+
+Goal: a website where anyone can play Saltmarket against the real PPO and DQN agents,
+inside a 3D atoll world they walk around as their own piece. Full plan: the owner's
+"Saltmarket 3D — Build Playbook" doc, mirrored in `docs/web/PLAN.md` once task 0 runs.
+
+### Where things live
+
+```
+web/                  Vite + React + TypeScript + React Three Fiber app (Vercel root)
+  src/contract/       GameSession interface, event types (generated from Python, never hand-edited)
+  src/world/          3D scene: atoll, districts, buildings, pieces, cameras, quality tiers
+  src/hud/            2D interface: decision panels, thought lanterns, ledger, menus
+  src/runtime/        Web Worker that runs the engine (Pyodide) or talks to the API (fallback)
+  fixtures/           Recorded games as JSON, produced by scripts/record_fixtures.py
+src/saltmarket/web/   Python side: GameSession, HumanSeat, AgentSeat, event log
+docs/web/             PLAN.md, DESIGN.md, REFERENCES.md, ANTI_SLOP.md, handoff/<task>.md
+prompts/              Kickoff prompt for each pane
+```
+
+### Rules for web work
+
+- One pane = one task from `docs/web/PLAN.md`. Read `docs/web/handoff/` for the tasks
+  you depend on, not the whole repo. Use the `explorer` subagent for searching.
+- Plan first. Start every task in plan mode. A plan lists files to touch, tests to add,
+  and how you will know it is done. Execute only after the owner approves.
+- End every task by writing `docs/web/handoff/<task>.md` (what changed, what is left,
+  how to verify, decisions made), committing, and pushing the branch.
+- Never change the rules engine's behaviour for the website. The web layer wraps the
+  engine; if the engine needs a hook, add it with a test and keep every existing test
+  passing and every game fingerprint identical.
+- Every number shown on the site comes from a file in `results/` and states its table
+  size (for example "85.6% at 2 players against the 26 training bots"). Never invent,
+  round up, or drop the qualifier.
+- Saltmarket stays original: no Monopoly names, art, colours, or card text.
+- Read `docs/web/DESIGN.md` and `docs/web/ANTI_SLOP.md` before any UI or 3D work. Run the
+  `design-critic` subagent on any screen you change before you call the task done.
+- Performance budget: 60 fps on the owner's laptop integrated GPU, under 150 draw calls,
+  DPR capped at 2, instancing for repeated buildings, shadow map refreshed only when the
+  board changes. Run `perf-auditor` after 3D changes.
+- Tests: follow `docs/web/PLAN.md` "Testing". Test parity, legality, the GameSession
+  contract and the event reducer. Do not write pixel snapshots, CSS tests, animation
+  timing tests, or a render test per component.
+- Caveman mode applies to chat replies only. UI copy, docs, handoff files, commit
+  messages, and README text are written in normal, clear English.
+
+### Hosting and live testing
+
+- Test locally first with `npm run build` and `npm run preview` in `web/`.
+- You never create or change Vercel projects, settings, or domains yourself.
+- When a task needs a live URL (task 6 `deploy`, task 7 `qa`, or any time local preview
+  cannot show the problem), stop and print one line starting with
+  `HOSTING NEEDED:` followed by the reason and the exact steps from the playbook's
+  Hosting section, then send the same text with RunPane notify (`runpane notify`, or the
+  pane MCP `notify` tool) so it reaches the owner's phone. Wait for the URL.
+- Live tests use agent-browser against the Vercel preview URL for the current branch.
+  Load its instructions with `agent-browser skills get core` before the first command.

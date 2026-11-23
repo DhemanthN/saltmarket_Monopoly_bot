@@ -1,0 +1,9 @@
+{
+  "name": "saltmarket-runtime-spike",
+  "private": true,
+  "type": "module",
+  "description": "Throwaway proof that the engine runs in Pyodide. Not part of web/.",
+  "dependencies": {
+    "pyodide": "314.0.8"
+  }
+}

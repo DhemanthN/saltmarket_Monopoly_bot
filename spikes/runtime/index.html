@@ -1,0 +1,50 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Runtime spike</title>
+<body style="font:14px monospace;max-width:70ch;margin:1rem">
+<h3>Saltmarket runtime spike (throwaway)</h3>
+<pre id="status">starting</pre>
+<div id="buttons"></div>
+<pre id="log"></pre>
+<script>
+const params = new URLSearchParams(location.search);
+const auto = params.get("auto") === "1";
+const status = document.getElementById("status");
+const log = document.getElementById("log");
+const buttons = document.getElementById("buttons");
+const sab = new SharedArrayBuffer(8);
+const cell = new Int32Array(sab);
+const t0 = performance.now();
+const worker = new Worker("/worker.js?v=3", { type: "module" });
+const pick = (count, legal) => legal[(count * 7) % legal.length];
+window.spike = { readyMs: null, bytes: null, done: null, decisions: 0 };
+
+function answer(action) {
+  Atomics.store(cell, 1, action);
+  Atomics.store(cell, 0, 1);
+  Atomics.notify(cell, 0);
+  buttons.textContent = "";
+}
+worker.onmessage = ({ data }) => {
+  if (data.type === "ready") {
+    window.spike.readyMs = performance.now() - t0;
+    window.spike.bytes = data.bytes; window.spike.marks = data.marks;
+    status.textContent = `ready in ${(window.spike.readyMs / 1000).toFixed(2)} s, ${(data.bytes / 1e6).toFixed(1)} MB transferred, crossOriginIsolated=${self.crossOriginIsolated}, worker SAB=${data.sab}`;
+    worker.postMessage({ type: "play", seed: 4242, bot: "cash_hoarder" });
+  } else if (data.type === "decision") {
+    window.spike.decisions = data.count;
+    if (auto) return answer(pick(data.count, data.legal));
+    log.textContent += `decision ${data.count}: engine paused, legal actions [${data.legal.join(", ")}]\n`;
+    for (const action of data.legal) {
+      const b = document.createElement("button");
+      b.textContent = String(action);
+      b.onclick = () => { log.textContent += `  -> page chose ${action}, engine resumed\n`; answer(action); };
+      buttons.append(b);
+    }
+  } else if (data.type === "done") {
+    window.spike.done = data.summary;
+    status.textContent += `\nfinished: ${data.summary} after ${data.decisions} decisions`;
+  }
+};
+worker.postMessage({ type: "init", sab });
+</script>

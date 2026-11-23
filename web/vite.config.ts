@@ -14,7 +14,8 @@ const ISOLATION_HEADERS = {
 
 export default defineConfig({
   plugins: [react()],
-  server: { headers: ISOLATION_HEADERS },
+  // data/board.json lives one level above web/.
+  server: { headers: ISOLATION_HEADERS, fs: { allow: [".."] } },
   preview: { headers: ISOLATION_HEADERS },
   test: { environment: "node", include: ["src/**/*.test.ts"] },
 });

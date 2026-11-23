@@ -1,0 +1,18 @@
+.panel {
+  padding: var(--space-6);
+  border: 1px solid color-mix(in srgb, var(--rule) 55%, transparent);
+  border-radius: var(--radius-panel);
+  color: var(--text);
+}
+
+.paper {
+  background: var(--surface);
+}
+
+.sailcloth {
+  background: var(--surface-raised);
+}
+
+.floating {
+  box-shadow: var(--shadow-paper-lift);
+}

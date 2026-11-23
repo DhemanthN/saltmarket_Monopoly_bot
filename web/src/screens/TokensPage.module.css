@@ -1,0 +1,158 @@
+.page {
+  max-width: 960px;
+  margin-inline: auto;
+  padding: var(--space-7) var(--space-4) var(--space-10);
+  min-height: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-7);
+}
+
+.section {
+  margin-bottom: var(--space-9);
+}
+
+.section > h2 {
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--brass);
+}
+
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.swatch {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.chip {
+  display: flex;
+  align-items: flex-end;
+  height: 56px;
+  border: 1.5px solid var(--outline);
+}
+
+.chipLabel {
+  padding: var(--space-1) var(--space-2);
+  color: var(--sailcloth);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  font-weight: 600;
+}
+
+.swatchName {
+  font-weight: 600;
+  font-size: var(--text-small);
+}
+
+.swatchMeta {
+  color: var(--text-soft);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+}
+
+.type p {
+  margin-bottom: var(--space-2);
+  font-weight: 500;
+}
+
+.type .display {
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+.spacing {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.spaceRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.spaceName {
+  width: 150px;
+  font-size: var(--text-small);
+}
+
+.spaceBar {
+  height: 12px;
+  background: var(--tide);
+}
+
+.shapes,
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.shape {
+  display: grid;
+  place-items: center;
+  width: 160px;
+  height: 80px;
+  border: 1px solid var(--outline);
+  background: var(--surface-raised);
+  font-size: var(--text-small);
+}
+
+.track {
+  container-type: inline-size;
+  position: relative;
+  height: 32px;
+  margin-top: var(--space-3);
+  border-bottom: 1px solid var(--brass);
+}
+
+.trackLabel {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  font-size: var(--text-caption);
+  color: var(--text-soft);
+}
+
+.puck {
+  position: absolute;
+  inset-block-end: 4px;
+  inset-inline-start: 0;
+  width: 24px;
+  height: 12px;
+  background: var(--ink);
+  border-radius: var(--radius-button);
+}
+
+[data-mood="night"] .puck {
+  background: var(--night-text);
+}
+
+.layers {
+  columns: 2;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (max-width: 640px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

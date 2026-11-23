@@ -1,0 +1,42 @@
+.region {
+  position: fixed;
+  inset-block-end: var(--space-6);
+  inset-inline-end: var(--space-6);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: min(360px, calc(100vw - var(--space-8)));
+  pointer-events: none;
+}
+
+.toast {
+  padding: var(--space-3) var(--space-4);
+  background: var(--ink);
+  color: var(--sailcloth);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-paper-lift);
+  font-size: var(--text-small);
+  line-height: var(--leading-small);
+  animation: toast-in var(--motion-standard) var(--ease-standard);
+}
+
+[data-mood="night"] .toast {
+  background: var(--night-text);
+  color: var(--night);
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (max-width: 640px) {
+  .region {
+    inset-block: var(--space-4) auto;
+    inset-inline: var(--space-4);
+    max-width: none;
+  }
+}

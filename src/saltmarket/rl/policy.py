@@ -1,6 +1,7 @@
 """NumPy copy of the trained network, for fast single-step play without PyTorch."""
 
 from dataclasses import dataclass
+from pathlib import Path
 
 import numpy as np
 
@@ -13,6 +14,28 @@ class PolicyWeights:
 
     actor: tuple[tuple[np.ndarray, np.ndarray], ...]
     critic: tuple[tuple[np.ndarray, np.ndarray], ...]
+
+
+def save_policy(weights: PolicyWeights, path: Path) -> None:
+    """Save network weights as a small NumPy archive for evaluation."""
+    arrays = {}
+    for name, layers in (("actor", weights.actor), ("critic", weights.critic)):
+        for position, (weight, bias) in enumerate(layers):
+            arrays[f"{name}_{position}_w"] = weight
+            arrays[f"{name}_{position}_b"] = bias
+    np.savez_compressed(path, **arrays)
+
+
+def load_policy(path: Path) -> PolicyWeights:
+    """Load network weights saved by ``save_policy``."""
+    with np.load(path) as data:
+        def layers(name: str) -> tuple:
+            count = sum(key.startswith(name) and key.endswith("_w") for key in data.files)
+            return tuple(
+                (data[f"{name}_{i}_w"], data[f"{name}_{i}_b"]) for i in range(count)
+            )
+
+        return PolicyWeights(layers("actor"), layers("critic"))
 
 
 def _forward(layers: tuple[tuple[np.ndarray, np.ndarray], ...], x: np.ndarray) -> np.ndarray:
@@ -53,3 +76,11 @@ class NumpyPolicy:
     def greedy(self, obs: np.ndarray, mask: np.ndarray) -> int:
         """Return the most likely legal action."""
         return int(np.argmax(self._log_probs(obs, mask)))
+
+    def probabilities(self, obs: np.ndarray, mask: np.ndarray) -> np.ndarray:
+        """Return the probability of every action. Illegal actions get zero."""
+        return np.exp(self._log_probs(obs, mask))
+
+    def advantages(self, obs: np.ndarray) -> np.ndarray:
+        """Return the actor head's raw output, which is advantages for a DQN export."""
+        return _forward(self.weights.actor, obs)

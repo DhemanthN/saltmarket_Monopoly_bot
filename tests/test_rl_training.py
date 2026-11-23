@@ -7,17 +7,9 @@ import pytest
 from saltmarket.bots.catalog import BOTS
 from saltmarket.rl import encoding as enc
 from saltmarket.rl import evaluate as ev
-from saltmarket.rl.policy import NumpyPolicy
+from saltmarket.rl.policy import NumpyPolicy, load_policy, save_policy
 from saltmarket.rl.ppo import ActorCritic, PPOConfig
-from saltmarket.rl.train import (
-    CURRICULUM,
-    TrainConfig,
-    load_policy,
-    resolve_device,
-    save_policy,
-    stage_at,
-    train,
-)
+from saltmarket.rl.train import CURRICULUM, TrainConfig, resolve_device, stage_at, train
 from saltmarket.rl.workers import TableSpec, sample_opponents, snapshot_bot
 
 smoke = pytest.mark.smoke

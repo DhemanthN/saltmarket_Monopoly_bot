@@ -33,7 +33,7 @@ GAMES_DIR = RESULTS / "raw" / "eval"
 
 def load_weights(run: str) -> PolicyWeights:
     """Load saved weights without importing PyTorch into evaluation workers."""
-    from saltmarket.rl.train import load_policy
+    from saltmarket.rl.policy import load_policy
 
     return load_policy(MODELS / f"{run}.npz")
 

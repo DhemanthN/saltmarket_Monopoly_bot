@@ -14,8 +14,9 @@ def main() -> None:
     """Parse arguments and run training."""
     import torch
 
+    from saltmarket.rl.policy import save_policy
     from saltmarket.rl.ppo import PPOConfig
-    from saltmarket.rl.train import TrainConfig, resolve_device, save_policy, train
+    from saltmarket.rl.train import TrainConfig, resolve_device, train
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--steps", type=int, required=True)

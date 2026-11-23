@@ -116,7 +116,7 @@
 .track {
   container-type: inline-size;
   position: relative;
-  height: 32px;
+  height: 44px;
   margin-top: var(--space-3);
   border-bottom: 1px solid var(--brass);
 }

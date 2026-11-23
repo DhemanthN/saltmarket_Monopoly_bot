@@ -28,14 +28,12 @@
 
 .table {
   margin: 0 0 var(--space-6);
-  padding: 0;
-  border: 0;
-  border-top: 1px solid var(--brass);
 }
 
 .legend {
-  padding: 0;
-  margin-block: var(--space-3) var(--space-1);
+  margin-block: 0 var(--space-1);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--brass);
   font: 600 var(--text-small) / var(--leading-small) var(--font-text);
   color: var(--text-soft);
 }

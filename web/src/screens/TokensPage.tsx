@@ -187,7 +187,7 @@ export default function TokensPage() {
         <ul className={styles.layers}>
           {Object.entries(zLayers).map(([name, z]) => (
             <li key={name} className="figures">
-              {name}: {z}
+              {name.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}: {z}
             </li>
           ))}
         </ul>

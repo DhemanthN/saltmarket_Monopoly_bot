@@ -36,8 +36,10 @@ export function StartScreen() {
           trained agents.
         </p>
 
-        <fieldset className={styles.table}>
-          <legend className={styles.legend}>Seats at the table</legend>
+        <div className={styles.table} role="group" aria-labelledby="seats-title">
+          <p id="seats-title" className={styles.legend}>
+            Seats at the table
+          </p>
           <div className={styles.seat}>
             <Emblem emblem={seatOrder[0].emblem} seat={seatOrder[0].name} />
             <span className={styles.seatName}>You</span>
@@ -75,7 +77,7 @@ export function StartScreen() {
               Add a seat
             </Button>
           ) : null}
-        </fieldset>
+        </div>
 
         <div className={styles.actions}>
           <Button variant="primary" onClick={() => toast("The game engine is not connected yet.")}>

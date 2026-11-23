@@ -1,5 +1,5 @@
 Task 4b: hud. Read docs/web/handoff/contract.md and design-system.md, then
-DESIGN.md (including the Mobbin picks). Start in plan mode. Runs at the same time as
+DESIGN.md (including "HUD patterns per moment"). Start in plan mode. Runs at the same time as
 task 4a; do not touch `web/src/world/`.
 
 Build `web/src/hud/` against the contract types and fixture data:
@@ -17,5 +17,5 @@ Build `web/src/hud/` against the contract types and fixture data:
   table size and comes from `results/`.
 - Keyboard support for every decision; visible focus states.
 
-Use Mobbin (via MCP) for anything DESIGN.md does not cover yet. Run `design-critic`
-before calling it done. Handoff, commit, push.
+If DESIGN.md does not cover a screen, extend its HUD patterns section rather than
+borrowing an outside look. Run `design-critic` before calling it done. Handoff, commit, push.

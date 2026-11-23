@@ -15,17 +15,8 @@ Take one idea from each. Never copy a look, model, texture, or layout wholesale.
 | Kenney City Kits (CC0) — https://kenney-assets.itch.io/city-kit-suburban | Free low-poly GLB buildings and roads to start from; recolour through our palette |
 | R3F scaling performance — https://r3f.docs.pmnd.rs/advanced/scaling-performance | Instancing, on-demand frames, PerformanceMonitor quality tiers |
 
-## 2D interface (search Mobbin with the Mobbin MCP)
+## 2D interface
 
-Pull three examples per row into DESIGN.md with a one-line note on what to take.
-
-| Saltmarket moment | Mobbin search |
-| --- | --- |
-| Buy or pass on a space | product purchase confirmation, order ticket |
-| Auction | live bidding, bid confirmation |
-| Trade offer | trade or swap offer, counter-offer |
-| Cash, net worth, rent paid | wallet balance, transaction feed |
-| First game | onboarding coach marks, first-run tutorial |
-| Game over | results, leaderboard, streak summary |
-
-Mobbin covers 2D app and web screens only. Do not look there for the 3D world.
+The owner decided not to use Mobbin (2026-11-23). The patterns for each Saltmarket moment
+(buy or pass, auction, trade, cash and rent, first game, game over) are written in
+`DESIGN.md`, section "HUD patterns per moment".

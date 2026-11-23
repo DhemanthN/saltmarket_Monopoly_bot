@@ -17,6 +17,14 @@ AgentName = Literal["ppo", "dqn"]
 SubmitFailure = Literal["illegal", "not_your_turn", "game_over"]
 BrigExit = Literal["roll", "pay", "pass"]
 DeckName = Literal["tide", "ledger"]
+LITERAL_ALIASES: dict[str, object] = {
+    "DecisionKind": DecisionKindName,
+    "AgentName": AgentName,
+    "SubmitFailure": SubmitFailure,
+    "BrigExit": BrigExit,
+    "DeckName": DeckName,
+}
+"""Named string unions, so the TypeScript file can name them instead of repeating them."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -275,6 +283,49 @@ class GameOver(EventBase):
     by_turn_cap: bool
 
 
+GameEvent = (
+    Roll | Move | Buy | AuctionStart | AuctionBid | AuctionWin | Rent | LevelChange
+    | MortgageChange | TradeOffered | TradeResult | BrigMove | CardDrawn | DecisionMade
+    | Bankrupt | CashChange | OwnerChange | GameOver
+)
+
+
+@dataclass(frozen=True, slots=True)
+class ResultView:
+    """The engine's result for a finished game."""
+
+    winner: int
+    turns: int
+    hit_cap: bool
+    net_worths: tuple[int, ...]
+    bankrupt: tuple[bool, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class FinalState:
+    """The board at the end of a game, used to check that events replay to the same state."""
+
+    cash: tuple[int, ...]
+    owner: tuple[int | None, ...]
+    level: tuple[int, ...]
+    mortgaged: tuple[bool, ...]
+    position: tuple[int, ...]
+    bankrupt: tuple[bool, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class GameFixture:
+    """A recorded game: how it was set up, what the human chose, and everything that happened."""
+
+    name: str
+    config: SessionConfig
+    answers: tuple[ActionId, ...]
+    events: tuple[GameEvent, ...]
+    result: ResultView
+    final_state: FinalState
+    fingerprint: str
+
+
 EVENT_TYPES: tuple[type[EventBase], ...] = (
     Roll, Move, Buy, AuctionStart, AuctionBid, AuctionWin, Rent, LevelChange, MortgageChange,
     TradeOffered, TradeResult, BrigMove, CardDrawn, DecisionMade, Bankrupt, CashChange,
@@ -284,16 +335,9 @@ EVENT_TYPES: tuple[type[EventBase], ...] = (
 
 VALUE_TYPES: tuple[type, ...] = (
     SessionConfig, TradeOfferView, LegalAction, Decision, SubmitResult, ExplainedAction,
-    Explanation, EventBase,
+    Explanation, ResultView, FinalState, GameFixture,
 )
 """Every other exported class."""
-
-GameEvent = (
-    Roll | Move | Buy | AuctionStart | AuctionBid | AuctionWin | Rent | LevelChange
-    | MortgageChange | TradeOffered | TradeResult | BrigMove | CardDrawn | DecisionMade
-    | Bankrupt | CashChange | OwnerChange | GameOver
-)
-
 
 def camel(name: str) -> str:
     """Turn a snake_case field name into camelCase."""

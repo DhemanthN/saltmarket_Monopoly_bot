@@ -35,3 +35,8 @@ Claude outputs/
 .claude/
 docs/RESUME_UPDATE.md
 docs/web/moodboard/images/
+
+# Web frontend
+node_modules/
+web/dist/
+*.tsbuildinfo

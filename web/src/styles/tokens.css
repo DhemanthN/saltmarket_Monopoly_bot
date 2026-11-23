@@ -1,0 +1,128 @@
+/* Saltmarket design tokens. Source of truth: docs/web/DESIGN.md.
+   tokens.ts mirrors the colour, motion and z-layer values; tokens.test.ts keeps them equal. */
+
+:root {
+  /* Colour: surfaces and ink */
+  --paper: #F3EAD7;
+  --paper-deep: #E6D8BC;
+  --sailcloth: #FBF7EE;
+  --ink: #1F2A2E;
+  --ink-soft: #4A5558;
+  --brass: #8A6A1F;
+  --tide: #1E5A66;
+  --focus: #0B5CAD;
+  --danger: #A3261A;
+  --ok: #2E6B34;
+  --night: #16232B;
+  --night-panel: #22333C;
+  --night-text: #EDE3CF;
+
+  /* Colour: districts */
+  --district-kelp: #4F7A3A;
+  --district-reef: #B5523B;
+  --district-coral: #C2456B;
+  --district-driftwood: #7A5A3C;
+  --district-amber: #96680F;
+  --district-cinder: #5B4A4E;
+  --district-jade: #2E7E6A;
+  --district-crown: #3B4F8C;
+
+  /* Colour: seats */
+  --seat-saffron: #D9A21B;
+  --seat-teal: #137C86;
+  --seat-vermilion: #B8321A;
+  --seat-indigo: #3A2F7A;
+
+  /* Semantic roles. Night mood only redefines these. */
+  --page: var(--paper);
+  --surface: var(--paper);
+  --surface-raised: var(--sailcloth);
+  --surface-inset: var(--paper-deep);
+  --text: var(--ink);
+  --text-soft: var(--ink-soft);
+  --link: var(--tide);
+  --rule: var(--brass);
+  --outline: var(--ink);
+
+  /* Type */
+  --font-display: "Fraunces", "Iowan Old Style", Georgia, "Times New Roman", serif;
+  --font-text: "IBM Plex Sans", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --text-caption: 12px;
+  --leading-caption: 16px;
+  --text-small: 14px;
+  --leading-small: 20px;
+  --text-body: 16px;
+  --leading-body: 24px;
+  --text-h4: 20px;
+  --leading-h4: 28px;
+  --text-h3: 25px;
+  --leading-h3: 32px;
+  --text-h2: 31px;
+  --leading-h2: 36px;
+  --text-h1: 39px;
+  --leading-h1: 44px;
+  --text-display: 49px;
+  --leading-display: 52px;
+
+  /* Spacing: 4 px base */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-9: 48px;
+  --space-10: 64px;
+
+  /* Radius: deliberately not uniform */
+  --radius-panel: 2px;
+  --radius-signboard: 0;
+  --radius-button: 4px;
+  --radius-round: 50%;
+
+  /* Shadow: floating panels only */
+  --shadow-paper-lift: 0 1px 0 rgb(31 42 46 / 0.12), 0 8px 18px -8px rgb(31 42 46 / 0.35);
+
+  /* Motion */
+  --motion-quick: 120ms;
+  --motion-standard: 240ms;
+  --motion-travel: 480ms;
+  --ease-quick: cubic-bezier(0.2, 0, 0, 1);
+  --ease-standard: cubic-bezier(0.3, 0, 0, 1);
+  --ease-travel: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* Z-layers */
+  --z-canvas: 0;
+  --z-world-label: 100;
+  --z-hud-rail: 200;
+  --z-decision: 300;
+  --z-coach: 400;
+  --z-toast: 500;
+  --z-modal: 600;
+  --z-dev: 900;
+}
+
+/* Night mood: page and panels darken, ink and accents keep their contrast roles. */
+[data-mood="night"] {
+  --page: var(--night);
+  --surface: var(--night-panel);
+  --surface-raised: var(--night-panel);
+  --surface-inset: var(--night);
+  --text: var(--night-text);
+  --text-soft: var(--night-text);
+  --link: var(--night-text);
+  --rule: var(--night-text);
+  --outline: var(--night-text);
+}
+
+/* Reduced motion: travel and hops become a short crossfade. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-standard: 120ms;
+    --motion-travel: 120ms;
+    --ease-standard: var(--ease-quick);
+    --ease-travel: var(--ease-quick);
+  }
+}

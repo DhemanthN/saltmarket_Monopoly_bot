@@ -58,7 +58,7 @@ every swatch gets a 1 px sailcloth ring.
 | driftwood | `#7A5A3C` | 5.85 | 5.23 |
 | amber | `#96680F` | 4.58 | 4.10 |
 | cinder | `#5B4A4E` | 7.75 | 6.93 |
-| jade | `#2F7F6B` | 4.50 | 4.02 |
+| jade | `#2E7E6A` | 4.56 | 4.08 |
 | crown | `#3B4F8C` | 7.32 | 6.55 |
 
 **Owner colours.**

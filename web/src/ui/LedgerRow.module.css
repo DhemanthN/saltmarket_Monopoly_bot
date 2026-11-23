@@ -31,19 +31,17 @@
 }
 
 .delta {
-  color: var(--text-soft);
   text-align: right;
 }
 
 .gain {
-  color: var(--ok);
+  color: var(--gain);
 }
 
 .debt {
-  color: var(--danger);
+  color: var(--debt);
 }
 
-[data-mood="night"] .gain,
-[data-mood="night"] .debt {
-  color: var(--night-text);
+.negative {
+  color: var(--debt);
 }

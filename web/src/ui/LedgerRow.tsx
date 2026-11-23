@@ -7,8 +7,9 @@ interface LedgerRowProps {
   label: string;
   /** Pre-formatted figure, for example "1,420". Shown in tabular figures. */
   value: string;
-  /** Change since the last update. Always print the sign, since colour is never the only cue. */
+  /** Change since the last update. Always print the sign (use U+2212 for minus); colour is never the only cue. */
   delta?: string;
+  /** Colours the delta, not the balance. */
   tone?: "default" | "gain" | "debt";
   active?: boolean;
 }
@@ -19,8 +20,8 @@ export function LedgerRow({ mark, label, value, delta, tone = "default", active 
     <div className={`${styles.row} ${active ? styles.active : ""}`}>
       <span className={styles.mark}>{mark}</span>
       <span className={styles.label}>{label}</span>
-      <span className={`${styles.delta} figures`}>{delta}</span>
-      <span className={`${styles.value} figures ${styles[tone]}`}>{value}</span>
+      <span className={`${styles.delta} figures ${tone === "default" ? "" : styles[tone]}`}>{delta}</span>
+      <span className={`${styles.value} figures ${value.startsWith("−") ? styles.negative : ""}`}>{value}</span>
     </div>
   );
 }

@@ -66,8 +66,8 @@ function CameraRig({ onAnchor }: { onAnchor: (p: ScreenPoint) => void }) {
   const { camera, size, invalidate } = useThree();
   useLayoutEffect(() => {
     const wide = size.width / size.height > 1;
-    camera.position.set(0, wide ? 15 : 40, wide ? 31 : 70);
-    camera.lookAt(wide ? -4.5 : 0, wide ? -1 : -9, 0);
+    camera.position.set(0, wide ? 15 : 44, wide ? 31 : 78);
+    camera.lookAt(wide ? -4.5 : 0, wide ? -1 : -16, 0);
     camera.updateMatrixWorld();
     camera.updateProjectionMatrix();
     const home = ringPosition(0);

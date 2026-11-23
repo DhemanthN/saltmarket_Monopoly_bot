@@ -15,7 +15,7 @@
 .primary {
   background: var(--ink);
   color: var(--sailcloth);
-  border-bottom-width: 3px;
+  border-bottom: 3px solid var(--primary-edge);
 }
 
 .primary:hover {

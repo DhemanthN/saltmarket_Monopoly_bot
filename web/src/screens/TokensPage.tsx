@@ -75,6 +75,7 @@ function MotionDemo() {
 export default function TokensPage() {
   const toast = useToast();
   const [night, setNight] = useState(false);
+  const base = night ? palette.night : palette.paper;
 
   useEffect(() => {
     document.documentElement.dataset.mood = night ? "night" : "day";
@@ -99,7 +100,7 @@ export default function TokensPage() {
               <span className={styles.chip} style={{ background: hex }} />
               <span className={styles.swatchName}>{name}</span>
               <span className={`${styles.swatchMeta} figures`}>
-                {hex}, {ratio(hex, palette.paper)} on paper
+                {hex}, {ratio(hex, base)} on {night ? "night" : "paper"}
               </span>
             </li>
           ))}
@@ -116,7 +117,7 @@ export default function TokensPage() {
               <span className={styles.swatchName}>{name}</span>
               <span className={`${styles.swatchMeta} figures`}>
                 {districts[name]}, label {ratio(palette.sailcloth, districts[name])}, mark{" "}
-                {ratio(districts[name], palette.paper)}
+                {ratio(districts[name], base)}
               </span>
             </li>
           ))}
@@ -228,8 +229,8 @@ export default function TokensPage() {
             tone="gain"
             active
           />
-          <LedgerRow mark={<Emblem emblem="wave" seat="teal" />} label="PPO agent" value="980" delta="-60" />
-          <LedgerRow mark={<Emblem emblem="star" seat="vermilion" />} label="Scripted bot" value="-40" tone="debt" />
+          <LedgerRow mark={<Emblem emblem="wave" seat="teal" />} label="PPO agent" value="980" delta={"−60"} tone="debt" />
+          <LedgerRow mark={<Emblem emblem="star" seat="vermilion" />} label="Scripted bot" value={"−40"} />
         </Panel>
       </Section>
 

@@ -43,6 +43,9 @@
   --link: var(--tide);
   --rule: var(--brass);
   --outline: var(--ink);
+  --gain: var(--ok);
+  --debt: var(--danger);
+  --primary-edge: #11181B;
 
   /* Type */
   --font-display: "Fraunces", "Iowan Old Style", Georgia, "Times New Roman", serif;
@@ -115,6 +118,11 @@
   --link: var(--night-text);
   --rule: var(--night-text);
   --outline: var(--night-text);
+  /* Night gain and debt, 6.61 and 6.00 on night-panel. */
+  --gain: #7FC98A;
+  --debt: #F2988A;
+  --primary-edge: var(--brass);
+  --shadow-paper-lift: 0 0 0 1px rgb(237 227 207 / 0.12), 0 10px 22px -8px rgb(0 0 0 / 0.6);
 }
 
 /* Reduced motion: travel and hops become a short crossfade. */

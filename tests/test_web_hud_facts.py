@@ -8,7 +8,8 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def _load_script():
-    spec = importlib.util.spec_from_file_location("export_hud_facts", ROOT / "scripts" / "export_hud_facts.py")
+    path = ROOT / "scripts" / "export_hud_facts.py"
+    spec = importlib.util.spec_from_file_location("export_hud_facts", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module

@@ -26,7 +26,8 @@ def _stats(file: str, key: str) -> dict:
 
 def build_facts() -> list[dict]:
     """Return one fact per (agent, table size) that `results/` backs up."""
-    bots = json.loads((RESULTS / "rl_eval_summary_two_player_v2_all.json").read_text("utf-8"))["bots"]
+    two_player = RESULTS / "rl_eval_summary_two_player_v2_all.json"
+    bots = json.loads(two_player.read_text(encoding="utf-8"))["bots"]
     facts = []
     for (agent, players), (file, key) in SOURCES.items():
         stats = _stats(file, key)

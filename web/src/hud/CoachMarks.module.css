@@ -1,0 +1,59 @@
+.wrap {
+  position: absolute;
+  z-index: var(--z-coach);
+  width: min(320px, calc(100% - var(--space-8)));
+  inset-inline: 0;
+  margin-inline: auto;
+}
+
+.centre {
+  inset-block-start: 30%;
+}
+
+.decision {
+  inset-block-end: 62%;
+}
+
+.lanterns {
+  inset-block-start: 96px;
+  inset-inline: var(--space-4) auto;
+  margin-inline: 0;
+}
+
+.card {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.count {
+  margin: 0;
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  color: var(--text-soft);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--text-h4);
+  line-height: var(--leading-h4);
+}
+
+.body {
+  margin: 0;
+  font-size: var(--text-small);
+  line-height: var(--leading-small);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+@media (max-width: 600px) {
+  .decision {
+    inset-block-end: auto;
+    inset-block-start: 96px;
+  }
+}

@@ -1,0 +1,25 @@
+.page {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
+.controls {
+  position: absolute;
+  inset-block-end: var(--space-2);
+  inset-inline-start: var(--space-2);
+  z-index: var(--z-dev);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  max-width: 60%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  font-size: var(--text-caption);
+}
+
+.controls label {
+  display: grid;
+  gap: var(--space-1);
+}

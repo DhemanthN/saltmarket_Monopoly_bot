@@ -1,5 +1,5 @@
 import boardData from "../../../data/board.json";
-import type { GameEvent } from "../contract/types";
+import type { Explanation, GameEvent } from "../contract/types";
 import { money, spaceName } from "./format";
 
 /** Starting cash from `src/saltmarket/engine/config.py`. */
@@ -27,6 +27,8 @@ export interface HudState {
   mortgaged: boolean[];
   bankrupt: boolean[];
   feed: FeedLine[];
+  /** Each seat's most recent explained decision, for the lanterns. */
+  explanation: (Explanation | null)[];
   /** The auction in progress, with the highest bid so far. */
   auction: { space: number; high: { seat: number; amount: number } | null } | null;
   winner: number | null;
@@ -45,6 +47,7 @@ export function initialHudState(seatCount: number): HudState {
     mortgaged: RAW.map(() => false),
     bankrupt: Array.from({ length: seatCount }, () => false),
     feed: [],
+    explanation: Array.from({ length: seatCount }, () => null),
     auction: null,
     winner: null,
     turns: null,
@@ -79,6 +82,7 @@ export function applyEvent(prev: HudState, event: GameEvent, names: readonly str
     level: [...prev.level],
     mortgaged: [...prev.mortgaged],
     bankrupt: [...prev.bankrupt],
+    explanation: [...prev.explanation],
     turn: event.turn,
   };
   switch (event.t) {
@@ -110,6 +114,9 @@ export function applyEvent(prev: HudState, event: GameEvent, names: readonly str
       break;
     case "buy":
       pushFeed(state, event.seq, `${names[event.seat]} bought ${spaceName(event.space)} for ${money(event.price)}`);
+      break;
+    case "decision":
+      if (event.explanation) state.explanation[event.seat] = event.explanation;
       break;
     case "auction_start":
       state.auction = { space: event.space, high: null };

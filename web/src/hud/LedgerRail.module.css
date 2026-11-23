@@ -1,0 +1,52 @@
+.rail {
+  position: absolute;
+  inset-inline-end: var(--space-4);
+  inset-block-start: var(--space-4);
+  z-index: var(--z-hud-rail);
+  width: min(300px, calc(100% - var(--space-8)));
+  max-height: calc(100% - var(--space-8));
+  overflow-y: auto;
+  padding: var(--space-4);
+}
+
+.seat {
+  margin-bottom: var(--space-2);
+}
+
+.worth {
+  margin: 0;
+  padding-inline-start: 34px;
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  color: var(--text-soft);
+}
+
+.feed {
+  display: grid;
+  gap: var(--space-1);
+  margin: var(--space-3) 0 0;
+  padding: var(--space-3) 0 0;
+  border-top: 1px solid var(--rule);
+  list-style: none;
+  font-size: var(--text-small);
+  line-height: var(--leading-small);
+}
+
+.feed:empty {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .rail {
+    inset-block-start: auto;
+    inset-block-end: var(--space-4);
+    inset-inline: var(--space-4);
+    width: auto;
+    max-height: 30vh;
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .feed {
+    display: none;
+  }
+}

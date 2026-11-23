@@ -11,7 +11,6 @@ import torch
 
 from saltmarket.bots.catalog import BOTS
 from saltmarket.rl import encoding as enc
-from saltmarket.rl.policy import PolicyWeights
 from saltmarket.rl.ppo import PPO, PPOConfig
 from saltmarket.rl.rollout import Rollout, merge_batches
 from saltmarket.rl.workers import OPPONENT_COUNTS, RolloutRequest, TableSpec, worker_main
@@ -110,28 +109,6 @@ def append_log(path: Path, row: dict, fields: tuple[str, ...] = LOG_FIELDS) -> N
         if new_file:
             writer.writeheader()
         writer.writerow(row)
-
-
-def save_policy(weights: PolicyWeights, path: Path) -> None:
-    """Save network weights as a small NumPy archive for evaluation."""
-    arrays = {}
-    for name, layers in (("actor", weights.actor), ("critic", weights.critic)):
-        for position, (weight, bias) in enumerate(layers):
-            arrays[f"{name}_{position}_w"] = weight
-            arrays[f"{name}_{position}_b"] = bias
-    np.savez_compressed(path, **arrays)
-
-
-def load_policy(path: Path) -> PolicyWeights:
-    """Load network weights saved by ``save_policy``."""
-    with np.load(path) as data:
-        def layers(name: str) -> tuple:
-            count = sum(key.startswith(name) and key.endswith("_w") for key in data.files)
-            return tuple(
-                (data[f"{name}_{i}_w"], data[f"{name}_{i}_b"]) for i in range(count)
-            )
-
-        return PolicyWeights(layers("actor"), layers("critic"))
 
 
 def _save_checkpoint(

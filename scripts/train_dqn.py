@@ -17,7 +17,8 @@ def main() -> None:
 
     from saltmarket.rl.dqn import DQNConfig
     from saltmarket.rl.dqn_train import DQNTrainConfig, train_dqn
-    from saltmarket.rl.train import resolve_device, save_policy
+    from saltmarket.rl.policy import save_policy
+    from saltmarket.rl.train import resolve_device
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--steps", type=int, required=True)

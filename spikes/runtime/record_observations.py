@@ -7,8 +7,7 @@ import numpy as np
 from saltmarket.bots.registry import make_any_bot
 from saltmarket.engine.game import Game
 from saltmarket.rl.agent import AgentStrategy
-from saltmarket.rl.policy import MASKED_LOGIT, NumpyPolicy, _forward
-from saltmarket.rl.train import load_policy
+from saltmarket.rl.policy import MASKED_LOGIT, NumpyPolicy, _forward, load_policy
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]

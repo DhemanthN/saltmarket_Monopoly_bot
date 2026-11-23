@@ -79,7 +79,7 @@ def heldout_split(tables: dict[str, pd.DataFrame], overlap: pd.DataFrame) -> pd.
 
 def main() -> None:
     """Build all tables and charts."""
-    from saltmarket.rl.train import load_policy
+    from saltmarket.rl.policy import load_policy
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--runs", nargs="+", default=["main"])

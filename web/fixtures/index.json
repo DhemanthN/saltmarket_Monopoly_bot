@@ -1,0 +1,70 @@
+[
+  {
+    "name": "vs_ppo_2p",
+    "file": "vs_ppo_2p.json",
+    "shows": "a 2-player game against PPO",
+    "seats": [
+      "human",
+      "ppo"
+    ],
+    "seed": 23,
+    "turns": 33,
+    "events": 327,
+    "humanDecisions": 29
+  },
+  {
+    "name": "vs_dqn_2p",
+    "file": "vs_dqn_2p.json",
+    "shows": "a 2-player game against DQN",
+    "seats": [
+      "human",
+      "dqn"
+    ],
+    "seed": 13,
+    "turns": 51,
+    "events": 694,
+    "humanDecisions": 57
+  },
+  {
+    "name": "table_4p",
+    "file": "table_4p.json",
+    "shows": "a 4-player table with PPO",
+    "seats": [
+      "human",
+      "ppo",
+      "balanced",
+      "expert"
+    ],
+    "seed": 11,
+    "turns": 178,
+    "events": 1419,
+    "humanDecisions": 30
+  },
+  {
+    "name": "bots_3p",
+    "file": "bots_3p.json",
+    "shows": "an auction, a trade and a bankruptcy against bots",
+    "seats": [
+      "human",
+      "expert",
+      "always_buy"
+    ],
+    "seed": 11,
+    "turns": 134,
+    "events": 932,
+    "humanDecisions": 43
+  },
+  {
+    "name": "watch_2p",
+    "file": "watch_2p.json",
+    "shows": "a game with no human decisions",
+    "seats": [
+      "expert",
+      "balanced"
+    ],
+    "seed": 5,
+    "turns": 163,
+    "events": 1048,
+    "humanDecisions": 0
+  }
+]

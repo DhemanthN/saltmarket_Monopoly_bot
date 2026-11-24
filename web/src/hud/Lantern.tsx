@@ -12,27 +12,33 @@ export interface LanternDockProps {
 
 /** One lantern per agent opponent. Hover, focus or tap opens its top three choices. */
 export function LanternDock({ lanterns }: LanternDockProps) {
-  const [open, setOpen] = useState<number | null>(null);
+  const [hover, setHover] = useState<number | null>(null);
+  const [pinned, setPinned] = useState<number | null>(null);
   if (lanterns.length === 0) return null;
   return (
     <div className={styles.dock} data-coach="lanterns">
       {lanterns.map(({ seat, name, explanation }) => {
-        const isOpen = open === seat;
+        const isOpen = hover === seat || pinned === seat;
         const agent = explanation?.agent === "dqn" ? "DQN" : "PPO";
         return (
           <div
             key={seat}
             className={styles.lantern}
-            onMouseEnter={() => setOpen(seat)}
-            onMouseLeave={() => setOpen((cur) => (cur === seat ? null : cur))}
+            onMouseEnter={() => setHover(seat)}
+            onMouseLeave={() => setHover((cur) => (cur === seat ? null : cur))}
           >
             <button
               type="button"
               className={styles.button}
               aria-expanded={isOpen}
+              aria-pressed={pinned === seat}
               aria-controls={`lantern-${seat}`}
-              onClick={() => setOpen(isOpen ? null : seat)}
-              onKeyDown={(e) => e.key === "Escape" && setOpen(null)}
+              onClick={() => setPinned(pinned === seat ? null : seat)}
+              onKeyDown={(e) => {
+                if (e.key !== "Escape") return;
+                setPinned(null);
+                setHover(null);
+              }}
             >
               <Emblem emblem={seatOrder[seat].emblem} seat={seatOrder[seat].name} size={22} />
               {name}

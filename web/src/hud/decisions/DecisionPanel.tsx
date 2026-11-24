@@ -35,6 +35,7 @@ export function DecisionPanel({ decision, hud, names, onSubmit }: DecisionPanelP
   const model = panelModel(decision);
   const rootRef = useRef<HTMLDivElement>(null);
   const [bidIndex, setBidIndex] = useState(0);
+  const [groupIndex, setGroupIndex] = useState(0);
 
   useEffect(() => {
     rootRef.current?.focus();
@@ -42,17 +43,22 @@ export function DecisionPanel({ decision, hud, names, onSubmit }: DecisionPanelP
 
   const isAuction = decision.kind === "auction";
   const selectedBid = model.bids[Math.min(bidIndex, model.bids.length - 1)] ?? null;
-  const primary = isAuction ? selectedBid : model.primary;
+  const isPropose = decision.kind === "propose";
+  const groups = proposalGroups(model);
+  const offers = isPropose ? offersFor(model, groups[Math.min(groupIndex, groups.length - 1)]) : [];
+  const selectedOffer = offers[Math.min(bidIndex, offers.length - 1)] ?? null;
+  const primary = isAuction ? selectedBid : isPropose ? selectedOffer : model.primary;
 
   useDecisionKeys({
     onEnter: () => primary && onSubmit(primary.id),
     onEscape: () => model.pass && onSubmit(model.pass.id),
     onDigit: (i) => {
-      if (isAuction) setBidIndex(i);
+      if (isAuction || isPropose) setBidIndex(i);
       else if (model.choices[i]) onSubmit(model.choices[i].id);
     },
     onArrow: (step) => {
-      if (isAuction) setBidIndex((i) => Math.max(0, Math.min(model.bids.length - 1, i + step)));
+      const count = isAuction ? model.bids.length : offers.length;
+      if (isAuction || isPropose) setBidIndex((i) => Math.max(0, Math.min(count - 1, i + step)));
     },
   });
 
@@ -62,7 +68,7 @@ export function DecisionPanel({ decision, hud, names, onSubmit }: DecisionPanelP
       <h2 id="decision-title" className={styles.title}>
         {DECISION_TITLE[decision.kind]}
       </h2>
-      <Body decision={decision} model={model} hud={hud} names={names} onSubmit={onSubmit} bidIndex={bidIndex} setBidIndex={setBidIndex} />
+      <Body decision={decision} model={model} hud={hud} names={names} onSubmit={onSubmit} bidIndex={bidIndex} setBidIndex={setBidIndex} groupIndex={groupIndex} setGroupIndex={setGroupIndex} />
       <div className={styles.actions}>
         {primary ? (
           <Button variant="primary" onClick={() => onSubmit(primary.id)}>
@@ -86,6 +92,7 @@ function primaryLabel(decision: Decision, action: LegalAction): string {
   if (decision.kind === "buy" && action.amount !== null) return `Buy for ${money(action.amount)}`;
   if (decision.kind === "auction" && action.amount !== null) return `Bid ${money(action.amount)}`;
   if (decision.kind === "accept") return "Accept";
+  if (decision.kind === "propose" && action.amount !== null) return `Offer ${money(action.amount)}`;
   return action.label;
 }
 
@@ -93,6 +100,8 @@ interface BodyProps extends DecisionPanelProps {
   model: PanelModel;
   bidIndex: number;
   setBidIndex: (i: number) => void;
+  groupIndex: number;
+  setGroupIndex: (i: number) => void;
 }
 
 function Body(props: BodyProps) {
@@ -111,12 +120,12 @@ function Body(props: BodyProps) {
   }
 }
 
-function Deed({ space, cash, price }: { space: number | null; cash: number; price: number | null }) {
+function Deed({ space, cash, price, ladder = true }: { space: number | null; cash: number; price: number | null; ladder?: boolean }) {
   if (space === null) return null;
   const raw = RAW[space];
   const district = raw.group as DistrictName | undefined;
   const rents = raw.rents ?? [];
-  const showLadder = raw.kind === "property";
+  const showLadder = ladder && raw.kind === "property";
   return (
     <div className={styles.deed} style={district ? { borderInlineStartColor: districts[district] } : undefined}>
       <p className={styles.deedName}>{raw.name}</p>
@@ -151,7 +160,7 @@ function Auction({ decision, model, hud, names, bidIndex, setBidIndex }: BodyPro
   const selected = Math.min(bidIndex, model.bids.length - 1);
   return (
     <>
-      {decision.space !== null ? <Deed space={decision.space} cash={hud.cash[decision.seat]} price={null} /> : null}
+      {decision.space !== null ? <Deed space={decision.space} cash={hud.cash[decision.seat]} price={null} ladder={false} /> : null}
       {decision.price !== null ? (
         <p className={styles.note}>
           List price <span className="figures">{money(decision.price)}</span>. Bids are shares of it.
@@ -198,14 +207,14 @@ function ChoiceList({ model, hud, decision, onSubmit }: BodyProps) {
         </p>
       ) : null}
       <ul className={styles.list}>
-        {model.choices.map((action, i) => (
+        {model.choices.slice(1).map((action, i) => (
           <li key={action.id}>
             <button
               type="button"
-              className={`${styles.row} ${action === model.primary ? styles.rowPrimary : ""}`}
+              className={styles.row}
               onClick={() => onSubmit(action.id)}
             >
-              <span className={styles.chipIndex}>{i + 1}</span>
+              <span className={styles.chipIndex}>{i + 2}</span>
               <span className={styles.rowLabel}>{action.label}</span>
               {action.amount !== null ? <span className="figures">{money(action.amount)}</span> : null}
             </button>
@@ -216,31 +225,56 @@ function ChoiceList({ model, hud, decision, onSubmit }: BodyProps) {
   );
 }
 
-function ProposeList({ model, onSubmit }: BodyProps) {
-  const groups = [...new Set(model.choices.map((a) => a.group ?? "other"))];
-  let n = 0;
+function proposalGroups(model: PanelModel): string[] {
+  return [...new Set(model.choices.map((a) => a.group ?? "other"))];
+}
+
+function offersFor(model: PanelModel, group: string): LegalAction[] {
+  return model.choices.filter((a) => (a.group ?? "other") === group).sort((x, y) => (x.amount ?? 0) - (y.amount ?? 0));
+}
+
+/** Pick a group, then one of its premiums. The primary button sends the selected offer. */
+function ProposeList({ model, groupIndex, setGroupIndex, bidIndex, setBidIndex }: BodyProps) {
+  const groups = proposalGroups(model);
+  const group = groups[Math.min(groupIndex, groups.length - 1)];
+  const offers = offersFor(model, group);
+  const selected = Math.min(bidIndex, offers.length - 1);
   return (
     <div className={styles.groups}>
       <p className={styles.note}>Pick a group, then one of three premiums.</p>
-      {groups.map((group) => (
-        <fieldset key={group} className={styles.group}>
-          <legend>{group === "other" ? "Other" : `${group} district`}</legend>
-          <div className={styles.chips}>
-            {model.choices
-              .filter((a) => (a.group ?? "other") === group)
-              .map((a) => {
-                n += 1;
-                return (
-                  <button key={a.id} type="button" className={`${styles.chip} figures`} onClick={() => onSubmit(a.id)}>
-                    <span className={styles.chipIndex}>{n}</span>
-                    {money(a.amount ?? 0)}
-                  </button>
-                );
-              })}
-          </div>
-          <p className={styles.deedMeta}>{model.choices.find((a) => (a.group ?? "other") === group)?.label.replace(/^Offer \d+ for /, "For ")}</p>
-        </fieldset>
-      ))}
+      <div role="radiogroup" aria-label="Group to buy" className={styles.chips}>
+        {groups.map((g, i) => (
+          <button
+            key={g}
+            type="button"
+            role="radio"
+            aria-checked={g === group}
+            className={`${styles.chip} ${g === group ? styles.chipOn : ""}`}
+            onClick={() => {
+              setGroupIndex(i);
+              setBidIndex(0);
+            }}
+          >
+            {g === "other" ? "Other" : g}
+          </button>
+        ))}
+      </div>
+      <p className={styles.deedMeta}>{offers[0]?.label.replace(/^Offer d+ for /, "For ")}</p>
+      <div role="radiogroup" aria-label="Premium" className={styles.chips}>
+        {offers.map((a, i) => (
+          <button
+            key={a.id}
+            type="button"
+            role="radio"
+            aria-checked={i === selected}
+            className={`${styles.chip} ${i === selected ? styles.chipOn : ""} figures`}
+            onClick={() => setBidIndex(i)}
+          >
+            <span className={styles.chipIndex}>{i + 1}</span>
+            {money(a.amount ?? 0)}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

@@ -7,7 +7,11 @@ import { initialHudState, reduceHud } from "../hud/state";
 import { AtollSilhouette } from "../world/AtollSilhouette";
 import styles from "./HudPage.module.css";
 
-const loaders = import.meta.glob<GameFixture>("../../fixtures/!(index).json", { import: "default" });
+const loaders = Object.fromEntries(
+  Object.entries(import.meta.glob<GameFixture>("../../fixtures/*.json", { import: "default" })).filter(
+    ([path]) => !path.endsWith("/index.json"),
+  ),
+);
 
 /** Dev page: replay a recorded game through the HUD and open any decision kind. Not in production builds. */
 export default function HudPage() {

@@ -5,6 +5,9 @@
   z-index: var(--z-decision);
   width: min(400px, calc(100% - var(--space-8)));
   margin-inline: auto;
+}
+
+.wrap:focus-visible {
   outline: none;
 }
 
@@ -13,11 +16,6 @@
   gap: var(--space-4);
   max-height: 70vh;
   overflow-y: auto;
-}
-
-.wrap:focus-visible .panel {
-  outline: 3px solid var(--focus);
-  outline-offset: 2px;
 }
 
 .title {
@@ -78,17 +76,27 @@
   color: var(--text-soft);
 }
 
-.ladder th {
-  text-align: start;
-  font-weight: 400;
-}
-
-.ladder td {
-  text-align: end;
+.ladder tbody {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
 }
 
 .ladder tr {
+  display: grid;
+  padding-top: var(--space-1);
   border-top: 1px solid color-mix(in srgb, var(--rule) 40%, transparent);
+}
+
+.ladder th {
+  text-align: start;
+  font-weight: 400;
+  font-size: var(--text-caption);
+  color: var(--text-soft);
+}
+
+.ladder td {
+  font-weight: 600;
 }
 
 .note {
@@ -162,11 +170,6 @@
   cursor: pointer;
 }
 
-.rowPrimary {
-  border-width: 2px;
-  font-weight: 600;
-}
-
 .rowLabel {
   flex: 1;
 }
@@ -183,26 +186,13 @@
 }
 
 [data-mood="night"] .chip:focus-visible,
-[data-mood="night"] .row:focus-visible,
-[data-mood="night"] .wrap:focus-visible .panel {
+[data-mood="night"] .row:focus-visible {
   outline-color: var(--night-text);
 }
 
 .groups {
   display: grid;
   gap: var(--space-3);
-}
-
-.group {
-  margin: 0;
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--rule);
-}
-
-.group legend {
-  padding-inline: var(--space-1);
-  font-weight: 600;
-  text-transform: capitalize;
 }
 
 .columns {

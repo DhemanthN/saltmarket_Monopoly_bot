@@ -1,23 +1,9 @@
 .wrap {
   position: absolute;
   z-index: var(--z-coach);
-  width: min(320px, calc(100% - var(--space-8)));
-  inset-inline: 0;
-  margin-inline: auto;
-}
-
-.centre {
-  inset-block-start: 30%;
-}
-
-.decision {
-  inset-block-end: 62%;
-}
-
-.lanterns {
-  inset-block-start: 96px;
-  inset-inline: var(--space-4) auto;
-  margin-inline: 0;
+  inset-block-start: 120px;
+  inset-inline-start: var(--space-4);
+  width: min(300px, calc(100% - var(--space-8)));
 }
 
 .card {
@@ -49,11 +35,4 @@
   align-items: center;
   gap: var(--space-3);
   margin-top: var(--space-2);
-}
-
-@media (max-width: 600px) {
-  .decision {
-    inset-block-end: auto;
-    inset-block-start: 96px;
-  }
 }

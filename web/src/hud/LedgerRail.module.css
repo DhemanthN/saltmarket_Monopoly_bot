@@ -3,7 +3,7 @@
   inset-inline-end: var(--space-4);
   inset-block-start: var(--space-4);
   z-index: var(--z-hud-rail);
-  width: min(300px, calc(100% - var(--space-8)));
+  width: min(340px, calc(100% - var(--space-8)));
   max-height: calc(100% - var(--space-8));
   overflow-y: auto;
   padding: var(--space-4);

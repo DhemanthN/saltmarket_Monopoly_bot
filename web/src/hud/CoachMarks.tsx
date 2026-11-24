@@ -8,14 +8,12 @@ const STORAGE_KEY = "saltmarket.coach.done";
 interface Mark {
   title: string;
   body: string;
-  /** Where the card sits, pointing at the thing it names. */
-  place: "centre" | "decision" | "lanterns";
 }
 
 const MARKS: readonly Mark[] = [
-  { title: "Your piece and the road", body: "You are the sun piece. Walk the ring road clockwise; each lot you land on can be bought.", place: "centre" },
-  { title: "Your decisions", body: "A panel opens here whenever you must choose. Enter takes the main action, Esc takes the quiet one, and number keys pick from a list.", place: "decision" },
-  { title: "Lanterns", body: "Open a lantern to see the agent's top three choices from its last move. These are the model's numbers, not an explanation in words.", place: "lanterns" },
+  { title: "Your piece and the road", body: "You are the sun piece. Your piece walks the ring road clockwise, and each lot you land on can be bought." },
+  { title: "Your decisions", body: "A panel opens at the bottom whenever you must choose. Enter takes the main action, Esc takes the quiet one, and number keys pick from a list." },
+  { title: "Lanterns", body: "Open a lantern, top left, to see the agent's top three choices from its last move. These are the model's numbers, not an explanation in words." },
 ];
 
 function coachSeen(): boolean {
@@ -46,7 +44,7 @@ export function CoachMarks({ onDone }: { onDone?: () => void }) {
     onDone?.();
   };
   return (
-    <div className={`${styles.wrap} ${styles[mark.place]}`}>
+    <div className={styles.wrap}>
       <Panel floating role="dialog" aria-label={`Tip ${step + 1} of ${MARKS.length}`} className={styles.card}>
         <p className={styles.count}>
           Tip {step + 1} of {MARKS.length}

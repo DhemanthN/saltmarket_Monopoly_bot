@@ -36,7 +36,7 @@ export interface HudState {
   turn: number;
 }
 
-const FEED_LIMIT = 8;
+const FEED_LIMIT = 5;
 
 export function initialHudState(seatCount: number): HudState {
   return {

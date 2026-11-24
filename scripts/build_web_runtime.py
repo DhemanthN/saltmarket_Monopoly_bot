@@ -70,7 +70,9 @@ def main() -> int:
         "bundle": name,
         "sha256": digest,
         "bytes": len(data),
-        "models": {stem: {"file": file, "bytes": len(blob)} for stem, (file, blob) in models.items()},
+        "models": {
+            stem: {"file": file, "bytes": len(blob)} for stem, (file, blob) in models.items()
+        },
     }
     manifest_path = OUT / "manifest.json"
 

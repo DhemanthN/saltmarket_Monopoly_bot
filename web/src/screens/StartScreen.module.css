@@ -4,14 +4,105 @@
   overflow: hidden;
 }
 
+.sea {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #8fc6cf 0%, #f3ddb4 46%, #2f7f8c 46.2%, #1e5a66 100%);
+}
+
+.sun {
+  position: absolute;
+  inset-block-start: 22%;
+  inset-inline-start: 56%;
+  width: clamp(72px, 9vw, 140px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #fff4e0;
+  opacity: 0.8;
+}
+
+/* The ship gets its own box beside the panel, so it is never drawn under it. */
+.ship {
+  position: absolute;
+  inset-block: 6% 4%;
+  inset-inline-start: 0;
+  width: calc(100% - 520px);
+}
+
 .panel {
   position: absolute;
-  inset-inline-start: var(--space-6);
-  inset-block-end: var(--space-6);
+  inset-inline-end: 64px;
+  inset-block-start: 50%;
+  transform: translateY(-50%);
   z-index: var(--z-decision);
-  width: min(420px, calc(100% - var(--space-8)));
+  width: 400px;
   max-height: calc(100% - var(--space-8));
   overflow-y: auto;
+}
+
+.modes {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.mode {
+  position: relative;
+  display: block;
+}
+
+.mode input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.modeBody {
+  display: grid;
+  gap: 2px;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--brass);
+  border-radius: var(--radius-button);
+}
+
+.modeTitle {
+  font-weight: 600;
+}
+
+.modeNote {
+  font-size: var(--text-small);
+  line-height: var(--leading-small);
+  color: var(--text-soft);
+}
+
+.mode input:checked + .modeBody {
+  background: var(--ink);
+  color: var(--sailcloth);
+}
+
+.mode input:checked + .modeBody .modeNote {
+  color: var(--sailcloth);
+}
+
+.mode input:focus-visible + .modeBody {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.mode[data-disabled="true"] input {
+  cursor: not-allowed;
+}
+
+.mode[data-disabled="true"] .modeBody {
+  opacity: 0.6;
+  border-style: dashed;
+}
+
+.load {
+  margin: var(--space-3) 0 0;
+  font: 500 var(--text-small) / var(--leading-small) var(--font-text);
+  color: var(--text-soft);
 }
 
 .title {
@@ -127,19 +218,25 @@
   color: var(--text-soft);
 }
 
-@media (max-width: 640px) {
-  /* The atoll is the point of this screen: keep the panel short so it stays in view. */
-  .intro,
-  .table {
-    display: none;
+@media (max-width: 900px) {
+  .ship {
+    inset-block: 4% auto;
+    height: 40%;
+    width: 100%;
   }
 
   .panel {
-    inset-inline: var(--space-4);
-    inset-block-end: var(--space-4);
+    inset-inline: var(--space-3);
+    inset-block: auto var(--space-3);
+    transform: none;
     width: auto;
-    max-height: 52%;
+    max-height: 58%;
     padding: var(--space-4);
+  }
+
+  .intro,
+  .table {
+    display: none;
   }
 
   .title {

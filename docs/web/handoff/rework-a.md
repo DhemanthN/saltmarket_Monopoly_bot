@@ -1,6 +1,8 @@
-# Rework A: HUD, UI and store slice
+# Rework A: both slices (HUD/UI/store and world)
 
-Branch `rework-a`. A second tab ("world") fixed the 3D items (F1, F4-F7, F21, F23, F24, F26-F30) and is documented separately.
+Branch `rework-a`. Two slices. Part 1 is HUD, UI and store (main tab). Part 2 is world, runtime and bundle (helper tab "world"); its full notes are in `rework-a-world.md`. `GameScreen` now uses `useQualityChoice()` (quality persists across reloads) and passes `paused` to `WorldScene` while the error panel is open.
+
+## Part 1: HUD, UI and store
 
 ## What changed
 
@@ -41,3 +43,30 @@ Branch `rework-a`. A second tab ("world") fixed the 3D items (F1, F4-F7, F21, F2
 ## Notes
 
 `npm run dev` runs `fetch-pyodide` first. Running `npx vite` alone leaves the engine stuck at 0%.
+
+## Part 2: world slice (summary of `rework-a-world.md`)
+
+| Item | Change |
+|---|---|
+| F1 | `world/chartFit.ts` fits the ring into the open frame above the sheet. Tested at 390x844 in a unit test. |
+| F4 | Day, dusk, night and dawn ease in turns (24 per day). `WorldScene` sets `data-mood`, so the HUD night panel applies. Windows and lamps glow at night. |
+| F5 | `TierGovernor` replaces the drei monitor. Desktop starts on High, phones on Medium, Auto Low probes to climb back. Reduced motion no longer forces Low. |
+| F6, F7 | Signboards hide when overlapping, avoid the ledger rail, use ledger names. |
+| F21 | `beforeunload` warning during a game. Quality choice persists. |
+| F23 | Console warnings removed, except the upstream `THREE.Clock` one, which is filtered. |
+| F24 | Open-centre sun emblem and a distinct piece shape per seat. |
+| F26 | Main chunk 34 kB (was 1.23 MB). `three` chunk 1.15 MB loads at Start. |
+| F27 | `?perf=1` enables `window.__saltmarketPerf` with texture and geometry counts. |
+| F28 | Weights ship as separate files and only the chosen opponent's loads. A PPO 2p game downloads about 1.2 MB of runtime, not 3.4 MB. |
+| F29 | Not reproduced in code. Needs the perf-auditor on Low. |
+| F30 | Per-frame allocations removed and geometries disposed on unmount. |
+
+World slice skipped: stars, moon and bloom (task 8). Night stays turn-based by owner answer.
+
+## Live checks not done
+
+- Phone 390x844: the browser tool refused the resize, and an iframe froze before game over. Phone game over, bankrupt banner and sheet layout are unchecked. Phone chart fit is covered by a unit test only.
+- Phone landscape 844x390 (F12): not checked.
+- 4x CPU throttle, real-phone fps, perf-auditor on Low (F5, F29).
+- Jail "use card" (F10) and a build decision: not reached.
+- Live Vercel URL: not checked until main deploys.

@@ -1,10 +1,10 @@
 import { Component, useEffect, useState, type ReactNode } from "react";
-import { GameMenu, type QualityChoice } from "../hud/GameMenu";
+import { GameMenu } from "../hud/GameMenu";
 import { HudView } from "../hud/HudView";
 import { useGameStore } from "../store/gameStore";
 import { Button } from "../ui/Button";
 import { AtollSilhouette } from "../world/AtollSilhouette";
-import { prefersReducedMotion } from "../world/quality";
+import { prefersReducedMotion, useQualityChoice } from "../world/quality";
 import { WorldScene } from "../world/WorldScene";
 import { LOAD_CAPTION } from "./loadCaption";
 import { RuntimeTrouble } from "./RuntimeTrouble";
@@ -85,7 +85,7 @@ function Game() {
   const ready = load.phase === "ready";
   const shownDecision = trouble ? null : decision;
   const sheetInset = useSheetInset(shownDecision !== null);
-  const [quality, setQuality] = useState<QualityChoice>(null);
+  const [quality, setQuality] = useQualityChoice();
   const [reducedMotion, setReducedMotion] = useState(prefersReducedMotion);
 
   return (
@@ -98,6 +98,7 @@ function Game() {
               seatKinds={config.seats}
               bottomInset={sheetInset}
               tierOverride={quality}
+              paused={trouble !== null}
               reducedMotion={reducedMotion}
               controls={
                 <GameMenu

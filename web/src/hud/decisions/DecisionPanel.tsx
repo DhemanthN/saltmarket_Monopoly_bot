@@ -7,7 +7,7 @@ import { Emblem } from "../../ui/Emblem";
 import { Panel } from "../../ui/Panel";
 import { money, spaceName } from "../format";
 import { completedGroups, districtColor, districtLabel } from "../groups";
-import { DECISION_TITLE, enterSubmits, liveBids, panelModel, type PanelModel } from "../layout";
+import { DECISION_TITLE, listChoices, liveBids, panelModel, type PanelModel } from "../layout";
 import type { HudState } from "../state";
 import { useDecisionKeys } from "../useDecisionKeys";
 import styles from "./DecisionPanel.module.css";
@@ -61,11 +61,14 @@ export function DecisionPanel({ decision, hud, names, onSubmit }: DecisionPanelP
   const primary = isAuction ? selectedBid : isPropose ? selectedOffer : model.primary;
 
   useDecisionKeys({
-    onEnter: () => primary && enterSubmits(decision.kind) && onSubmit(primary.id),
+    onEnter: () => primary && onSubmit(primary.id),
     onEscape: () => model.pass && onSubmit(model.pass.id),
     onDigit: (i) => {
       if (isAuction || isPropose) setBidIndex(i);
-      else if (model.choices[i + 1]) onSubmit(model.choices[i + 1].id);
+      else {
+        const row = listChoices(decision.kind, model.choices)[i];
+        if (row) onSubmit(row.id);
+      }
     },
     onArrow: (step) => {
       const count = isAuction ? model.bids.length : offers.length;
@@ -91,7 +94,7 @@ export function DecisionPanel({ decision, hud, names, onSubmit }: DecisionPanelP
           <Button variant="primary" onClick={() => onSubmit(primary.id)}>
             <span>{primaryLabel(decision, primary, hud.cash[decision.seat])}</span>
             {primaryFigure(decision, primary) ? <span className="figures">{primaryFigure(decision, primary)}</span> : null}
-            {enterSubmits(decision.kind) ? <kbd className={styles.key}>Enter</kbd> : null}
+            <kbd className={styles.key}>Enter</kbd>
           </Button>
         ) : null}
         {model.pass ? (
@@ -184,6 +187,7 @@ function Deed({ space, cash, price, ladder = true }: { space: number | null; cas
 
 function Auction({ decision, model, hud, names, bidIndex, setBidIndex }: BodyProps) {
   const selected = Math.min(bidIndex, model.bids.length - 1);
+  const high = hud.auction?.high ?? null;
   return (
     <>
       {decision.space !== null ? <Deed space={decision.space} cash={hud.cash[decision.seat]} price={null} ladder={false} /> : null}
@@ -205,6 +209,11 @@ function Auction({ decision, model, hud, names, bidIndex, setBidIndex }: BodyPro
           );
         })}
       </ol>
+      {model.bids.length === 0 ? (
+        <p className={styles.note}>
+          {high ? `${names[high.seat]} leads at ${money(high.amount)}, the top bid.` : "No bid is open to you."} Pass to leave the auction.
+        </p>
+      ) : null}
       <div role="radiogroup" aria-label="Bid amount" className={`${styles.chips} ${styles.bidChips}`} style={{ "--n": model.bids.length } as CSSProperties}>
         {model.bids.map((bid, i) => (
           <button
@@ -226,6 +235,7 @@ function Auction({ decision, model, hud, names, bidIndex, setBidIndex }: BodyPro
 
 function ChoiceList({ model, hud, decision, onSubmit }: BodyProps) {
   const debt = decision.debt;
+  const rows = listChoices(decision.kind, model.choices);
   return (
     <>
       {debt !== null ? (
@@ -233,18 +243,19 @@ function ChoiceList({ model, hud, decision, onSubmit }: BodyProps) {
           You owe <span className="figures">{money(debt)}</span> and hold <span className="figures">{money(hud.cash[decision.seat])}</span>.
         </p>
       ) : null}
-      {model.choices.length > 1 ? <p className={styles.listCaption}>Other options</p> : null}
+      {rows.length > 0 ? <p className={styles.listCaption}>{rows.length === model.choices.length ? "Options" : "Other options"}</p> : null}
       <ul className={styles.list}>
-        {model.choices.slice(1).map((action, i) => (
+        {rows.map((action, i) => (
           <li key={action.id}>
             <button
               type="button"
-              className={styles.row}
+              className={`${styles.row} ${action === model.primary ? styles.rowPrimary : ""}`}
               onClick={() => onSubmit(action.id)}
             >
               <span className={styles.chipIndex}>{i + 1}</span>
               <span className={styles.rowLabel}>{action.label}</span>
               {action.amount !== null ? <span className="figures">{money(action.amount)}</span> : null}
+              {action === model.primary && rows.length === model.choices.length ? <kbd className={styles.key}>Enter</kbd> : null}
             </button>
           </li>
         ))}

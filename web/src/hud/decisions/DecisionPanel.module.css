@@ -185,6 +185,10 @@
   cursor: pointer;
 }
 
+.rowPrimary {
+  border-color: var(--focus);
+}
+
 .rowLabel {
   flex: 1;
 }
@@ -400,7 +404,7 @@ li.badge {
   position: sticky;
   inset-block-end: 0;
   padding-block: var(--space-2);
-  background: var(--paper);
+  background: var(--surface-raised);
 }
 
 @media (max-width: 600px) {

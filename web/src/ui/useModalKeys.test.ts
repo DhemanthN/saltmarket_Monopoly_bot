@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { enterSubmits } from "../hud/layout";
 import { isGameKey } from "./useModalKeys";
 
 const key = (k: string, mods: Partial<Record<"ctrlKey" | "metaKey" | "altKey", boolean>> = {}) => ({
@@ -21,13 +20,5 @@ describe("keys under an open tip or menu", () => {
   it("leave Tab, letters and shortcuts with modifiers alone", () => {
     for (const k of ["Tab", "a", " "]) expect(isGameKey(key(k)), k).toBe(false);
     expect(isGameKey(key("1", { ctrlKey: true }))).toBe(false);
-  });
-});
-
-describe("Enter on a decision", () => {
-  it("never sells or mortgages blindly", () => {
-    expect(enterSubmits("raise_cash")).toBe(false);
-    expect(enterSubmits("liquidate")).toBe(false);
-    expect(enterSubmits("buy")).toBe(true);
   });
 });

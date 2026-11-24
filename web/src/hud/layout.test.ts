@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { liveBids, panelModel } from "./layout";
+import { listChoices, liveBids, panelModel } from "./layout";
 import { SAMPLE_DECISIONS } from "./samples";
 
 describe("panelModel", () => {
@@ -46,7 +46,21 @@ describe("liveBids", () => {
     expect(liveBids([bid(1, 22), bid(2, 135), bid(3, 180)], 135).map((b) => b.id)).toEqual([3]);
   });
 
-  it("keeps every chip when none beats the high bid", () => {
-    expect(liveBids([bid(1, 22)], 135)).toHaveLength(1);
+  it("returns no chips when none beats the high bid, leaving only Pass", () => {
+    expect(liveBids([bid(1, 22), bid(2, 135)], 360)).toEqual([]);
+  });
+});
+
+describe("listChoices", () => {
+  const act = (id: number) => ({ id, label: "Sell", amount: id, group: null, space: null, offer: null });
+  const choices = [act(1), act(2), act(3)];
+
+  it("lists the highlighted choice first for raise-cash decisions", () => {
+    expect(listChoices("raise_cash", choices).map((a) => a.id)).toEqual([1, 2, 3]);
+    expect(listChoices("liquidate", choices)).toHaveLength(3);
+  });
+
+  it("lists only the rest for decisions with a primary button", () => {
+    expect(listChoices("build", choices).map((a) => a.id)).toEqual([2, 3]);
   });
 });

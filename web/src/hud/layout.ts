@@ -42,12 +42,15 @@ export function panelModel(decision: Decision, cash: number = Infinity): PanelMo
   return { primary, choices, pass, bids: [] };
 }
 
+/** Decisions where every choice, the highlighted one included, appears in the numbered list. */
+const FULL_LIST_KINDS: ReadonlySet<DecisionKind> = new Set(["liquidate", "raise_cash"]);
+
 /**
- * Decisions whose first action sells or mortgages something. Enter does not take it blindly
- * there; the player clicks the row or presses its number.
+ * The rows of a decision's numbered list; digit key n picks row n. Selling decisions list every choice
+ * so the highlighted one (the one Enter takes) is visible; the others list the rest after the primary button.
  */
-export function enterSubmits(kind: DecisionKind): boolean {
-  return kind !== "liquidate" && kind !== "raise_cash";
+export function listChoices(kind: DecisionKind, choices: LegalAction[]): LegalAction[] {
+  return FULL_LIST_KINDS.has(kind) ? choices : choices.slice(1);
 }
 
 export const DECISION_TITLE: Record<DecisionKind, string> = {
@@ -62,8 +65,7 @@ export const DECISION_TITLE: Record<DecisionKind, string> = {
   raise_cash: "Raise cash",
 };
 
-/** Auction chips that beat the highest bid so far. With none left, every chip stays so the panel never empties. */
+/** Auction chips that beat the highest bid so far. Empty when none can win, leaving only Pass. */
 export function liveBids(bids: LegalAction[], high: number): LegalAction[] {
-  const live = bids.filter((b) => (b.amount ?? 0) > high);
-  return live.length > 0 ? live : bids;
+  return bids.filter((b) => (b.amount ?? 0) > high);
 }

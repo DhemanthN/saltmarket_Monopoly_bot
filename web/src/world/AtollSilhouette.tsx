@@ -1,5 +1,5 @@
 import { Canvas, useThree } from "@react-three/fiber";
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { BackSide, Color, InstancedMesh, Object3D, Vector3 } from "three";
 import { Signboard } from "../ui/Signboard";
 import { districts, palette, sunKeyframes } from "../styles/tokens";
@@ -11,8 +11,15 @@ const OUTLINE_SCALE = 1.04;
 const ANCHOR_HEIGHT = 1.6;
 const SKY = "#EBC9A0";
 
+/** How far lot `index` has risen when `built` (0 to 1) of the ring is done. Lots rise in board order. */
+function riseOf(index: number, built: number): number {
+  const t = Math.min(1, Math.max(0, built * spaces.length - index));
+  return t * t * (3 - 2 * t);
+}
+
 /** Lots as two instanced meshes (body and ink hull outline), so the whole ring costs two draw calls. */
-function Lots() {
+function Lots({ built }: { built: number }) {
+  const { invalidate } = useThree();
   const body = useRef<InstancedMesh>(null);
   const hull = useRef<InstancedMesh>(null);
   const dummy = useMemo(() => new Object3D(), []);
@@ -22,7 +29,8 @@ function Lots() {
     const color = new Color();
     spaces.forEach((space, i) => {
       const { x, z, angle } = ringPosition(i);
-      const height = space.district ? DISTRICT_HEIGHT[space.district] : 0.25;
+      const rise = riseOf(i, built);
+      const height = Math.max(0.001, (space.district ? DISTRICT_HEIGHT[space.district] : 0.25) * rise);
       dummy.position.set(x, height / 2, z);
       dummy.rotation.set(0, -angle + Math.PI / 2, 0);
       dummy.scale.set(LOT_SIZE, height, LOT_SIZE);
@@ -36,7 +44,8 @@ function Lots() {
     body.current.instanceMatrix.needsUpdate = true;
     if (body.current.instanceColor) body.current.instanceColor.needsUpdate = true;
     hull.current.instanceMatrix.needsUpdate = true;
-  }, [dummy]);
+    invalidate();
+  }, [dummy, built, invalidate]);
 
   return (
     <>
@@ -78,7 +87,7 @@ function CameraRig({ onAnchor }: { onAnchor: (p: ScreenPoint) => void }) {
   return null;
 }
 
-function Atoll() {
+function Atoll({ built }: { built: number }) {
   return (
     <>
       <mesh rotation-x={-Math.PI / 2} position-y={-0.3}>
@@ -97,17 +106,51 @@ function Atoll() {
         <circleGeometry args={[RING_RADIUS - 1.6, 64]} />
         <meshLambertMaterial color="#6FA3A8" />
       </mesh>
-      <Lots />
+      <Lots built={built} />
     </>
   );
 }
 
+const RISE_MS = 700;
+
+/** Eases toward `target` over about `RISE_MS`, or jumps there when the person prefers less motion. */
+function useEased(target: number): number {
+  const [value, setValue] = useState(target);
+  const current = useRef(target);
+  useEffect(() => {
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      current.current = target;
+      setValue(target);
+      return;
+    }
+    const from = current.current;
+    const begin = performance.now();
+    let frame = requestAnimationFrame(function step(now) {
+      const t = Math.min(1, (now - begin) / RISE_MS);
+      current.current = from + (target - from) * (1 - (1 - t) ** 3);
+      setValue(current.current);
+      if (t < 1) frame = requestAnimationFrame(step);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [target]);
+  return value;
+}
+
+export interface AtollSilhouetteProps {
+  /** Share of the engine load done (0 to 1). The lots rise as it grows. Omit for the finished ring. */
+  progress?: number;
+  /** What is loading, shown on the Home Quay signboard while `progress` is below 1. */
+  caption?: string;
+}
+
 /**
- * Placeholder world behind the start screen: the 40-lot ring at golden hour.
- * One static frame (`frameloop="demand"`), no idle motion. Task 4a replaces this.
+ * The 40-lot ring at golden hour, behind the start screen and the loading screen.
+ * Renders on demand only: frames are drawn while the lots rise, then it stays still.
  */
-export function AtollSilhouette() {
+export function AtollSilhouette({ progress = 1, caption }: AtollSilhouetteProps) {
   const [anchor, setAnchor] = useState<ScreenPoint | null>(null);
+  const built = useEased(progress);
+  const loading = progress < 1 && caption;
   return (
     <div className={styles.world} aria-hidden>
       <Canvas frameloop="demand" dpr={[1, 2]} camera={{ fov: 38, near: 0.5, far: 160 }}>
@@ -116,11 +159,15 @@ export function AtollSilhouette() {
         <hemisphereLight args={["#FFF0D8", "#B9A98A", 2.2]} />
         <directionalLight position={[-14, 6, 10]} color={sunKeyframes.dusk} intensity={2.6} />
         <CameraRig onAnchor={setAnchor} />
-        <Atoll />
+        <Atoll built={built} />
       </Canvas>
       {anchor ? (
         <div className={styles.label} style={{ left: anchor.x, top: anchor.y }}>
-          <Signboard name={spaces[0].name} />
+          {loading ? (
+            <Signboard name={caption} price={`${Math.round(built * 100)}%`} />
+          ) : (
+            <Signboard name={spaces[0].name} />
+          )}
         </div>
       ) : null}
     </div>

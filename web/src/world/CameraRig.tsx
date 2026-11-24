@@ -1,6 +1,6 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
-import { Vector3 } from "three";
+import { type PerspectiveCamera, Vector3 } from "three";
 import { piecePositions } from "./piecePositions";
 import { roadForward } from "./layout";
 
@@ -20,6 +20,11 @@ const STREET_LOOK_Y = 0.7;
 const PORTRAIT_LOOK_Y = 1.3;
 /** Portrait screens back off further so the lots beside the road stay in frame. */
 const PORTRAIT_BACK = 2.4;
+/**
+ * Share of a bottom HUD inset the picture moves up by. Half would centre the old centre in the
+ * open area; the followed piece sits below centre, so it needs more to clear the sheet.
+ */
+const INSET_SHIFT = 0.75;
 
 interface Props {
   view: CameraView;
@@ -28,13 +33,15 @@ interface Props {
   /** Space that seat stands on, so the camera faces along the road. */
   followSpace: number;
   reducedMotion: boolean;
+  /** Screen pixels hidden by the HUD at the bottom. The view shifts up by `INSET_SHIFT` of it. */
+  bottomInset: number;
 }
 
 /**
  * Street view sits behind and above the followed piece, looking down the road. Chart view looks
  * down on the whole atoll. Both damp toward their pose; reduced motion cuts instead.
  */
-export function CameraRig({ view, followSeat, followSpace, reducedMotion }: Props) {
+export function CameraRig({ view, followSeat, followSpace, reducedMotion, bottomInset }: Props) {
   const { camera, invalidate, size } = useThree();
   const target = useRef(new Vector3().copy(CHART_TARGET));
   const goalPos = useMemo(() => new Vector3(), []);
@@ -43,6 +50,18 @@ export function CameraRig({ view, followSeat, followSpace, reducedMotion }: Prop
   const first = useRef(true);
 
   useEffect(() => invalidate(), [view, followSpace, followSeat, size, invalidate]);
+
+  // Centre the picture in the part of the screen the HUD leaves open, so a bottom sheet
+  // never hides the followed piece. The frustum moves; the camera pose does not.
+  useEffect(() => {
+    const perspective = camera as PerspectiveCamera;
+    if (bottomInset > 0) {
+      perspective.setViewOffset(size.width, size.height, 0, bottomInset * INSET_SHIFT, size.width, size.height);
+    } else {
+      perspective.clearViewOffset();
+    }
+    invalidate();
+  }, [camera, bottomInset, size, invalidate]);
 
   useFrame((_, dt) => {
     if (view === "chart") {

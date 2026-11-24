@@ -1,6 +1,7 @@
 import { useLayoutEffect, useState } from "react";
 import { Button } from "../ui/Button";
 import { Panel } from "../ui/Panel";
+import { useModalKeys } from "../ui/useModalKeys";
 import styles from "./CoachMarks.module.css";
 
 const STORAGE_KEY = "saltmarket.coach.done";
@@ -12,6 +13,11 @@ interface Mark {
   target: string;
   /** Which side of the target the card sits on. */
   side: "above" | "below";
+  /**
+   * `data-coach` value of a panel the card must not cover (tip 1 must leave the whole ledger
+   * readable). On wide screens the card sits to its left; otherwise just below it.
+   */
+  clear?: string;
 }
 
 const MARKS: readonly Mark[] = [
@@ -20,6 +26,7 @@ const MARKS: readonly Mark[] = [
     body: "You are the sun piece, and your row in the ledger carries the same emblem. Your piece walks the ring road clockwise, and each lot you land on can be bought.",
     target: "ledger-you",
     side: "below",
+    clear: "ledger",
   },
   {
     title: "Your decisions",
@@ -38,21 +45,34 @@ const MARKS: readonly Mark[] = [
 const CARD_WIDTH = 300;
 const GAP = 12;
 const EDGE = 16;
+/** Matches the HUD's mobile layout (ledger strip and bottom sheet). */
+const NARROW = 600;
 
 interface Placement {
   ring: { top: number; left: number; width: number; height: number };
-  card: { top?: number; bottom?: number; left: number };
+  card: { top?: number; bottom?: number; left: number; width: number };
 }
 
 function place(mark: Mark): Placement | null {
   const el = document.querySelector<HTMLElement>(`[data-coach="${mark.target}"]`);
   if (!el) return null;
   const r = el.getBoundingClientRect();
-  const left = Math.max(EDGE, Math.min(r.left, window.innerWidth - CARD_WIDTH - EDGE));
+  const width = Math.min(CARD_WIDTH, window.innerWidth - 2 * EDGE);
+  const ring = { top: r.top - 4, left: r.left - 4, width: r.width + 8, height: r.height + 8 };
+  const clear = mark.clear ? document.querySelector<HTMLElement>(`[data-coach="${mark.clear}"]`) : null;
+  if (clear) {
+    const c = clear.getBoundingClientRect();
+    const beside = window.innerWidth > NARROW && c.left - GAP - width >= EDGE;
+    const card = beside
+      ? { top: c.top, left: c.left - GAP - width, width }
+      : { top: c.bottom + GAP, left: Math.max(EDGE, Math.min(c.left, window.innerWidth - width - EDGE)), width };
+    return { ring, card };
+  }
+  const left = Math.max(EDGE, Math.min(r.left, window.innerWidth - width - EDGE));
   const below = mark.side === "below" && r.bottom + GAP + 180 < window.innerHeight;
   return {
-    ring: { top: r.top - 4, left: r.left - 4, width: r.width + 8, height: r.height + 8 },
-    card: below ? { top: r.bottom + GAP, left } : { bottom: window.innerHeight - r.top + GAP, left },
+    ring,
+    card: below ? { top: r.bottom + GAP, left, width } : { bottom: window.innerHeight - r.top + GAP, left, width },
   };
 }
 
@@ -72,10 +92,22 @@ function markSeen(): void {
   }
 }
 
-/** Up to three skippable marks, each pointing at its target, shown on the first game only. */
-export function CoachMarks({ onDone }: { onDone?: () => void }) {
+interface CoachMarksProps {
+  /**
+   * Current tip. The parent owns it because the marks unmount between decisions, and the tour
+   * must carry on where it stopped rather than start again at tip 1.
+   */
+  step: number;
+  onStep: (step: number) => void;
+  onDone?: () => void;
+}
+
+/**
+ * Up to three skippable marks, each pointing at its target, shown on the first game only.
+ * While a tip is open, game keys do not reach the decision panel under it; Escape skips the tips.
+ */
+export function CoachMarks({ step, onStep, onDone }: CoachMarksProps) {
   const [marks, setMarks] = useState<readonly Mark[] | null>(null);
-  const [step, setStep] = useState(0);
   const [visible, setVisible] = useState(() => !coachSeen());
   const [placement, setPlacement] = useState<Placement | null>(null);
 
@@ -86,6 +118,12 @@ export function CoachMarks({ onDone }: { onDone?: () => void }) {
   }, [visible, step]);
 
   const mark = marks?.[step];
+  const finish = () => {
+    markSeen();
+    setVisible(false);
+    onDone?.();
+  };
+  useModalKeys(visible && mark !== undefined, finish);
   useLayoutEffect(() => {
     if (!mark) return;
     const update = () => setPlacement(place(mark));
@@ -100,11 +138,6 @@ export function CoachMarks({ onDone }: { onDone?: () => void }) {
   }, [mark]);
 
   if (!visible || !marks || !mark || !placement) return null;
-  const finish = () => {
-    markSeen();
-    setVisible(false);
-    onDone?.();
-  };
   const last = step + 1 >= marks.length;
   return (
     <div className={styles.wrap}>
@@ -114,7 +147,7 @@ export function CoachMarks({ onDone }: { onDone?: () => void }) {
         role="dialog"
         aria-label={`Tip ${step + 1} of ${marks.length}`}
         className={styles.card}
-        style={{ ...placement.card, width: CARD_WIDTH }}
+        style={placement.card}
       >
         <p className={styles.count}>
           Tip {step + 1} of {marks.length}
@@ -122,7 +155,7 @@ export function CoachMarks({ onDone }: { onDone?: () => void }) {
         <h2 className={styles.title}>{mark.title}</h2>
         <p className={styles.body}>{mark.body}</p>
         <div className={styles.actions}>
-          <Button variant="primary" autoFocus onClick={() => (last ? finish() : setStep(step + 1))}>
+          <Button variant="primary" autoFocus onClick={() => (last ? finish() : onStep(step + 1))}>
             {last ? "Got it" : "Next"}
           </Button>
           <Button variant="quiet" onClick={finish}>

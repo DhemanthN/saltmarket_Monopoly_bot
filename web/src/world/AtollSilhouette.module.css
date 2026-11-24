@@ -2,6 +2,8 @@
   position: absolute;
   inset: 0;
   z-index: var(--z-canvas);
+  /* Same as the scene's sky, so the first frames before WebGL draws do not flash paper. */
+  background: #EBC9A0;
 }
 
 .label {

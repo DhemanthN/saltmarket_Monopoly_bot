@@ -1,7 +1,10 @@
 import { useEffect, useRef } from "react";
 
 export interface DecisionKeyHandlers {
-  /** Enter, when focus is not on a button (buttons activate natively). */
+  /**
+   * Enter, when focus is not on a button (buttons activate natively). Choice chips
+   * (`role="radio"`) only select, so Enter on one still submits the decision.
+   */
   onEnter?: () => void;
   /** Escape: the secondary "do nothing" action. */
   onEscape?: () => void;
@@ -9,6 +12,8 @@ export interface DecisionKeyHandlers {
   onDigit?: (index: number) => void;
   /** Left and right arrows. */
   onArrow?: (step: -1 | 1) => void;
+  /** Up and down arrows. */
+  onVertical?: (step: -1 | 1) => void;
 }
 
 function isTypingTarget(target: EventTarget | null): boolean {
@@ -27,7 +32,7 @@ export function useDecisionKeys(handlers: DecisionKeyHandlers, enabled = true): 
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey || isTypingTarget(e.target)) return;
       const h = ref.current;
-      const onButton = e.target instanceof HTMLButtonElement;
+      const onButton = e.target instanceof HTMLButtonElement && e.target.getAttribute("role") !== "radio";
       if (e.key === "Enter" && h.onEnter && !onButton) {
         e.preventDefault();
         h.onEnter();
@@ -40,6 +45,9 @@ export function useDecisionKeys(handlers: DecisionKeyHandlers, enabled = true): 
       } else if ((e.key === "ArrowLeft" || e.key === "ArrowRight") && h.onArrow) {
         e.preventDefault();
         h.onArrow(e.key === "ArrowLeft" ? -1 : 1);
+      } else if ((e.key === "ArrowUp" || e.key === "ArrowDown") && h.onVertical) {
+        e.preventDefault();
+        h.onVertical(e.key === "ArrowUp" ? -1 : 1);
       }
     };
     window.addEventListener("keydown", onKeyDown);

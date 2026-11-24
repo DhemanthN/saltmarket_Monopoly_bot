@@ -5,11 +5,31 @@
   background: var(--surface);
 }
 
-.viewToggle {
+/* Bottom-right corner: game menu and camera view button. On phones the decision sheet owns the
+   bottom, so the corner moves under the ledger strip and stacks, and key hints are hidden. */
+.corner {
   position: absolute;
   right: var(--space-4);
   bottom: var(--space-4);
   z-index: 200;
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-end;
+}
+
+@media (max-width: 600px) {
+  .corner {
+    top: 64px;
+    bottom: auto;
+    flex-direction: column;
+  }
+
+  .corner kbd {
+    display: none;
+  }
+}
+
+.viewToggle {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);

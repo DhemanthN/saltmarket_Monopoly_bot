@@ -10,11 +10,11 @@ from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
-from saltmarket.engine.game import GameResult
 from saltmarket.paths import MODELS
 from saltmarket.rl import encoding as enc
 from saltmarket.sim.digest import game_digest
 from saltmarket.web import contract as c
+from saltmarket.web.live import final_state, result_view
 from saltmarket.web.observed import ObservedGame
 from saltmarket.web.seats import HUMAN, make_seat
 
@@ -82,28 +82,14 @@ def record(spec: FixtureSpec) -> c.GameFixture:
     game = ObservedGame(strategies, spec.seed)
     result = game.play()
     game.finish(result)
-    state = game.state
     return c.GameFixture(
         name=spec.name,
         config=c.SessionConfig(spec.seed, spec.seats),
         answers=tuple(answers),
         events=tuple(game.events),
-        result=_result_view(result),
-        final_state=c.FinalState(
-            cash=tuple(p.cash for p in state.players),
-            owner=tuple(state.owner),
-            level=tuple(state.level),
-            mortgaged=tuple(state.mortgaged),
-            position=tuple(p.position for p in state.players),
-            bankrupt=tuple(p.bankrupt for p in state.players),
-        ),
+        result=result_view(result),
+        final_state=final_state(game),
         fingerprint=game_digest(game),
-    )
-
-
-def _result_view(result: GameResult) -> c.ResultView:
-    return c.ResultView(
-        result.winner, result.turns, result.hit_cap, result.net_worths, result.bankrupt
     )
 
 

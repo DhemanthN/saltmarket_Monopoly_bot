@@ -111,15 +111,38 @@
     margin: 0;
   }
 
+  /* Each seat is emblem, cash, and the seat name underneath in caption size. */
   .seat > div {
-    grid-template-columns: 24px auto;
+    grid-template-columns: 24px minmax(0, 1fr);
+    grid-template-areas:
+      "mark value"
+      "mark label";
     column-gap: var(--space-2);
+    row-gap: 0;
     padding-inline: var(--space-1);
   }
 
-  .seat > div > span:nth-child(2),
+  .seat > div > span:nth-child(1) {
+    grid-area: mark;
+  }
+
+  .seat > div > span:nth-child(2) {
+    grid-area: label;
+    overflow: hidden;
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
+    color: var(--text-soft);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
   .seat > div > span:nth-child(3) {
     display: none;
+  }
+
+  .seat > div > span:nth-child(4) {
+    grid-area: value;
+    text-align: start;
   }
 
   .rail {

@@ -4,8 +4,12 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "runtime:assets": "node scripts/fetch-pyodide.mjs && python ../scripts/build_web_runtime.py",
+    "predev": "npm run runtime:assets",
     "dev": "vite",
+    "prebuild": "npm run runtime:assets",
     "build": "tsc --noEmit && vite build",
+    "prebuild:dev": "npm run runtime:assets",
     "build:dev": "tsc --noEmit && vite build --mode devpages",
     "preview": "vite preview",
     "preview:dev": "npm run build:dev && vite preview",
@@ -18,9 +22,11 @@
     "@react-three/fiber": "9.8.2",
     "@react-three/postprocessing": "3.2.2",
     "postprocessing": "6.39.6",
+    "pyodide": "314.0.8",
     "react": "19.3.1",
     "react-dom": "19.3.1",
-    "three": "0.187.0"
+    "three": "0.187.0",
+    "zustand": "5.1.0"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

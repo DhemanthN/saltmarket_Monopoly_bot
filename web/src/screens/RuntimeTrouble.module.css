@@ -1,0 +1,36 @@
+.scrim {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: rgb(31 42 46 / 0.35);
+}
+
+.panel {
+  width: min(480px, 100%);
+}
+
+.title {
+  font-size: var(--text-h3);
+}
+
+.body {
+  margin-block: var(--space-3);
+  text-wrap: pretty;
+  color: var(--text-soft);
+}
+
+.detail {
+  margin-block: 0 var(--space-4);
+  font-size: var(--text-caption);
+  color: var(--text-soft);
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}

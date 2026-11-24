@@ -7,7 +7,7 @@ import { Emblem } from "../../ui/Emblem";
 import { Panel } from "../../ui/Panel";
 import { money, spaceName } from "../format";
 import { completedGroups, districtColor, districtLabel } from "../groups";
-import { DECISION_TITLE, panelModel, type PanelModel } from "../layout";
+import { DECISION_TITLE, enterSubmits, panelModel, type PanelModel } from "../layout";
 import type { HudState } from "../state";
 import { useDecisionKeys } from "../useDecisionKeys";
 import styles from "./DecisionPanel.module.css";
@@ -51,7 +51,7 @@ export function DecisionPanel({ decision, hud, names, onSubmit }: DecisionPanelP
   const primary = isAuction ? selectedBid : isPropose ? selectedOffer : model.primary;
 
   useDecisionKeys({
-    onEnter: () => primary && onSubmit(primary.id),
+    onEnter: () => primary && enterSubmits(decision.kind) && onSubmit(primary.id),
     onEscape: () => model.pass && onSubmit(model.pass.id),
     onDigit: (i) => {
       if (isAuction || isPropose) setBidIndex(i);
@@ -61,6 +61,12 @@ export function DecisionPanel({ decision, hud, names, onSubmit }: DecisionPanelP
       const count = isAuction ? model.bids.length : offers.length;
       if (isAuction || isPropose) setBidIndex((i) => Math.max(0, Math.min(count - 1, i + step)));
     },
+    onVertical: isPropose
+      ? (step) => {
+          setGroupIndex((g) => Math.max(0, Math.min(groups.length - 1, g + step)));
+          setBidIndex(0);
+        }
+      : undefined,
   });
 
   return (
@@ -75,7 +81,7 @@ export function DecisionPanel({ decision, hud, names, onSubmit }: DecisionPanelP
           <Button variant="primary" onClick={() => onSubmit(primary.id)}>
             <span>{primaryLabel(decision, primary, hud.cash[decision.seat])}</span>
             {primaryFigure(decision, primary) ? <span className="figures">{primaryFigure(decision, primary)}</span> : null}
-            <kbd className={styles.key}>Enter</kbd>
+            {enterSubmits(decision.kind) ? <kbd className={styles.key}>Enter</kbd> : null}
           </Button>
         ) : null}
         {model.pass ? (

@@ -1,11 +1,12 @@
 import { useState } from "react";
+import { Dialog } from "../ui/Dialog";
 import type { SessionConfig } from "../contract/types";
 import { seatOrder } from "../styles/tokens";
 import { Button } from "../ui/Button";
 import { Emblem } from "../ui/Emblem";
 import { Panel } from "../ui/Panel";
-import { useToast } from "../ui/Toast";
 import { AtollSilhouette } from "../world/AtollSilhouette";
+import { HOW_TO_PLAY } from "./rules";
 import { buildConfig, opponentAllowed, TABLE_SIZES, type Opponent, type TableSize } from "./startConfig";
 import styles from "./StartScreen.module.css";
 
@@ -16,12 +17,15 @@ const OPPONENT_LABEL: Record<Opponent, string> = {
 };
 
 interface StartScreenProps {
-  /** Called with the chosen table. Absent until the game engine is connected. */
-  onStart?: (config: SessionConfig) => void;
+  /** Called with the chosen table. */
+  onStart: (config: SessionConfig) => void;
+  /** Engine load progress, drawn as the atoll rising behind the panel. */
+  progress?: number;
+  caption?: string;
 }
 
-export function StartScreen({ onStart }: StartScreenProps) {
-  const toast = useToast();
+export function StartScreen({ onStart, progress, caption }: StartScreenProps) {
+  const [rulesOpen, setRulesOpen] = useState(false);
   const [opponent, setOpponent] = useState<Opponent>("ppo");
   const [size, setSize] = useState<TableSize>(2);
 
@@ -32,16 +36,12 @@ export function StartScreen({ onStart }: StartScreenProps) {
 
   const config = buildConfig(opponent, size, 0);
   const start = () => {
-    if (!onStart) {
-      toast("The game engine is not connected yet.");
-      return;
-    }
     onStart(buildConfig(opponent, size, Math.floor(Math.random() * 1_000_000)));
   };
 
   return (
     <main className={styles.screen}>
-      <AtollSilhouette />
+      <AtollSilhouette progress={progress} caption={caption} />
       <Panel floating className={styles.panel} aria-labelledby="start-title">
         <h1 id="start-title" className={styles.title}>
           Saltmarket
@@ -105,11 +105,24 @@ export function StartScreen({ onStart }: StartScreenProps) {
           <Button variant="primary" onClick={start}>
             Start game
           </Button>
-          <Button variant="quiet" onClick={() => toast("The rules summary arrives with the game screen.")}>
+          <Button variant="quiet" aria-haspopup="dialog" onClick={() => setRulesOpen(true)}>
             How to play
           </Button>
         </div>
       </Panel>
+      {rulesOpen ? (
+        <Dialog title="How to play" wide onClose={() => setRulesOpen(false)}>
+          {HOW_TO_PLAY.map((topic) => (
+            <section key={topic.title} className={styles.rule}>
+              <h3 className={styles.ruleTitle}>{topic.title}</h3>
+              <p className={styles.ruleBody}>{topic.body}</p>
+            </section>
+          ))}
+          <Button variant="primary" onClick={() => setRulesOpen(false)}>
+            Back
+          </Button>
+        </Dialog>
+      ) : null}
     </main>
   );
 }

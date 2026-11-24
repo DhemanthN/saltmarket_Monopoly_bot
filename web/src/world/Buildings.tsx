@@ -96,8 +96,10 @@ function Storeys({ district, geometry, state, texture, reducedMotion, shadows }:
         const fill = Math.max(0, Math.min(1, shown.current[li] - k));
         const at: [number, number, number] = [STOREY_ANCHOR[0], STOREY_ANCHOR[1] + k * STOREY_HEIGHT, STOREY_ANCHOR[2]];
         const i = li * MAX_STOREYS + k;
-        body.current?.setMatrixAt(i, placeLot(lot, at, [1, fill || 1e-4, 1]));
-        hull.current?.setMatrixAt(i, placeLot(lot, at, [OUTLINE, (fill || 1e-4) * OUTLINE, OUTLINE]));
+        // An empty slot collapses on every axis; flattening only y left a coloured plate behind.
+        const w = fill > 0 ? 1 : 0;
+        body.current?.setMatrixAt(i, placeLot(lot, at, [w, fill, w]));
+        hull.current?.setMatrixAt(i, placeLot(lot, at, [w * OUTLINE, fill * OUTLINE, w * OUTLINE]));
       }
     });
     if (body.current) body.current.instanceMatrix.needsUpdate = true;

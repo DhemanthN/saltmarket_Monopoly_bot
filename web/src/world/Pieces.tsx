@@ -159,15 +159,16 @@ export function Pieces({ state, seatKinds, texture, reducedMotion, outlines }: P
 
   return (
     <group>
-      <instancedMesh ref={body} args={[geometry, undefined, count]} castShadow>
+      {/* Instances move every frame, so a bounding sphere from the first frame would cull them. */}
+      <instancedMesh ref={body} args={[geometry, undefined, count]} castShadow frustumCulled={false}>
         <meshLambertMaterial map={texture} />
       </instancedMesh>
       {outlines ? (
-        <instancedMesh ref={hull} args={[geometry, undefined, count]}>
+        <instancedMesh ref={hull} args={[geometry, undefined, count]} frustumCulled={false}>
           <meshBasicMaterial color={palette.ink} side={BackSide} polygonOffset polygonOffsetFactor={1} polygonOffsetUnits={1} />
         </instancedMesh>
       ) : null}
-      <instancedMesh ref={blobs} args={[undefined, undefined, count]}>
+      <instancedMesh ref={blobs} args={[undefined, undefined, count]} frustumCulled={false}>
         <circleGeometry args={[0.32, 12]} />
         <meshBasicMaterial color={palette.ink} transparent opacity={0.22} depthWrite={false} />
       </instancedMesh>

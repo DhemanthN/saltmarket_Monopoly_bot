@@ -6,6 +6,8 @@ export interface BoardSpace {
   name: string;
   kind: string;
   district: DistrictName | null;
+  /** Purchase price for buyable spaces, from data/board.json. */
+  price: number | null;
 }
 
 interface RawSpace {
@@ -13,6 +15,7 @@ interface RawSpace {
   name: string;
   kind: string;
   group?: string;
+  price?: number;
 }
 
 function isDistrict(group: string | undefined): group is DistrictName {
@@ -25,6 +28,7 @@ export const spaces: readonly BoardSpace[] = (boardData.spaces as RawSpace[]).ma
   name: s.name,
   kind: s.kind,
   district: isDistrict(s.group) ? s.group : null,
+  price: s.price ?? null,
 }));
 
 /** Height of the lot's silhouette, so each district reads from the skyline alone. */

@@ -5,6 +5,8 @@ import { type DirectionalLight } from "three";
 import { Buildings } from "./Buildings";
 import { CameraRig, type CameraView } from "./CameraRig";
 import { CoinCarts } from "./CoinCarts";
+import { Sky } from "./Sky";
+import { Signboards } from "./Signboards";
 import { Atoll } from "./Atoll";
 import { Pieces } from "./Pieces";
 import { paletteTexture } from "./palette";
@@ -119,7 +121,10 @@ export function WorldScene({ state, seatKinds, tierOverride = null, onViewChange
   const sun = sunForTurn(state.turn);
   const texture = paletteTexture(sun.mood);
   const human = seatKinds.indexOf("human");
-  const followSeat = human === -1 ? 0 : human;
+  // Follow the human; in a watched game follow the first seat still playing, so the camera
+  // never ends on an empty street after a bankruptcy.
+  const firstActive = state.bankrupt.findIndex((b) => !b);
+  const followSeat = human !== -1 ? human : Math.max(0, state.winner ?? firstActive);
   const shadows = settings.shadowMapSize !== null;
 
   useEffect(() => {
@@ -150,7 +155,9 @@ export function WorldScene({ state, seatKinds, tierOverride = null, onViewChange
         />
         <Lights turn={state.turn} boardVersion={state.boardVersion} shadowMapSize={settings.shadowMapSize} />
         <CameraRig view={view} followSeat={followSeat} followSpace={state.position[followSeat] ?? 0} reducedMotion={reducedMotion} />
-        <Atoll texture={texture} shadows={shadows} />
+        <Sky sky={sun.sky} texture={texture} />
+        <Atoll texture={texture} shadows={shadows} seatCount={seatKinds.length} />
+        <Signboards state={state} fromSpace={state.position[followSeat] ?? 0} street={view === "street"} />
         <Buildings state={state} texture={texture} reducedMotion={reducedMotion} shadows={shadows} fullOutlines={settings.fullOutlines} />
         <Pieces state={state} seatKinds={seatKinds} texture={texture} reducedMotion={reducedMotion} outlines={settings.fullOutlines} />
         <CoinCarts rent={state.lastRent} texture={texture} reducedMotion={reducedMotion} />

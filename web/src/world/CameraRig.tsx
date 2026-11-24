@@ -10,9 +10,13 @@ export type CameraView = "street" | "chart";
 const DAMP = 9;
 const CHART_POSITION = new Vector3(0, 30, 21);
 const CHART_TARGET = new Vector3(0, 0, 0.5);
-const STREET_BACK = 4.2;
-const STREET_UP = 2.6;
-const STREET_AHEAD = 2.5;
+const STREET_BACK = 4.6;
+const STREET_UP = 2.2;
+const STREET_AHEAD = 3.2;
+/** Look-at height: high enough that the road fills the lower third, not the lower half. */
+const STREET_LOOK_Y = 1.1;
+/** Portrait screens back off further so the lots beside the road stay in frame. */
+const PORTRAIT_BACK = 2.4;
 
 interface Props {
   view: CameraView;
@@ -28,14 +32,14 @@ interface Props {
  * down on the whole atoll. Both damp toward their pose; reduced motion cuts instead.
  */
 export function CameraRig({ view, followSeat, followSpace, reducedMotion }: Props) {
-  const { camera, invalidate } = useThree();
+  const { camera, invalidate, size } = useThree();
   const target = useRef(new Vector3().copy(CHART_TARGET));
   const goalPos = useMemo(() => new Vector3(), []);
   const goalTarget = useMemo(() => new Vector3(), []);
   const forward = useMemo(() => new Vector3(), []);
   const first = useRef(true);
 
-  useEffect(() => invalidate(), [view, followSpace, invalidate]);
+  useEffect(() => invalidate(), [view, followSpace, followSeat, size, invalidate]);
 
   useFrame((_, dt) => {
     if (view === "chart") {
@@ -44,10 +48,12 @@ export function CameraRig({ view, followSeat, followSpace, reducedMotion }: Prop
     } else {
       const p = piecePositions[followSeat];
       roadForward(followSpace, forward);
-      goalPos.copy(p).addScaledVector(forward, -STREET_BACK).setY(p.y + STREET_UP);
+      const portrait = size.width < size.height;
+      const back = STREET_BACK + (portrait ? PORTRAIT_BACK : 0);
+      goalPos.copy(p).addScaledVector(forward, -back).setY(p.y + STREET_UP + (portrait ? 0.8 : 0));
       // Pull slightly toward the lagoon so the lots on the outside stay in frame.
       goalPos.multiplyScalar(0.92);
-      goalTarget.copy(p).addScaledVector(forward, STREET_AHEAD).setY(0.6);
+      goalTarget.copy(p).addScaledVector(forward, STREET_AHEAD).setY(STREET_LOOK_Y);
     }
     const k = reducedMotion || first.current ? 1 : 1 - Math.exp(-DAMP * dt);
     first.current = false;

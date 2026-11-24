@@ -46,7 +46,7 @@ function Lots() {
       </instancedMesh>
       <instancedMesh ref={hull} args={[undefined, undefined, spaces.length]}>
         <boxGeometry />
-        <meshBasicMaterial color={palette.ink} side={BackSide} />
+        <meshBasicMaterial color={palette.ink} side={BackSide} polygonOffset polygonOffsetFactor={1} polygonOffsetUnits={1} />
       </instancedMesh>
     </>
   );

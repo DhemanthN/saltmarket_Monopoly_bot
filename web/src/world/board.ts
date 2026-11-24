@@ -6,6 +6,8 @@ export interface BoardSpace {
   name: string;
   kind: string;
   district: DistrictName | null;
+  /** Purchase price for buyable spaces, from data/board.json. */
+  price: number | null;
 }
 
 interface RawSpace {
@@ -13,6 +15,7 @@ interface RawSpace {
   name: string;
   kind: string;
   group?: string;
+  price?: number;
 }
 
 function isDistrict(group: string | undefined): group is DistrictName {
@@ -25,6 +28,7 @@ export const spaces: readonly BoardSpace[] = (boardData.spaces as RawSpace[]).ma
   name: s.name,
   kind: s.kind,
   district: isDistrict(s.group) ? s.group : null,
+  price: s.price ?? null,
 }));
 
 /** Height of the lot's silhouette, so each district reads from the skyline alone. */
@@ -46,3 +50,6 @@ export function ringPosition(index: number, count = spaces.length): { x: number;
   const angle = Math.PI / 2 - (index / count) * Math.PI * 2;
   return { x: Math.cos(angle) * RING_RADIUS, z: Math.sin(angle) * RING_RADIUS, angle };
 }
+
+/** Index of The Brig, where `brig_in` sends a piece. */
+export const BRIG_SPACE = spaces.findIndex((s) => s.kind === "brig");

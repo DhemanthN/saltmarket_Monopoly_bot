@@ -1,0 +1,17 @@
+/* The sign stands on a short brass leader whose foot is the anchor point on the lot. */
+.anchor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translate(-50%, -100%);
+  transition: opacity 120ms linear;
+}
+
+.leader {
+  width: 1px;
+  background: var(--brass);
+}
+
+.hidden {
+  opacity: 0;
+}

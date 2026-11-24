@@ -82,8 +82,8 @@ export function CoachMarks({ onDone }: { onDone?: () => void }) {
   useLayoutEffect(() => {
     // Which tips apply depends on what is on screen, so the DOM is read after the first commit.
     const findMarks = () => setMarks(MARKS.filter((m) => document.querySelector(`[data-coach="${m.target}"]`)));
-    if (visible && marks === null) findMarks();
-  }, [visible, marks]);
+    if (visible) findMarks();
+  }, [visible, step]);
 
   const mark = marks?.[step];
   useLayoutEffect(() => {

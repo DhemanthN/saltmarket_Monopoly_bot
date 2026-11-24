@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import boardData from "../../../../data/board.json";
 import type { Decision, LegalAction, TradeOfferView } from "../../contract/types";
 import { districts, seatOrder, type DistrictName } from "../../styles/tokens";
@@ -189,7 +189,7 @@ function Auction({ decision, model, hud, names, bidIndex, setBidIndex }: BodyPro
           );
         })}
       </ol>
-      <div role="radiogroup" aria-label="Bid amount" className={`${styles.chips} ${styles.bidChips}`}>
+      <div role="radiogroup" aria-label="Bid amount" className={`${styles.chips} ${styles.bidChips}`} style={{ "--n": model.bids.length } as CSSProperties}>
         {model.bids.map((bid, i) => (
           <button
             key={bid.id}
@@ -217,6 +217,7 @@ function ChoiceList({ model, hud, decision, onSubmit }: BodyProps) {
           You owe <span className="figures">{money(debt)}</span> and hold <span className="figures">{money(hud.cash[decision.seat])}</span>.
         </p>
       ) : null}
+      {model.choices.length > 1 ? <p className={styles.listCaption}>More choices</p> : null}
       <ul className={styles.list}>
         {model.choices.slice(1).map((action, i) => (
           <li key={action.id}>

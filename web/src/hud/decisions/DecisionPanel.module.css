@@ -247,7 +247,7 @@
 }
 
 .short {
-  color: var(--danger);
+  color: var(--debt);
 }
 
 .bidChips {
@@ -332,6 +332,57 @@ li.badge {
   }
 
   .bidChips {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(var(--n, 5), 1fr);
+    gap: var(--space-1);
   }
+
+  .bidChips .chip {
+    min-width: 0;
+    font-size: var(--text-caption);
+  }
+
+  .bidChips .chipIndex {
+    display: none;
+  }
+
+  .ladderBids {
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+  }
+
+  .ladderBids li {
+    grid-template-columns: 20px auto;
+  }
+
+  .ladderBids li > span:nth-child(2) {
+    display: none;
+  }
+
+  .actions {
+    position: sticky;
+    inset-block-end: calc(-1 * var(--space-4));
+    margin-inline: calc(-1 * var(--space-4));
+    padding: var(--space-3) var(--space-4);
+    background: var(--surface);
+    border-top: 1px solid var(--rule);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wrap {
+    animation-name: panel-fade;
+  }
+
+  @keyframes panel-fade {
+    from {
+      opacity: 0;
+    }
+  }
+}
+
+.listCaption {
+  margin: 0 0 calc(-1 * var(--space-2));
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  color: var(--text-soft);
 }

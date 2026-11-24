@@ -97,7 +97,6 @@ def check_game(game: Played, seats: int) -> None:
     assert rebuilt["mortgaged"] == [bool(v) for v in final["mortgaged"]]
 
 
-@pytest.mark.smoke
 @pytest.mark.parametrize("name", TABLES)
 def test_table_finishes_and_matches_reducer(name: str) -> None:
     seed, seats = TABLES[name]
@@ -106,7 +105,6 @@ def test_table_finishes_and_matches_reducer(name: str) -> None:
     check_game(game, len(seats))
 
 
-@pytest.mark.smoke
 def test_four_player_table_with_scripted_human() -> None:
     seed, seats = HUMAN_TABLE
     game = play(seed, seats)
@@ -116,7 +114,6 @@ def test_four_player_table_with_scripted_human() -> None:
     check_game(game, len(seats))
 
 
-@pytest.mark.smoke
 @pytest.mark.parametrize("name", ["2p_ppo", "2p_dqn", "4p_bots"])
 def test_same_seed_gives_same_fingerprint(name: str) -> None:
     seed, seats = TABLES[name]

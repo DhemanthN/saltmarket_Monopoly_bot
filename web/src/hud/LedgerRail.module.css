@@ -36,16 +36,68 @@
   display: none;
 }
 
+.feed li {
+  animation: feed-in var(--motion-standard) var(--ease-standard);
+}
+
+.rent {
+  position: relative;
+}
+
+.rent::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 4px;
+  inset-inline-start: 0;
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+  background: var(--brass);
+  animation: coin-travel var(--motion-travel) var(--ease-travel) both;
+}
+
+.rent {
+  padding-inline-start: 16px;
+}
+
+@keyframes feed-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes coin-travel {
+  from {
+    transform: translate(-120px, 40px) scale(1.4);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+}
+
 @media (max-width: 600px) {
   .rail {
-    inset-block-start: auto;
-    inset-block-end: var(--space-4);
-    inset-inline: var(--space-4);
+    inset-block-start: 0;
+    inset-inline: 0;
+    inset-block-end: auto;
     width: auto;
-    max-height: 30vh;
-    padding: var(--space-2) var(--space-3);
+    max-height: none;
+    display: flex;
+    gap: var(--space-3);
+    padding: var(--space-1) var(--space-3);
+    overflow-x: auto;
+    border-radius: 0;
   }
 
+  .seat {
+    flex: 0 0 auto;
+    margin: 0;
+  }
+
+  .worth,
   .feed {
     display: none;
   }

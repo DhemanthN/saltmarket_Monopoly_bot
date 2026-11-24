@@ -11,28 +11,45 @@ export interface LedgerRailProps {
   names: readonly string[];
   /** Seat whose turn it is, when known. */
   active?: number | null;
+  /** The human's seat, anchored for the coach marks. */
+  human?: number;
+}
+
+/** Splits "Star (always buy)" into the short name and its qualifier. */
+function splitName(name: string): [string, string | null] {
+  const match = /^(.*?) \((.*)\)$/.exec(name);
+  return match ? [match[1], match[2]] : [name, null];
 }
 
 /** Cash and net worth for every seat, then a feed of rent, trades and auctions. */
-export function LedgerRail({ hud, names, active = null }: LedgerRailProps) {
+export function LedgerRail({ hud, names, active = null, human = -1 }: LedgerRailProps) {
   return (
     <Panel as="aside" floating className={styles.rail} aria-label="Ledger" data-coach="ledger">
-      {names.map((name, seat) => (
-        <div key={name + seat} className={styles.seat}>
+      {names.map((fullName, seat) => {
+        const [name, qualifier] = splitName(fullName);
+        const note = hud.bankrupt[seat] ? "bankrupt" : qualifier;
+        return (
+        <div key={fullName + seat} className={styles.seat} data-coach={seat === human ? "ledger-you" : undefined}>
           <LedgerRow
             mark={<Emblem emblem={seatOrder[seat].emblem} seat={seatOrder[seat].name} size={22} />}
-            label={hud.bankrupt[seat] ? `${name} (bankrupt)` : name}
+            label={name}
             value={money(hud.cash[seat])}
             delta={signedMoney(hud.lastDelta[seat])}
             tone={hud.lastDelta[seat] > 0 ? "gain" : hud.lastDelta[seat] < 0 ? "debt" : "default"}
             active={active === seat}
           />
-          <p className={`${styles.worth} figures`}>Net worth {money(netWorth(hud, seat))}</p>
+          <p className={`${styles.worth} figures`}>
+            Net worth {money(netWorth(hud, seat))}
+            {note ? ` · ${note}` : ""}
+          </p>
         </div>
-      ))}
+        );
+      })}
       <ul className={styles.feed} aria-live="polite" aria-label="Recent events">
         {hud.feed.map((line) => (
-          <li key={line.seq}>{line.text}</li>
+          <li key={line.seq} className={line.coin ? styles.rent : undefined}>
+            {line.text}
+          </li>
         ))}
       </ul>
     </Panel>

@@ -6,6 +6,7 @@ import { Button } from "../../ui/Button";
 import { Emblem } from "../../ui/Emblem";
 import { Panel } from "../../ui/Panel";
 import { money, spaceName } from "../format";
+import { completedGroups, districtColor, districtLabel } from "../groups";
 import { DECISION_TITLE, panelModel, type PanelModel } from "../layout";
 import type { HudState } from "../state";
 import { useDecisionKeys } from "../useDecisionKeys";
@@ -32,7 +33,7 @@ export interface DecisionPanelProps {
 
 /** One panel per decision. Only legal actions are shown, with one primary action. */
 export function DecisionPanel({ decision, hud, names, onSubmit }: DecisionPanelProps) {
-  const model = panelModel(decision);
+  const model = panelModel(decision, hud.cash[decision.seat]);
   const rootRef = useRef<HTMLDivElement>(null);
   const [bidIndex, setBidIndex] = useState(0);
   const [groupIndex, setGroupIndex] = useState(0);
@@ -54,7 +55,7 @@ export function DecisionPanel({ decision, hud, names, onSubmit }: DecisionPanelP
     onEscape: () => model.pass && onSubmit(model.pass.id),
     onDigit: (i) => {
       if (isAuction || isPropose) setBidIndex(i);
-      else if (model.choices[i]) onSubmit(model.choices[i].id);
+      else if (model.choices[i + 1]) onSubmit(model.choices[i + 1].id);
     },
     onArrow: (step) => {
       const count = isAuction ? model.bids.length : offers.length;
@@ -72,7 +73,8 @@ export function DecisionPanel({ decision, hud, names, onSubmit }: DecisionPanelP
       <div className={styles.actions}>
         {primary ? (
           <Button variant="primary" onClick={() => onSubmit(primary.id)}>
-            {primaryLabel(decision, primary)}
+            <span>{primaryLabel(decision, primary, hud.cash[decision.seat])}</span>
+            {primaryFigure(decision, primary) ? <span className="figures">{primaryFigure(decision, primary)}</span> : null}
             <kbd className={styles.key}>Enter</kbd>
           </Button>
         ) : null}
@@ -88,8 +90,17 @@ export function DecisionPanel({ decision, hud, names, onSubmit }: DecisionPanelP
   );
 }
 
-function primaryLabel(decision: Decision, action: LegalAction): string {
-  if (decision.kind === "buy" && action.amount !== null) return `Buy for ${money(action.amount)}`;
+/** Trailing amount for list-style primaries ("Build on ..." 40). Buy, bid and offer put theirs in the label. */
+function primaryFigure(decision: Decision, action: LegalAction): string | null {
+  const inLabel = ["buy", "auction", "propose", "accept"].includes(decision.kind);
+  return !inLabel && action.amount !== null ? money(action.amount) : null;
+}
+
+function primaryLabel(decision: Decision, action: LegalAction, cash: number): string {
+  if (decision.kind === "buy" && action.amount !== null) {
+    const short = action.amount - cash;
+    return short > 0 ? `Buy for ${money(action.amount)} (raise ${money(short)} first)` : `Buy for ${money(action.amount)}`;
+  }
   if (decision.kind === "auction" && action.amount !== null) return `Bid ${money(action.amount)}`;
   if (decision.kind === "accept") return "Accept";
   if (decision.kind === "propose" && action.amount !== null) return `Offer ${money(action.amount)}`;
@@ -112,7 +123,7 @@ function Body(props: BodyProps) {
     case "auction":
       return <Auction {...props} />;
     case "accept":
-      return decision.offer ? <OfferLedger offer={decision.offer} names={props.names} /> : null;
+      return decision.offer ? <OfferLedger offer={decision.offer} names={props.names} seat={decision.seat} owner={props.hud.owner} /> : null;
     case "propose":
       return <ProposeList {...props} />;
     default:
@@ -135,7 +146,7 @@ function Deed({ space, cash, price, ladder = true }: { space: number | null; cas
           <dt>Price</dt>
           <dd className="figures">{money(price)}</dd>
           <dt>Cash after buying</dt>
-          <dd className="figures">{money(cash - price)}</dd>
+          <dd className={`figures ${cash - price < 0 ? styles.short : ""}`}>{money(cash - price)}</dd>
         </dl>
       ) : null}
       {showLadder ? (
@@ -156,7 +167,6 @@ function Deed({ space, cash, price, ladder = true }: { space: number | null; cas
 }
 
 function Auction({ decision, model, hud, names, bidIndex, setBidIndex }: BodyProps) {
-  const high = hud.auction?.high ?? null;
   const selected = Math.min(bidIndex, model.bids.length - 1);
   return (
     <>
@@ -166,19 +176,20 @@ function Auction({ decision, model, hud, names, bidIndex, setBidIndex }: BodyPro
           List price <span className="figures">{money(decision.price)}</span>. Bids are shares of it.
         </p>
       ) : null}
-      <p className={styles.highBid} aria-live="polite">
-        {high ? (
-          <>
-            <Emblem emblem={seatOrder[high.seat].emblem} seat={seatOrder[high.seat].name} size={20} />
-            <span>
-              {names[high.seat]} leads at <span className="figures">{money(high.amount)}</span>
-            </span>
-          </>
-        ) : (
-          "No bids yet"
-        )}
-      </p>
-      <div role="radiogroup" aria-label="Bid amount" className={styles.chips}>
+      <ol className={styles.ladderBids} aria-live="polite" aria-label="Bids so far">
+        {names.map((name, seat) => {
+          const bid = hud.auction?.bids[seat] ?? null;
+          const leads = hud.auction?.high?.seat === seat;
+          return hud.bankrupt[seat] ? null : (
+            <li key={name + seat} className={leads ? styles.leads : ""}>
+              <Emblem emblem={seatOrder[seat].emblem} seat={seatOrder[seat].name} size={20} />
+              <span>{name}</span>
+              <span className="figures">{bid === null ? "no bid" : money(bid)}</span>
+            </li>
+          );
+        })}
+      </ol>
+      <div role="radiogroup" aria-label="Bid amount" className={`${styles.chips} ${styles.bidChips}`}>
         {model.bids.map((bid, i) => (
           <button
             key={bid.id}
@@ -214,7 +225,7 @@ function ChoiceList({ model, hud, decision, onSubmit }: BodyProps) {
               className={styles.row}
               onClick={() => onSubmit(action.id)}
             >
-              <span className={styles.chipIndex}>{i + 2}</span>
+              <span className={styles.chipIndex}>{i + 1}</span>
               <span className={styles.rowLabel}>{action.label}</span>
               {action.amount !== null ? <span className="figures">{money(action.amount)}</span> : null}
             </button>
@@ -234,11 +245,12 @@ function offersFor(model: PanelModel, group: string): LegalAction[] {
 }
 
 /** Pick a group, then one of its premiums. The primary button sends the selected offer. */
-function ProposeList({ model, groupIndex, setGroupIndex, bidIndex, setBidIndex }: BodyProps) {
+function ProposeList({ model, decision, hud, groupIndex, setGroupIndex, bidIndex, setBidIndex }: BodyProps) {
   const groups = proposalGroups(model);
   const group = groups[Math.min(groupIndex, groups.length - 1)];
   const offers = offersFor(model, group);
   const selected = Math.min(bidIndex, offers.length - 1);
+  const completes = completedGroups(offers[0]?.offer?.takeSpaces ?? [], decision.seat, hud.owner);
   return (
     <div className={styles.groups}>
       <p className={styles.note}>Pick a group, then one of three premiums.</p>
@@ -255,11 +267,15 @@ function ProposeList({ model, groupIndex, setGroupIndex, bidIndex, setBidIndex }
               setBidIndex(0);
             }}
           >
-            {g === "other" ? "Other" : g}
+            {districtColor(g) ? <span className={styles.swatch} style={{ background: districtColor(g) ?? undefined }} aria-hidden="true" /> : null}
+            {g === "other" ? "Other" : districtLabel(g)}
           </button>
         ))}
       </div>
-      <p className={styles.deedMeta}>{offers[0]?.label.replace(/^Offer d+ for /, "For ")}</p>
+      <p className={styles.deedMeta}>
+        {offers[0]?.label.replace(/^Offer \d+ for /i, "For ")}
+        {completes.length > 0 ? <span className={styles.badge}>Completes {districtLabel(completes[0])}</span> : null}
+      </p>
       <div role="radiogroup" aria-label="Premium" className={styles.chips}>
         {offers.map((a, i) => (
           <button
@@ -291,7 +307,8 @@ function side(offer: TradeOfferView, give: boolean): string[] {
 }
 
 /** Two columns from the responder's view: what you give, what you get. */
-function OfferLedger({ offer, names }: { offer: TradeOfferView; names: readonly string[] }) {
+function OfferLedger({ offer, names, seat, owner }: { offer: TradeOfferView; names: readonly string[]; seat: number; owner: readonly (number | null)[] }) {
+  const completes = completedGroups(offer.giveSpaces, seat, owner);
   return (
     <>
       <p className={styles.note}>{names[offer.proposer]} offers a trade.</p>
@@ -309,6 +326,12 @@ function OfferLedger({ offer, names }: { offer: TradeOfferView; names: readonly 
           <ul className={styles.plain}>
             {side(offer, true).map((t) => (
               <li key={t}>{t}</li>
+            ))}
+            {completes.map((g) => (
+              <li key={g} className={styles.badge}>
+                <span className={styles.swatch} style={{ background: districtColor(g) ?? undefined }} aria-hidden="true" />
+                Completes {districtLabel(g)}
+              </li>
             ))}
           </ul>
         </div>

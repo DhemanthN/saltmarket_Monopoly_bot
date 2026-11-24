@@ -1,10 +1,17 @@
 .wrap {
   position: absolute;
-  inset-inline: var(--space-4);
+  inset-inline-start: var(--space-4);
   inset-block-end: var(--space-4);
   z-index: var(--z-decision);
   width: min(400px, calc(100% - var(--space-8)));
-  margin-inline: auto;
+  animation: panel-in var(--motion-standard) var(--ease-standard) both;
+}
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
 }
 
 .wrap:focus-visible {
@@ -236,5 +243,95 @@
 @media (max-width: 600px) {
   .key {
     display: none;
+  }
+}
+
+.short {
+  color: var(--danger);
+}
+
+.bidChips {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
+  gap: var(--space-1);
+}
+
+.bidChips .chip {
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding-inline: var(--space-1);
+  font-size: var(--text-small);
+}
+
+.ladderBids {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-small);
+}
+
+.ladderBids li {
+  display: grid;
+  grid-template-columns: 20px 1fr auto;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-inline-start: 3px solid transparent;
+}
+
+.ladderBids .leads {
+  border-inline-start-color: var(--ink);
+  background: var(--surface-inset);
+  font-weight: 600;
+}
+
+.swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-inline-end: var(--space-2);
+  border: 1px solid var(--surface-raised);
+  outline: 1px solid var(--ink);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  margin-inline-start: var(--space-2);
+  padding: 0 var(--space-2);
+  border: 1px solid var(--rule);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  text-transform: none;
+  color: var(--text);
+}
+
+li.badge {
+  margin: var(--space-1) 0 0;
+  width: fit-content;
+}
+
+.chip {
+  text-transform: none;
+}
+
+@media (max-width: 600px) {
+  .wrap {
+    inset-inline: 0;
+    inset-block-end: 0;
+    width: auto;
+  }
+
+  .panel {
+    max-height: 50vh;
+    border-end-start-radius: 0;
+    border-end-end-radius: 0;
+  }
+
+  .bidChips {
+    grid-template-columns: repeat(4, 1fr);
   }
 }

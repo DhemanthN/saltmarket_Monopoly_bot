@@ -22,6 +22,11 @@ describe("panelModel", () => {
     expect(panelModel(auction).bids.map((b) => b.amount)).toEqual([52, 105, 157, 210, 262]);
   });
 
+  it("does not offer bids above the player's cash", () => {
+    const auction = SAMPLE_DECISIONS.find((d) => d.kind === "auction")!;
+    expect(panelModel(auction, 160).bids.map((b) => b.amount)).toEqual([52, 105, 157]);
+  });
+
   it("makes rolling the primary Brig action", () => {
     const brig = SAMPLE_DECISIONS.find((d) => d.kind === "brig")!;
     expect(panelModel(brig).primary?.label).toBe("Roll for doubles");

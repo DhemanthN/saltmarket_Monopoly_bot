@@ -29,7 +29,7 @@ export function HudView({ hud, names, seats, decision, gameOver, onSubmit, onPla
   const human = seats.indexOf("human");
   return (
     <>
-      <LedgerRail hud={hud} names={names} active={decision?.seat ?? null} />
+      <LedgerRail hud={hud} names={names} active={decision?.seat ?? null} human={human} />
       <LanternDock lanterns={lanterns} />
       {decision && !gameOver ? (
         <DecisionPanel key={`${decision.turn}-${decision.kind}-${decision.legal.map((a) => a.id).join(",")}`} decision={decision} hud={hud} names={names} onSubmit={onSubmit} />

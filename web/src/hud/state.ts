@@ -16,6 +16,8 @@ const RAW = boardData.spaces as RawSpace[];
 export interface FeedLine {
   seq: number;
   text: string;
+  /** True for rent: the feed shows a coin travelling to the line. */
+  coin?: boolean;
 }
 
 export interface HudState {
@@ -30,7 +32,7 @@ export interface HudState {
   /** Each seat's most recent explained decision, for the lanterns. */
   explanation: (Explanation | null)[];
   /** The auction in progress, with the highest bid so far. */
-  auction: { space: number; high: { seat: number; amount: number } | null } | null;
+  auction: { space: number; high: { seat: number; amount: number } | null; bids: (number | null)[] } | null;
   winner: number | null;
   turns: number | null;
   turn: number;
@@ -68,8 +70,8 @@ export function netWorth(state: HudState, seat: number): number {
   return total;
 }
 
-function pushFeed(state: HudState, seq: number, text: string): void {
-  state.feed = [{ seq, text }, ...state.feed].slice(0, FEED_LIMIT);
+function pushFeed(state: HudState, seq: number, text: string, coin = false): void {
+  state.feed = [{ seq, text, coin }, ...state.feed].slice(0, FEED_LIMIT);
 }
 
 /** Applies one event and returns the next state. `names` gives each seat's display name for the feed. */
@@ -110,6 +112,7 @@ export function applyEvent(prev: HudState, event: GameEvent, names: readonly str
         state,
         event.seq,
         `${names[event.payer]} paid ${money(event.amount)} rent to ${names[event.payee]} at ${spaceName(event.space)}`,
+        true,
       );
       break;
     case "buy":
@@ -119,10 +122,14 @@ export function applyEvent(prev: HudState, event: GameEvent, names: readonly str
       if (event.explanation) state.explanation[event.seat] = event.explanation;
       break;
     case "auction_start":
-      state.auction = { space: event.space, high: null };
+      state.auction = { space: event.space, high: null, bids: prev.cash.map(() => null) };
       break;
     case "auction_bid":
-      if (state.auction) state.auction = { ...state.auction, high: { seat: event.seat, amount: event.amount } };
+      if (state.auction) {
+        const bids = [...state.auction.bids];
+        bids[event.seat] = event.amount;
+        state.auction = { ...state.auction, high: { seat: event.seat, amount: event.amount }, bids };
+      }
       break;
     case "auction_win":
       state.auction = null;

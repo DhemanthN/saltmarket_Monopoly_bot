@@ -29,11 +29,11 @@ export function isPass(action: LegalAction): boolean {
 }
 
 /** Splits a decision's legal actions into primary, choices and pass. Only legal actions are ever returned. */
-export function panelModel(decision: Decision): PanelModel {
+export function panelModel(decision: Decision, cash: number = Infinity): PanelModel {
   const pass = decision.legal.find(isPass) ?? null;
   const rest = decision.legal.filter((a) => !isPass(a));
   if (decision.kind === "auction") {
-    const bids = rest.filter((a) => a.amount !== null).sort((a, b) => (a.amount ?? 0) - (b.amount ?? 0));
+    const bids = rest.filter((a) => a.amount !== null && a.amount <= cash).sort((a, b) => (a.amount ?? 0) - (b.amount ?? 0));
     return { primary: null, choices: bids, pass, bids };
   }
   const roll = decision.kind === "brig" ? rest.find((a) => a.label === BRIG_ROLL) : undefined;

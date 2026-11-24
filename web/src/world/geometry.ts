@@ -27,7 +27,7 @@ interface Placement {
   rot?: [number, number, number];
 }
 
-function part(geometry: BufferGeometry, cell: string, { at = [0, 0, 0], rot = [0, 0, 0] }: Placement = {}): BufferGeometry {
+export function part(geometry: BufferGeometry, cell: string, { at = [0, 0, 0], rot = [0, 0, 0] }: Placement = {}): BufferGeometry {
   const g = nonIndexed(geometry);
   paint(g, cell);
   const m = new Matrix4().compose(new Vector3(...at), new Quaternion().setFromEuler(new Euler(...rot)), new Vector3(1, 1, 1));
@@ -35,7 +35,7 @@ function part(geometry: BufferGeometry, cell: string, { at = [0, 0, 0], rot = [0
   return g;
 }
 
-function merge(parts: BufferGeometry[]): BufferGeometry {
+export function merge(parts: BufferGeometry[]): BufferGeometry {
   const merged = mergeGeometries(parts);
   if (!merged) throw new Error("Lot geometry parts do not share attributes");
   merged.computeBoundingSphere();
@@ -43,7 +43,7 @@ function merge(parts: BufferGeometry[]): BufferGeometry {
 }
 
 /** A gabled prism (A-frame or roof): width along x, height up, depth along z, base at y = 0. */
-function prism(width: number, height: number, depth: number): BufferGeometry {
+export function prism(width: number, height: number, depth: number): BufferGeometry {
   const s = new Shape();
   s.moveTo(-width / 2, 0);
   s.lineTo(width / 2, 0);
@@ -54,8 +54,8 @@ function prism(width: number, height: number, depth: number): BufferGeometry {
   return g;
 }
 
-const box = (w: number, h: number, d: number, y = 0) => new BoxGeometry(w, h, d).translate(0, h / 2 + y, 0);
-const post = (r: number, h: number) => new CylinderGeometry(r, r, h, 5).translate(0, h / 2, 0);
+export const box = (w: number, h: number, d: number, y = 0) => new BoxGeometry(w, h, d).translate(0, h / 2 + y, 0);
+export const post = (r: number, h: number) => new CylinderGeometry(r, r, h, 5).translate(0, h / 2, 0);
 
 function districtBase(name: DistrictName): BufferGeometry {
   const accent = `district.${name}`;

@@ -7,6 +7,8 @@ import { CoinCarts } from "./CoinCarts";
 import { Sky } from "./Sky";
 import { Signboards } from "./Signboards";
 import { Atoll } from "./Atoll";
+import { Landmarks } from "./Landmarks";
+import { Flare, Galleons, ShoreFoam, WorldClock } from "./LivingSea";
 import { followSeatFor } from "./follow";
 import { CursorFx } from "./CursorFx";
 import { Pieces } from "./Pieces";
@@ -18,8 +20,8 @@ import { sunForTurn } from "./sun";
 import "./quietUpstream";
 import styles from "./WorldScene.module.css";
 
-// Loaded only when the high tier shows chart view, so other tiers never download it.
-const ChartTiltShift = lazy(() => import("./ChartTiltShift"));
+// Loaded only on the high tier, so other tiers never download the post-processing code.
+const HighEffects = lazy(() => import("./HighEffects"));
 
 interface Props {
   state: WorldState;
@@ -230,15 +232,20 @@ export function WorldScene({ state, seatKinds, tierOverride = null, controls, bo
         <Lights turn={state.turn} boardVersion={state.boardVersion} shadowMapSize={settings.shadowMapSize} fog={view === "chart" ? CHART_FOG : STREET_FOG} />
         <CameraRig view={view} followSeat={followSeat} followSpace={state.position[followSeat] ?? 0} reducedMotion={reducedMotion} bottomInset={bottomInset} />
         <Sky sky={sun.sky} haze={sun.haze} texture={texture} />
-        <Atoll texture={texture} shadows={shadows} seatCount={seatKinds.length} chart={view === "chart"} />
+        <WorldClock tier={tier} reducedMotion={reducedMotion} />
+        <Atoll texture={texture} shadows={shadows} seatCount={seatKinds.length} chart={view === "chart"} water={tier !== "low"} />
+        <ShoreFoam />
+        <Landmarks texture={texture} shadows={shadows} outline={settings.fullOutlines} />
+        <Galleons texture={texture} tier={tier} reducedMotion={reducedMotion} />
+        <Flare tier={tier} reducedMotion={reducedMotion} />
         <Signboards state={state} fromSpace={state.position[followSeat] ?? 0} street={view === "street"} seatKinds={seatKinds} />
         <Buildings state={state} texture={texture} reducedMotion={reducedMotion} shadows={shadows} fullOutlines={settings.fullOutlines} />
         <Pieces state={state} seatKinds={seatKinds} texture={texture} reducedMotion={reducedMotion} outlines={settings.fullOutlines} />
         <CursorFx />
         <CoinCarts rent={state.lastRent} texture={texture} reducedMotion={reducedMotion} />
-        {settings.effects && view === "chart" ? (
+        {settings.effects ? (
           <Suspense fallback={null}>
-            <ChartTiltShift />
+            <HighEffects chart={view === "chart"} />
           </Suspense>
         ) : null}
         {DEV_PERF ? <PerfProbe tier={tier} dpr={settings.dpr} /> : null}

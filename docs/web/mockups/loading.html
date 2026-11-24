@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loading screen mockups</title>
+<style>
+/* DESIGN.md night tokens. Fonts named, not embedded (no network). */
+:root{--paper:#F3EAD7;--brass:#8A6A1F;--brass-lt:#C9A24A;--ink:#1F2A2E;--ink-soft:#4A5558;--night:#16232B;--night-panel:#22333C;
+--night-text:#EDE3CF;--grid:#2C4450;--route:#EDE3CF;--x:#B8321A;
+--display:Cinzel,Fraunces,Georgia,serif;--text:"IBM Plex Sans","Segoe UI",Arial,sans-serif;--mono:"JetBrains Mono",Consolas,monospace}
+*{box-sizing:border-box}
+body{margin:0;background:#CFC3A8;color:var(--ink);font:14px/20px var(--text)}
+.doc{max-width:1900px;margin:0 auto;padding:24px 16px 64px}
+.doc>h1{font:600 31px/36px var(--display);margin:0 0 4px}
+.doc>p{max-width:80ch;margin:0 0 16px;color:var(--ink-soft)}
+.ctl{margin:0 0 24px;font:12px/16px var(--mono)}
+.opt{margin:0 0 48px}.opt h2{font:600 22px/28px var(--display);margin:0 0 4px}.opt .why{margin:0 0 12px;max-width:90ch}
+.row{display:flex;gap:24px;align-items:flex-start;overflow-x:auto;padding-bottom:8px}
+.label{font:600 12px/16px var(--mono);color:var(--ink-soft);margin:0 0 6px}
+.frame{flex:none;position:relative;overflow:hidden;border:6px solid var(--ink);border-radius:10px;background:var(--night);color:var(--night-text)}
+.phone{width:390px;height:844px;border-radius:28px}.desk{width:1440px;height:900px}
+.bp{position:absolute;inset:0;background:
+ linear-gradient(var(--grid) 1px,transparent 1px) 0 0/40px 40px,
+ linear-gradient(90deg,var(--grid) 1px,transparent 1px) 0 0/40px 40px,radial-gradient(circle at 50% 40%,#1E3641,#16232B 70%)}
+svg.map{position:absolute;inset:0;width:100%;height:100%}
+.route{fill:none;stroke:var(--route);stroke-width:3;stroke-dasharray:2 10;stroke-linecap:round}
+.route.done{stroke:var(--brass-lt);stroke-width:4}
+.title{font:700 31px/36px var(--display);letter-spacing:.1em;color:var(--night-text);margin:0}
+.pct{font:600 49px/52px var(--mono);font-variant-numeric:tabular-nums;color:var(--brass-lt)}
+.cap{font:14px/20px var(--text);color:var(--night-text)}
+.stages{list-style:none;margin:0;padding:0;display:grid;gap:6px;font:12px/16px var(--mono)}
+.stages li{display:flex;gap:8px;align-items:center;opacity:.55}.stages li.done,.stages li.now{opacity:1}
+.stages li:before{content:"";width:10px;height:10px;border:1px solid var(--brass-lt);transform:rotate(45deg)}
+.stages li.done:before{background:var(--brass-lt)}.stages li.now:before{background:var(--x)}
+.bar{height:4px;background:var(--grid);border-radius:2px}.bar i{display:block;height:100%;background:var(--brass-lt);border-radius:2px}
+.card{position:absolute;background:var(--night-panel);border:1px solid var(--brass);border-radius:6px;padding:16px}
+.note{font:12px/16px var(--mono);color:#A9B4B6}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+ <symbol id="xmark" viewBox="0 0 40 40"><path d="M8 8 L32 32 M32 8 L8 32" stroke="#B8321A" stroke-width="6" stroke-linecap="round"/></symbol>
+ <symbol id="boat" viewBox="0 0 30 30"><path d="M4 20 L26 20 L22 26 L8 26z" fill="#EDE3CF"/><path d="M15 4 L15 19 L24 19z" fill="#C9A24A"/><path d="M15 6 L15 19 L7 19z" fill="#EDE3CF"/></symbol>
+ <symbol id="rose" viewBox="-50 -50 100 100"><g fill="none" stroke="#C9A24A"><circle r="44"/><circle r="38" stroke-dasharray="1 4"/></g><path d="M0 -46 L6 0 L0 46 L-6 0z M-46 0 L0 -6 L46 0 L0 6z" fill="#C9A24A" opacity=".8"/><text y="-30" text-anchor="middle" font-size="10" fill="#EDE3CF" font-family="serif">N</text></symbol>
+ <symbol id="isle" viewBox="0 0 120 60"><path d="M6 40 Q20 8 60 14 Q104 6 114 38 Q80 56 6 40z" fill="none" stroke="#EDE3CF" stroke-width="1.5"/><path d="M14 38 Q30 18 60 22 Q96 16 106 36" fill="none" stroke="#EDE3CF" stroke-width="1" stroke-dasharray="3 3" opacity=".6"/></symbol>
+</defs></svg>
+
+<main class="doc">
+<h1>Loading screen: three options</h1>
+<p>Dark ocean blueprint. The dotted route is split into four legs, one per real loading stage: runtime download, Python start, models, first scene. The percent comes from bytes downloaded during stage 1 and from stage completion after that, so it never moves without a real event. The frames show an example state, stage 2 of 4. Use the buttons to step through stages.</p>
+<p class="ctl">Preview stage: <button data-s="0">1 Runtime</button> <button data-s="1">2 Python</button> <button data-s="2">3 Models</button> <button data-s="3">4 Scene</button> <button data-s="4">Done</button></p>
+
+<section class="opt"><h2>A. Full chart, route across the screen</h2>
+<p class="why">Route winds from a harbour mark past three islets (one per stage) to the X. Percent and caption sit low in a quiet card. Most map-like.</p>
+<div class="row" data-opt="a"></div></section>
+
+<section class="opt"><h2>B. Compass rose and route strip</h2>
+<p class="why">A slowly turning compass rose (static under reduced motion) in the centre, route as a straight dotted strip under it with four waypoints. Least busy, best on phone.</p>
+<div class="row" data-opt="b"></div></section>
+
+<section class="opt"><h2>C. Logbook entries beside the chart</h2>
+<p class="why">Chart on one side, a ship's log listing each stage with its real elapsed time on the other (desktop); on phone the log stacks under the chart. Most informative; useful for slow connections.</p>
+<div class="row" data-opt="c"></div></section>
+</main>
+
+<script>
+// Example stage data. In the build these come from the runtime worker's progress events.
+const ST=[["Downloading runtime","Python runtime, 3 of 9 MB",22],["Starting Python","Loading the rules engine",48],["Loading models","PPO and DQN weights",74],["Building the island","First scene",92],["Ready","Weigh anchor",100]];
+const NAMES=["Runtime download","Python start","Models","First scene"];
+// Route paths per layout; legs are equal-length segments for the progress overlay.
+const R={
+ a:{p:{d:"M40 760 C 120 640, 300 680, 300 560 S 80 420, 140 320 S 340 220, 300 150",x:[300,150],isles:[[200,600],[60,420],[230,250]]},
+    d:{d:"M120 760 C 300 700, 340 520, 520 540 S 760 760, 900 600 S 1000 300, 1180 320 S 1300 200, 1260 160",x:[1260,160],isles:[[460,480],[820,640],[1100,260]]}},
+ b:{p:{d:"M40 520 L350 520",x:[350,520]},d:{d:"M320 620 L1120 620",x:[1120,620]}},
+ c:{p:{d:"M40 420 C 120 300, 260 380, 200 240 S 300 120, 340 100",x:[340,100],isles:[[120,320],[220,180]]},
+    d:{d:"M80 780 C 200 600, 420 700, 480 520 S 360 300, 600 240 S 820 160, 820 140",x:[820,140],isles:[[260,640],[380,360],[640,200]]}}};
+function stagesHtml(s){return '<ul class="stages">'+NAMES.map((n,i)=>`<li class="${i<s?'done':i==s?'now':''}">${n}</li>`).join('')+'</ul>'}
+function mapSvg(o,k,w,h,s){const r=R[o][k];const pct=ST[s][2]/100;
+ let g=`<svg class="map" viewBox="0 0 ${w} ${h}">`;
+ (r.isles||[]).forEach(([x,y])=>g+=`<use href="#isle" x="${x-60}" y="${y-30}" width="120" height="60"/>`);
+ g+=`<path class="route" d="${r.d}" pathLength="100"/><path class="route done" d="${r.d}" pathLength="100" style="stroke-dasharray:${pct*100} 100"/>`;
+ g+=`<use href="#xmark" x="${r.x[0]-18}" y="${r.x[1]-18}" width="36" height="36"/>`;
+ return g+'</svg>'}
+function frame(o,k,s){const ph=k=='p',w=ph?390:1440,h=ph?844:900,[t,c,p]=ST[s];
+ let inner=`<div class="bp"></div>`;
+ if(o=='a'){inner+=mapSvg(o,k,w,h,s)+`<div style="position:absolute;top:${ph?40:48}px;left:${ph?20:64}px"><p class="title">Saltmarket</p><p class="note">Charting the course</p></div>
+  <div class="card" style="${ph?'left:16px;right:16px;bottom:16px':'right:64px;bottom:64px;width:360px'}"><div class="pct">${p}%</div><div class="cap">${t}</div><div class="note">${c}</div><div class="bar" style="margin:12px 0"><i style="width:${p}%"></i></div>${stagesHtml(s)}</div>`}
+ if(o=='b'){const cx=w/2,cy=ph?300:340,sz=ph?220:300;inner+=`<svg class="map" viewBox="0 0 ${w} ${h}"><use href="#rose" x="${cx-sz/2}" y="${cy-sz/2}" width="${sz}" height="${sz}"/></svg>`+mapSvg(o,k,w,h,s)+
+  `<div style="position:absolute;left:0;right:0;top:${ph?560:660}px;text-align:center"><div class="pct">${p}%</div><div class="cap">${t}</div><div class="note">${c}</div></div><p class="title" style="position:absolute;top:${ph?48:56}px;left:0;right:0;text-align:center">Saltmarket</p>`}
+ if(o=='c'){const log=NAMES.map((n,i)=>`<div style="display:grid;grid-template-columns:1fr auto;padding:8px 0;border-bottom:1px solid var(--grid);opacity:${i<=s?1:.45}"><span class="cap">${n}</span><span class="note">${i<s?['0.8 s','1.9 s','0.6 s','0.4 s'][i]+' (example)':i==s?'running':'waiting'}</span></div>`).join('');
+  inner+=(ph?`<div style="position:absolute;left:0;right:0;top:0;height:470px">${mapSvg(o,k,390,470,s)}</div>`:`<div style="position:absolute;left:0;top:0;width:900px;height:900px">${mapSvg(o,k,900,900,s)}</div>`)+
+  `<div class="card" style="${ph?'left:16px;right:16px;top:480px;bottom:16px':'right:64px;top:64px;bottom:64px;width:420px'}"><p class="title" style="font-size:25px">Ship's log</p><div class="note" style="margin-bottom:8px">Saltmarket is getting ready</div>${log}<div class="pct" style="margin-top:16px">${p}%</div><div class="cap">${t}</div><div class="bar" style="margin-top:8px"><i style="width:${p}%"></i></div></div>`}
+ return `<div><p class="label">${ph?'PHONE 390x844':'DESKTOP 1440x900'}</p><div class="frame ${ph?'phone':'desk'}">${inner}</div></div>`}
+function render(s){document.querySelectorAll('[data-opt]').forEach(r=>{const o=r.dataset.opt;r.innerHTML=frame(o,'p',s)+frame(o,'d',s)})}
+document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>render(+b.dataset.s));
+render(1);
+</script>
+</body>
+</html>

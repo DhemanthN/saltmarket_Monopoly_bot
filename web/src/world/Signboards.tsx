@@ -1,20 +1,25 @@
 import { Html } from "@react-three/drei";
+import { useThree } from "@react-three/fiber";
 import { Signboard } from "../ui/Signboard";
 import { BRIG_SPACE, DISTRICT_HEIGHT, spaces } from "./board";
 import { BRIG_ROCK, lotTransform } from "./layout";
 import type { WorldState } from "./reduceEvents";
-import { zLayers } from "../styles/tokens";
+import { seatOrder, zLayers } from "../styles/tokens";
 
 /** How many spaces ahead of the followed piece get a signboard in street view. */
-const AHEAD = 6;
+const AHEAD = 3;
+const AHEAD_PORTRAIT = 2;
+/** Alternate signs sit this much higher, so neighbours never share a line on screen. */
+const STAGGER = 0.55;
 const Z: [number, number] = [zLayers.worldLabel, zLayers.worldLabel];
 
-/** Price while a buyable space is unowned, "Mortgaged" or "Owned" after, nothing otherwise. */
+/** Price while a buyable space is unowned, then the owner's seat name, nothing otherwise. */
 function signText(state: WorldState, index: number): string | undefined {
   const space = spaces[index];
   if (space.price === null) return undefined;
   if (state.owner[index] === null) return String(space.price);
-  return state.mortgaged[index] ? "Mortgaged" : "Owned";
+  const owner = seatOrder[state.owner[index] ?? 0].label;
+  return state.mortgaged[index] ? `${owner} · mortgaged` : `${owner} owns`;
 }
 
 /**
@@ -23,15 +28,17 @@ function signText(state: WorldState, index: number): string | undefined {
  * The Brig rock is always labelled.
  */
 export function Signboards({ state, fromSpace, street }: { state: WorldState; fromSpace: number; street: boolean }) {
-  const ahead = street ? Array.from({ length: AHEAD }, (_, k) => (fromSpace + 1 + k) % spaces.length) : [];
+  const portrait = useThree((s) => s.size.width < s.size.height);
+  const count = portrait ? AHEAD_PORTRAIT : AHEAD;
+  const ahead = street ? Array.from({ length: count }, (_, k) => (fromSpace + 1 + k) % spaces.length) : [];
   return (
     <group>
-      {ahead.map((index) => {
+      {ahead.map((index, k) => {
         const space = spaces[index];
         const lot = lotTransform(index);
         const height = space.district ? DISTRICT_HEIGHT[space.district] : 0.6;
         return (
-          <Html key={index} position={[lot.x, height + 0.45, lot.z]} center zIndexRange={Z} pointerEvents="none">
+          <Html key={index} position={[lot.x, height + 0.45 + (k % 2) * STAGGER, lot.z]} center zIndexRange={Z} pointerEvents="none">
             <Signboard name={space.name} price={signText(state, index)} district={space.district ?? undefined} />
           </Html>
         );

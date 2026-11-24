@@ -1,12 +1,12 @@
 import { useEffect, useMemo } from "react";
 import { BackSide, BufferAttribute, Color, ConeGeometry, DodecahedronGeometry, SphereGeometry, type BufferGeometry, type Texture } from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
-import { worldColors } from "../styles/tokens";
+import { sunKeyframes, worldColors, type Mood } from "../styles/tokens";
 import { paint } from "./palette";
 
 const DOME_RADIUS = 150;
-/** Pale haze at the horizon, so the sea meets the sky in a soft band instead of a seam. */
-const HAZE = new Color(worldColors.sand);
+/** Pale haze at the horizon, so the sea meets the sky in a soft band instead of a seam. Night uses moonlight. */
+const HAZE: Record<Mood, string> = { day: worldColors.sand, night: sunKeyframes.night };
 
 /** Distant islets on the horizon, fixed in place, as one merged mesh that the fog softens. */
 function isletGeometry(): BufferGeometry {
@@ -27,13 +27,13 @@ function isletGeometry(): BufferGeometry {
 }
 
 /** A sky dome whose vertex colours run from haze at the horizon to `sky` overhead. */
-function domeGeometry(sky: Color): BufferGeometry {
+function domeGeometry(sky: Color, haze: Color): BufferGeometry {
   const g = new SphereGeometry(DOME_RADIUS, 24, 12);
   const pos = g.attributes.position;
   const colors = new Float32Array(pos.count * 3);
   const c = new Color();
   // Half haze, half sky at the horizon, so night keeps a dark horizon instead of a sand band.
-  const horizon = sky.clone().lerp(HAZE, 0.5);
+  const horizon = sky.clone().lerp(haze, 0.5);
   for (let i = 0; i < pos.count; i += 1) {
     const up = Math.max(0, pos.getY(i) / DOME_RADIUS);
     c.copy(horizon).lerp(sky, Math.min(1, Math.pow(up, 0.6) * 1.2));
@@ -47,9 +47,9 @@ function domeGeometry(sky: Color): BufferGeometry {
  * Sky dome and horizon. The dome blends from haze at the horizon to the mood's sky colour
  * overhead, through vertex colours, and ignores fog so it stays the backdrop.
  */
-export function Sky({ sky, texture }: { sky: Color; texture: Texture }) {
+export function Sky({ sky, mood, texture }: { sky: Color; mood: Mood; texture: Texture }) {
   const hex = sky.getHex();
-  const dome = useMemo(() => domeGeometry(new Color(hex)), [hex]);
+  const dome = useMemo(() => domeGeometry(new Color(hex), new Color(HAZE[mood])), [hex, mood]);
   useEffect(() => () => dome.dispose(), [dome]);
   const islets = useMemo(() => isletGeometry(), []);
   return (

@@ -10,11 +10,12 @@ export type CameraView = "street" | "chart";
 const DAMP = 9;
 const CHART_POSITION = new Vector3(0, 30, 21);
 const CHART_TARGET = new Vector3(0, 0, 0.5);
-const STREET_BACK = 4.6;
-const STREET_UP = 2.2;
-const STREET_AHEAD = 3.2;
+const STREET_BACK = 4.0;
+const STREET_UP = 2.4;
+/** Kept short so the followed piece sits in the lower third of the frame, not below it. */
+const STREET_AHEAD = 1.8;
 /** Look-at height: high enough that the road fills the lower third, not the lower half. */
-const STREET_LOOK_Y = 1.1;
+const STREET_LOOK_Y = 0.7;
 /** Portrait screens back off further so the lots beside the road stay in frame. */
 const PORTRAIT_BACK = 2.4;
 

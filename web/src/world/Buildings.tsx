@@ -28,6 +28,9 @@ const LOTS = Object.fromEntries(
 ) as Record<DistrictName, number[]>;
 const markerLots = spaces.filter((s) => s.district === null).map((s) => s.index);
 const propertyLots = spaces.filter((s) => s.district !== null).map((s) => s.index);
+/** Shutter height in lot space. Kelp shacks stand on stilts, so their facade starts above the deck. */
+const SHUTTER_Y: Partial<Record<DistrictName, number>> = { kelp: 0.4 };
+const shutterY = (lot: number) => SHUTTER_Y[spaces[lot].district ?? "reef"] ?? 0.12;
 
 interface Props {
   state: WorldState;
@@ -156,7 +159,7 @@ function LotMarks({ state, texture }: { state: WorldState; texture: Texture }) {
       const mortgaged = state.mortgaged[lot];
       awning.current?.setMatrixAt(i, placeLot(lot, [0, 0.36, 0.48], owner === null ? hidden : [1, 1, 1]));
       awning.current?.setColorAt(i, color.set(owner === null ? palette.paperDeep : mortgaged ? palette.paperDeep : seats[seatOrder[owner].name]));
-      shutter.current?.setMatrixAt(i, placeLot(lot, [0, 0.12, 0.5], mortgaged ? [1, 1, 1] : hidden));
+      shutter.current?.setMatrixAt(i, placeLot(lot, [0, shutterY(lot), 0.5], mortgaged ? [1, 1, 1] : hidden));
       port.current?.setMatrixAt(i, placeLot(lot, [0, 0, 0], state.level[lot] >= PORT_LEVEL ? [1, 1, 1] : hidden));
     });
     for (const mesh of [awning.current, shutter.current, port.current]) {

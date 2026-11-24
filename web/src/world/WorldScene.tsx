@@ -40,6 +40,8 @@ function Lights({ turn, boardVersion, shadowMapSize }: { turn: number; boardVers
   // Three.js renderer and scene objects are mutable by design; R3F hands them out for this.
   /* eslint-disable react-hooks/immutability */
   useEffect(() => {
+    // The Canvas `shadows` prop is read once, so a tier change at runtime must toggle it here.
+    gl.shadowMap.enabled = shadowMapSize !== null;
     gl.shadowMap.autoUpdate = false;
     gl.shadowMap.needsUpdate = true;
     if (shadowMapSize !== null) shadowUpdates.current += 1;
@@ -155,7 +157,7 @@ export function WorldScene({ state, seatKinds, tierOverride = null, onViewChange
         />
         <Lights turn={state.turn} boardVersion={state.boardVersion} shadowMapSize={settings.shadowMapSize} />
         <CameraRig view={view} followSeat={followSeat} followSpace={state.position[followSeat] ?? 0} reducedMotion={reducedMotion} />
-        <Sky sky={sun.sky} texture={texture} />
+        <Sky sky={sun.sky} mood={sun.mood} texture={texture} />
         <Atoll texture={texture} shadows={shadows} seatCount={seatKinds.length} />
         <Signboards state={state} fromSpace={state.position[followSeat] ?? 0} street={view === "street"} />
         <Buildings state={state} texture={texture} reducedMotion={reducedMotion} shadows={shadows} fullOutlines={settings.fullOutlines} />

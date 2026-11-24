@@ -83,7 +83,7 @@ engineer.
 
 ## Git
 
-- Private repo `DhemanthN/saltmarket-ai`. The owner makes it public, never Claude.
+- Private repo `DhemanthN/saltmarket_Monopoly_bot`. The owner makes it public, never Claude.
 - Commit after every tested sub-step with conventional messages (`feat:`, `fix:`,
   `test:`, `docs:`). Push at the end of each milestone. Never commit failing tests.
 - Do not commit `.venv`, caches, checkpoints over about 50 MB, or raw simulation

@@ -24,7 +24,7 @@ Branch: `plan` · Date: 2026-11-23 · Status: done
   replay can show a value river. Both are labelled "value estimate", because the values
   include reward shaping and are not win probabilities.
 - Owner colours are close in brightness, so each seat also gets an emblem and an ink outline.
-- The real repo is `DhemanthN/saltmarket-ai`. `prompts/06-deploy.md` and
+- The real repo is `DhemanthN/saltmarket_Monopoly_bot`. `prompts/06-deploy.md` and
   `prompts/DISPATCHER.md` still say `saltmarket_Monopoly_bot`; PLAN.md uses the real name.
 
 ## How to verify

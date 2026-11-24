@@ -4,7 +4,7 @@ Goal: a website where anyone can play Saltmarket against the real PPO and DQN ag
 inside a 3D atoll they walk around as their own piece. The browser runs the real Python
 engine and the real trained weights. Nothing is re-implemented.
 
-Date: 2026-11-23 · Repo: `DhemanthN/saltmarket-ai` · Visual rules: `DESIGN.md`, `ANTI_SLOP.md`
+Date: 2026-11-23 · Repo: `DhemanthN/saltmarket_Monopoly_bot` · Visual rules: `DESIGN.md`, `ANTI_SLOP.md`
 
 ## 1. Concept
 

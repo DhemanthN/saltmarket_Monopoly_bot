@@ -1,6 +1,8 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import { type PerspectiveCamera, Vector3 } from "three";
+import { activeShake, headingFromDirection, isCalm, isDecisionOpen, isIntroGateOpen, releaseIntro, setHeading, shakeDecay } from "./cameraBus";
+import { INTRO_SECONDS, INTRO_START_SCALE, PARALLAX_AMOUNT, SHAKE_FOV_PUNCH, introProgress, pointerUnit, shakeOffset, swayOffset } from "./cameraMotion";
 import { piecePositions } from "./piecePositions";
 import { CHART_DIR, CHART_TARGET, chartDistance } from "./chartFit";
 import { roadForward } from "./layout";
@@ -26,6 +28,11 @@ const PORTRAIT_BACK = 2.4;
 const INSET_SHIFT = 0.75;
 /** Chart view centres the ring in the open area, which is half the inset. */
 const CHART_INSET_SHIFT = 0.5;
+/** The intro waits this long for the loading screen to let go before it starts anyway. */
+const INTRO_GATE_TIMEOUT_S = 6;
+/** How quickly parallax follows the pointer. */
+const PARALLAX_DAMP = 3;
+const FINE_POINTER = "(pointer: fine)";
 
 interface Props {
   view: CameraView;
@@ -38,9 +45,16 @@ interface Props {
   bottomInset: number;
 }
 
+type IntroState = "waiting" | "playing" | "done";
+
 /**
  * Street view sits behind and above the followed piece, looking down the road. Chart view looks
  * down on the whole atoll. Both damp toward their pose; reduced motion cuts instead.
+ *
+ * Extra motion, all off in Calm and under reduced motion: a 2.5 s intro swoop from above the
+ * chart pose (a click or key ends it), a tiny idle sway, mouse parallax (fine pointers only, held
+ * still while a decision is open) and the cannon shake with a field-of-view punch. The compass
+ * heading is published from the real camera direction.
  */
 export function CameraRig({ view, followSeat, followSpace, reducedMotion, bottomInset }: Props) {
   const { camera, invalidate, size } = useThree();
@@ -48,8 +62,17 @@ export function CameraRig({ view, followSeat, followSpace, reducedMotion, bottom
   const goalPos = useMemo(() => new Vector3(), []);
   const goalTarget = useMemo(() => new Vector3(), []);
   const forward = useMemo(() => new Vector3(), []);
+  const base = useMemo(() => new Vector3(), []);
+  const direction = useMemo(() => new Vector3(), []);
+  const right = useMemo(() => new Vector3(), []);
+  const up = useMemo(() => new Vector3(), []);
+  const introStart = useMemo(() => new Vector3(), []);
   const first = useRef(true);
+  const intro = useRef<{ state: IntroState; elapsed: number; waited: number }>({ state: "done", elapsed: 0, waited: 0 });
+  const pointer = useRef({ x: 0, y: 0, smoothX: 0, smoothY: 0 });
+  const clock = useRef(0);
   const fov = (camera as PerspectiveCamera).fov;
+  const baseFov = useRef(fov);
   const chartAt = useMemo(() => chartDistance(size.width, size.height, bottomInset, fov), [size.width, size.height, bottomInset, fov]);
 
   useEffect(() => invalidate(), [view, followSpace, followSeat, size, chartAt, invalidate]);
@@ -68,7 +91,45 @@ export function CameraRig({ view, followSeat, followSpace, reducedMotion, bottom
     invalidate();
   }, [camera, bottomInset, size, view, invalidate]);
 
-  useFrame((_, dt) => {
+  // A click, tap or key ends the intro where it is; the damping then carries the camera in.
+  useEffect(() => {
+    const skip = () => {
+      if (intro.current.state === "done") return;
+      intro.current.state = "done";
+      releaseIntro();
+      invalidate();
+    };
+    window.addEventListener("pointerdown", skip);
+    window.addEventListener("keydown", skip);
+    return () => {
+      window.removeEventListener("pointerdown", skip);
+      window.removeEventListener("keydown", skip);
+    };
+  }, [invalidate]);
+
+  // Parallax follows a mouse, not a finger.
+  useEffect(() => {
+    if (!window.matchMedia?.(FINE_POINTER).matches) return;
+    const move = (e: PointerEvent) => {
+      Object.assign(pointer.current, pointerUnit(e.clientX, e.clientY, window.innerWidth, window.innerHeight));
+      invalidate();
+    };
+    window.addEventListener("pointermove", move);
+    return () => window.removeEventListener("pointermove", move);
+  }, [invalidate]);
+
+  useEffect(() => {
+    const perspective = camera as PerspectiveCamera;
+    const original = baseFov.current;
+    return () => {
+      perspective.fov = original;
+      perspective.updateProjectionMatrix();
+    };
+  }, [camera]);
+
+  useFrame((state, dt) => {
+    const calm = reducedMotion || isCalm();
+    clock.current += dt;
     if (view === "chart") {
       goalPos.copy(CHART_TARGET).addScaledVector(CHART_DIR, chartAt);
       goalTarget.copy(CHART_TARGET);
@@ -82,12 +143,92 @@ export function CameraRig({ view, followSeat, followSpace, reducedMotion, bottom
       goalPos.multiplyScalar(0.92);
       goalTarget.copy(p).addScaledVector(forward, STREET_AHEAD).setY(portrait ? PORTRAIT_LOOK_Y : STREET_LOOK_Y);
     }
-    const k = reducedMotion || first.current ? 1 : 1 - Math.exp(-DAMP * dt);
-    first.current = false;
-    camera.position.lerp(goalPos, k);
-    target.current.lerp(goalTarget, k);
+
+    if (first.current) {
+      first.current = false;
+      base.copy(goalPos);
+      // The swoop opens high above the chart pose and glides down to the street pose.
+      if (!calm && view === "street") {
+        introStart.copy(CHART_TARGET).addScaledVector(CHART_DIR, chartAt * INTRO_START_SCALE);
+        intro.current = { state: "waiting", elapsed: 0, waited: 0 };
+      }
+    }
+
+    const swoop = intro.current;
+    if (swoop.state === "waiting") {
+      swoop.waited += dt;
+      if (isIntroGateOpen() || swoop.waited > INTRO_GATE_TIMEOUT_S) {
+        releaseIntro();
+        swoop.state = "playing";
+      }
+    }
+    if (swoop.state === "playing") {
+      swoop.elapsed += dt;
+      if (swoop.elapsed >= INTRO_SECONDS) swoop.state = "done";
+    }
+
+    if (swoop.state === "done") {
+      const k = reducedMotion ? 1 : 1 - Math.exp(-DAMP * dt);
+      base.lerp(goalPos, k);
+      target.current.lerp(goalTarget, k);
+    } else {
+      const p = swoop.state === "waiting" ? 0 : introProgress(swoop.elapsed);
+      base.lerpVectors(introStart, goalPos, p);
+      target.current.lerpVectors(CHART_TARGET, goalTarget, p);
+      invalidate();
+    }
+
+    let offsetX = 0;
+    let offsetY = 0;
+    if (!calm && view === "street" && swoop.state === "done") {
+      // Sway needs a render every frame, so it runs only when the loop does.
+      if (state.frameloop === "always") {
+        const sway = swayOffset(clock.current);
+        offsetX += sway.x;
+        offsetY += sway.y;
+      }
+      const p = pointer.current;
+      const goalX = isDecisionOpen() ? 0 : p.x;
+      const goalY = isDecisionOpen() ? 0 : p.y;
+      const follow = 1 - Math.exp(-PARALLAX_DAMP * dt);
+      p.smoothX += (goalX - p.smoothX) * follow;
+      p.smoothY += (goalY - p.smoothY) * follow;
+      offsetX += p.smoothX * PARALLAX_AMOUNT;
+      offsetY -= p.smoothY * PARALLAX_AMOUNT * 0.5;
+      if (Math.abs(goalX - p.smoothX) + Math.abs(goalY - p.smoothY) > 1e-3) invalidate();
+    }
+
+    const now = performance.now();
+    const shake = calm ? null : activeShake(now);
+    const perspective = state.camera as PerspectiveCamera;
+    let nextFov = baseFov.current;
+    if (shake) {
+      const strength = shake.intensity * shakeDecay(shake, now);
+      const rattle = shakeOffset(strength, now / 1000);
+      offsetX += rattle.x;
+      offsetY += rattle.y;
+      nextFov += SHAKE_FOV_PUNCH * strength;
+      invalidate();
+    }
+    if (perspective.fov !== nextFov) {
+      perspective.fov = nextFov;
+      perspective.updateProjectionMatrix();
+    }
+
+    camera.position.copy(base);
+    if (offsetX !== 0 || offsetY !== 0) {
+      camera.lookAt(target.current);
+      camera.getWorldDirection(direction);
+      right.crossVectors(direction, camera.up).normalize();
+      up.crossVectors(right, direction).normalize();
+      camera.position.addScaledVector(right, offsetX).addScaledVector(up, offsetY);
+    }
     camera.lookAt(target.current);
-    if (camera.position.distanceToSquared(goalPos) > 1e-4) invalidate();
+
+    camera.getWorldDirection(direction);
+    if (Math.hypot(direction.x, direction.z) > 0.2) setHeading(headingFromDirection(direction.x, direction.z));
+
+    if (base.distanceToSquared(goalPos) > 1e-4) invalidate();
   });
 
   return null;

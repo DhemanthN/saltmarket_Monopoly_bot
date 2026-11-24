@@ -76,7 +76,6 @@ describe("lit brass ornament", () => {
     expect(contrastRatio(ornament.brassLit, palette.paper)).toBeLessThan(3);
   });
 });
-});
 
 describe("contrast", () => {
   const paperText: [string, string, number][] = [

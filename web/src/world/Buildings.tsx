@@ -72,7 +72,7 @@ function Static({ geometry, lots, texture, shadows, outline }: { geometry: Buffe
       </instancedMesh>
       {outline ? (
         <instancedMesh ref={hull} args={[geometry, undefined, lots.length]}>
-          <meshBasicMaterial color={palette.ink} side={BackSide} />
+          <meshBasicMaterial color={palette.ink} side={BackSide} polygonOffset polygonOffsetFactor={1} polygonOffsetUnits={1} />
         </instancedMesh>
       ) : null}
     </>
@@ -132,7 +132,7 @@ function Storeys({ district, geometry, state, texture, reducedMotion, shadows }:
         <meshLambertMaterial map={texture} />
       </instancedMesh>
       <instancedMesh ref={hull} args={[geometry, undefined, count]}>
-        <meshBasicMaterial color={palette.ink} side={BackSide} />
+        <meshBasicMaterial color={palette.ink} side={BackSide} polygonOffset polygonOffsetFactor={1} polygonOffsetUnits={1} />
       </instancedMesh>
     </>
   );

@@ -137,8 +137,9 @@ export function Pieces({ state, seatKinds, texture, reducedMotion, outlines }: P
       blobs.current?.setMatrixAt(seat, dummy.matrix);
       const flag = flags.current[seat];
       if (flag) {
-        flag.position.set(p.x, p.y + 0.95, p.z);
-        flag.quaternion.copy(camera.quaternion);
+        // A pennant on a short pole above the piece, turned only around the vertical axis.
+        flag.position.set(p.x, p.y + 0.75, p.z);
+        flag.rotation.set(0, Math.atan2(camera.position.x - p.x, camera.position.z - p.z), 0);
         flag.visible = !gone;
       }
       if (AGENTS.has(seatKinds[seat]) && !gone) {
@@ -163,7 +164,7 @@ export function Pieces({ state, seatKinds, texture, reducedMotion, outlines }: P
       </instancedMesh>
       {outlines ? (
         <instancedMesh ref={hull} args={[geometry, undefined, count]}>
-          <meshBasicMaterial color={palette.ink} side={BackSide} />
+          <meshBasicMaterial color={palette.ink} side={BackSide} polygonOffset polygonOffsetFactor={1} polygonOffsetUnits={1} />
         </instancedMesh>
       ) : null}
       <instancedMesh ref={blobs} args={[undefined, undefined, count]}>
@@ -171,12 +172,16 @@ export function Pieces({ state, seatKinds, texture, reducedMotion, outlines }: P
         <meshBasicMaterial color={palette.ink} transparent opacity={0.22} depthWrite={false} />
       </instancedMesh>
       {seatOrder.slice(0, count).map((seat, i) => (
-        <group key={seat.name} ref={(g) => { flags.current[i] = g; }} scale={0.34}>
-          <mesh>
+        <group key={seat.name} ref={(g) => { flags.current[i] = g; }} scale={0.15}>
+          <mesh position-y={-1.2}>
+            <cylinderGeometry args={[0.06, 0.06, 2.4, 5]} />
+            <meshBasicMaterial color={palette.ink} />
+          </mesh>
+          <mesh position-x={0.65}>
             <planeGeometry args={[1.3, 1.3]} />
             <meshBasicMaterial color={seats[seat.name]} />
           </mesh>
-          <mesh geometry={emblems[i]} position-z={0.05} scale={0.9}>
+          <mesh geometry={emblems[i]} position={[0.65, 0, 0.05]} scale={0.9}>
             <meshBasicMaterial color={seat.name === "saffron" ? palette.ink : palette.sailcloth} />
           </mesh>
         </group>

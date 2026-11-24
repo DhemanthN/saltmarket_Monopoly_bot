@@ -85,7 +85,7 @@ export function CoinCarts({ rent, texture, reducedMotion }: { rent: RentTrace | 
         <meshLambertMaterial map={texture} />
       </instancedMesh>
       <instancedMesh ref={hull} args={[geometry, undefined, POOL]} frustumCulled={false}>
-        <meshBasicMaterial color={palette.ink} side={BackSide} />
+        <meshBasicMaterial color={palette.ink} side={BackSide} polygonOffset polygonOffsetFactor={1} polygonOffsetUnits={1} />
       </instancedMesh>
     </>
   );

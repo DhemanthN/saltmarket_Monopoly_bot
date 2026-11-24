@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Saltmarket HUD chrome mockups</title>
+<style>
+:root{--paper:#F3EAD7;--deep:#E6D8BC;--sail:#FBF7EE;--ink:#1F2A2E;--soft:#4A5558;--brass:#8A6A1F;--lit:#C9A24A;--tide:#1E5A66;--focus:#0B5CAD;--danger:#A3261A;--ok:#2E6B34;--np:#22333C;--nt:#EDE3CF;--dim:#BFB59E;--amber:#96680F;
+--disp:Cinzel,"Iowan Old Style",Georgia,serif;--mono:"JetBrains Mono",Consolas,"Courier New",monospace;--lift:0 1px 0 rgb(31 42 46/.12),0 8px 18px -8px rgb(31 42 46/.35)}
+*{box-sizing:border-box}
+body{margin:0;background:#16232B;color:var(--nt);font:15px/22px var(--mono)}
+main{max-width:1560px;margin:0 auto;padding:24px 16px 64px}
+h1{font:600 28px/34px var(--disp);margin:0 0 4px}h2{font:600 22px/28px var(--disp);margin:40px 0 4px;color:var(--lit)}
+p.n{margin:4px 0;max-width:900px;color:var(--dim)}p.n b{color:var(--nt)}
+.bar{display:flex;gap:20px;flex-wrap:wrap;align-items:center;margin:16px 0;padding:12px 16px;background:var(--np);border:1px solid var(--lit)}
+.bar input[type=range]{width:220px}
+.pair{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start;margin-top:12px}
+.cap{font-size:12px;color:var(--dim);margin:0 0 6px}.bd{font-size:12px;margin:6px 0 0;color:var(--dim)}.bd.ok{color:#9BD3A0}.bd.bad{color:#FF9C8F}
+.box{position:relative}
+/* ---------- frame ---------- */
+.f{position:absolute;left:0;top:0;transform-origin:0 0;overflow:hidden;background:#17333c;color:var(--ink);font:13px/18px var(--mono);font-variant-numeric:tabular-nums}
+.f.desk{width:1440px;height:900px}.f.phone{width:390px;height:844px}
+.f>*{position:absolute}.f button{font:inherit;cursor:pointer}
+.world{inset:0;width:100%;height:100%;z-index:0}.vig{inset:0;pointer-events:none;z-index:1}
+.f.a .vig{background:radial-gradient(ellipse at 50% 45%,transparent 55%,rgba(10,20,26,.5))}
+.f.b .vig{background:radial-gradient(ellipse at 50% 45%,transparent 58%,rgba(10,20,26,.38)),linear-gradient(180deg,rgba(242,178,122,.12),transparent 40%)}
+.f.c .vig{background:radial-gradient(ellipse at 50% 45%,transparent 38%,rgba(10,20,26,.74))}
+.f.c::after{content:"";position:absolute;inset:5px;border:1px solid rgba(201,162,74,.55);pointer-events:none;z-index:4}
+.brk{width:34px;height:34px;color:var(--lit);fill:none;stroke:currentColor;z-index:5}
+.brk.tl{left:8px;top:8px}.brk.tr{right:8px;top:8px;transform:scaleX(-1)}.brk.bl{left:8px;bottom:8px;transform:scaleY(-1)}.brk.br{right:8px;bottom:8px;transform:scale(-1)}
+.phone .brk.bl,.phone .brk.br{display:none}
+.in{background:var(--np);color:var(--nt);border:1px solid var(--lit);box-shadow:inset 0 0 0 2px var(--np),inset 0 0 0 3px rgba(201,162,74,.45);z-index:200}
+.compass{display:flex}.read{flex:none;width:68px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;border-right:1px solid rgba(201,162,74,.5)}
+.cbw{flex:1;position:relative}.cbw svg{position:absolute;inset:0;width:100%;height:100%}
+.dial{display:none;border-radius:50%;padding:0}.f.b .dial{display:block}.f.b .compass{display:none}
+.tele{display:flex;align-items:center;gap:12px;padding:0 14px;height:34px;white-space:nowrap;font-size:13px}
+.tele b{color:#fff;font-weight:700}.tele i{font-style:normal;color:var(--dim)}.tele svg{width:16px;height:16px;margin-right:4px;vertical-align:-3px;stroke:#F2B27A;fill:none;stroke-width:1.5}
+.tele .t5{display:none}.f.b .t5{display:inline}
+.menubtn{display:flex;align-items:center;justify-content:center;gap:8px;font:600 14px var(--disp);letter-spacing:.08em;color:var(--nt)}
+.menubtn svg{width:16px;height:16px;stroke:var(--lit);stroke-width:2;fill:none}
+/* ledger */
+.ledger{background:var(--paper);border:1px solid var(--brass);border-radius:2px;box-shadow:var(--lift);z-index:200;padding:10px 12px}
+.ledger .hd{font:600 12px/16px var(--disp);letter-spacing:.16em;color:var(--brass);text-transform:uppercase;padding-bottom:6px;border-bottom:1px solid rgba(138,106,31,.5);margin-bottom:4px}
+.row{display:grid;grid-template-columns:30px 1fr auto;column-gap:10px;align-items:center;padding:5px 0 5px 8px;border-bottom:1px solid rgba(138,106,31,.25);position:relative}
+.row:last-child{border:0}.row .nm{font-weight:500}.row .cash{font-weight:700;text-align:right}.row .nw{grid-column:2/4;font-size:12px;color:var(--soft);margin-top:-2px}
+.row.cur{background:var(--sail)}.row.cur .nm{font-weight:700}.row.cur::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:3px;background:var(--brass)}
+.em{width:28px;height:28px;border-radius:50%;background:var(--c);color:var(--l);border:1.5px solid var(--ink);display:grid;place-items:center;grid-row:span 2}
+.em svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.em .fl{fill:currentColor}
+.feed{background:var(--sail);border:1px solid var(--brass);border-radius:2px;box-shadow:var(--lift);z-index:200;padding:6px 10px;font-size:12px;display:flex;align-items:center;gap:8px}
+.feed .coin{width:14px;height:14px;border-radius:50%;background:var(--lit);border:1.5px solid var(--ink);flex:none}
+/* deed */
+.deed{background:var(--paper);border:1px solid var(--brass);border-radius:2px;box-shadow:var(--lift);z-index:300;display:grid;padding:0 20px 18px;column-gap:24px;row-gap:6px}
+.deed .strip{grid-area:s;margin:0 -20px 8px;background:var(--amber);color:var(--sail);display:flex;justify-content:space-between;padding:5px 20px;font:600 12px/16px var(--disp);letter-spacing:.14em;text-transform:uppercase}
+.deed h3{grid-area:h;margin:0;font:600 24px/30px var(--disp)}
+.deed .price{grid-area:p;display:flex;align-items:baseline;gap:8px;color:var(--soft)}.deed .price b{font-size:28px;line-height:32px;color:var(--ink)}
+.ladder{grid-area:l;display:grid;grid-template-columns:repeat(3,1fr);gap:4px 12px;margin:4px 0}
+.ladder span{display:flex;justify-content:space-between;border-bottom:1px solid rgba(138,106,31,.3);padding:2px 0}.ladder i{font-style:normal;color:var(--soft);font-size:12px}
+.after{grid-area:c;margin:0;color:var(--soft)}.after b{color:var(--ok)}
+.acts{grid-area:a;display:flex;flex-direction:column;gap:8px;align-self:end}
+.acts button{border-radius:4px;min-height:44px;display:flex;justify-content:space-between;align-items:center;padding:0 14px;font-weight:700}
+.pri{background:var(--tide);color:var(--sail);border:0;border-bottom:2px solid var(--ink)}
+.sec{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
+kbd{font:600 11px var(--mono);border:1px solid currentColor;border-radius:3px;padding:0 5px;opacity:.85}
+.handle{display:none}
+/* menu */
+.scrim{inset:0;background:rgba(10,20,26,.55);display:none;z-index:600}
+.menu{display:none;z-index:610;background:var(--paper);border:1px solid var(--brass);border-radius:2px;box-shadow:var(--lift);padding:12px 20px 8px}
+.f.mo .scrim,.f.mo .menu{display:block}.f.mo.c .scrim{background:rgba(10,20,26,.2)}
+.menu header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--brass);padding-bottom:6px}
+.menu h4{margin:0;font:600 22px/28px var(--disp)}.menu .x{width:44px;height:44px;background:none;border:0;color:var(--ink)}.menu .x svg{width:18px;height:18px;stroke:currentColor;stroke-width:2;fill:none}
+.menu li{list-style:none;display:flex;justify-content:space-between;align-items:center;min-height:48px;border-bottom:1px solid rgba(138,106,31,.3);gap:12px}
+.menu ul{margin:0;padding:0}.menu li:last-child{border:0}.menu li.dg{color:var(--danger);font-weight:700}
+.seg{display:flex;border:1.5px solid var(--ink);border-radius:4px;overflow:hidden}.seg i{font-style:normal;padding:2px 8px;font-size:12px;border-left:1px solid var(--ink)}.seg i:first-child{border:0}.seg i.on{background:var(--ink);color:var(--sail)}
+.tg{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--soft)}.tg::before{content:"";width:34px;height:18px;border-radius:9px;border:1.5px solid var(--ink);background:radial-gradient(circle at 9px 50%,var(--ink) 5px,transparent 5.5px)}
+.f.a .menu{left:50%;top:50%;transform:translate(-50%,-50%);width:380px}.f.a.phone .menu{width:350px}
+.f.b .menu{right:0;top:0;bottom:0;width:340px;border-width:0 0 0 3px;border-radius:0}.f.b.phone .menu{width:310px}
+.f.c .menu{right:44px;top:56px;width:330px}.f.c.phone .menu{left:14px;right:14px;top:104px;width:auto}
+/* ---------- option A: chart table ---------- */
+.f.a.desk .tele{left:44px;top:12px}.f.a.desk .compass{left:510px;top:12px;width:420px;height:44px}
+.f.a.desk .menubtn{right:44px;top:12px;width:100px;height:36px}
+.f.a.desk .ledger{right:24px;top:76px;width:252px}.f.a.desk .feed{right:24px;top:344px;width:252px}
+.f.a.desk .deed{left:420px;bottom:24px;width:600px;grid-template-columns:1fr 210px;grid-template-areas:"s s" "h a" "p a" "l a" "c a"}
+.f.a.phone .tele{left:40px;top:15px;height:34px;padding:0 10px;gap:8px;font-size:12px}.f.a.phone .t4{display:none}
+.f.a.phone .menubtn{right:46px;top:10px;width:80px;height:44px}
+.f.a.phone .compass{left:14px;right:14px;top:62px;height:40px}
+.f.a.phone .ledger{left:12px;right:12px;top:112px;display:flex;gap:6px;padding:6px;height:46px}.f.a.phone .ledger .hd{display:none}
+/* ---------- option B: ship's log ---------- */
+.f.b.desk .dial{left:44px;top:12px;width:124px;height:124px}
+.f.b.desk .tele{left:44px;top:146px;width:200px;height:auto;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 14px}
+.f.b.desk .menubtn{right:44px;top:12px;width:100px;height:36px}
+.f.b.desk .ledger{left:44px;top:292px;width:240px}.f.b.desk .feed{left:44px;top:560px;width:240px}
+.f.b.desk .deed{right:44px;bottom:24px;width:420px;grid-template-columns:1fr;grid-template-areas:"s" "h" "p" "l" "c" "a"}
+.f.b.phone .dial{left:46px;top:10px;width:76px;height:76px}
+.f.b.phone .tele{left:130px;top:14px;width:132px;height:auto;flex-direction:column;align-items:flex-start;gap:0;padding:4px 8px;font-size:12px;line-height:17px}.f.b.phone .t4,.f.b.phone .t2 i{display:none}.f.b.phone .t1 i,.f.b.phone .t3 svg{display:none}
+.f.b.phone .menubtn{right:46px;top:14px;width:80px;height:44px}
+.f.b.phone .ledger{left:12px;top:100px;width:58px;padding:4px}.f.b.phone .ledger .hd{display:none}
+/* ---------- option C: bezel ---------- */
+.f.c.desk .compass{left:44px;top:12px;right:164px;height:34px}
+.f.c.desk .menubtn{right:44px;top:12px;width:100px;height:34px}
+.f.c.desk .tele{left:44px;top:58px}
+.f.c.desk .ledger{left:44px;top:104px;width:230px}.f.c.desk .nw{display:none}.f.c.desk .feed{left:44px;top:340px;width:230px}
+.f.c.desk .deed{left:340px;bottom:24px;width:760px;grid-template-columns:1fr 210px;grid-template-areas:"s s" "h a" "p a" "l a" "c a"}.f.c.desk .ladder{grid-template-columns:repeat(6,1fr)}
+.f.c.phone .tele{left:40px;top:15px;height:34px;padding:0 10px;gap:8px;font-size:12px}.f.c.phone .t4{display:none}
+.f.c.phone .menubtn{right:46px;top:10px;width:80px;height:44px}
+.f.c.phone .compass{left:14px;right:14px;top:62px;height:32px}.f.c.phone .read{width:60px;font-size:12px}
+.f.c.phone .ledger{right:12px;top:106px;width:58px;padding:4px}.f.c.phone .ledger .hd{display:none}
+/* ledger compact (phone) */
+.phone .row{display:flex;flex:1;padding:4px 6px;column-gap:6px;justify-content:center;align-items:center;border:0;font-size:12px}.phone .nm,.phone .nw{display:none}.phone .em{width:24px;height:24px}.phone .em svg{width:15px;height:15px}
+.phone.b .row,.phone.c .row{flex-direction:column;padding:6px 0;gap:2px;border-bottom:1px solid rgba(138,106,31,.25)}.phone.b .row:last-child,.phone.c .row:last-child{border:0}
+.phone .row.cur::before{top:2px;bottom:2px}
+.phone.b .row.cur::before,.phone.c .row.cur::before{left:-4px}
+.phone.a .row.cur{outline:1.5px solid var(--brass);outline-offset:-2px}
+.phone .feed{left:14px;right:14px;bottom:364px;height:30px}
+/* phone bottom sheet */
+.f.phone .deed{left:0;right:0;bottom:0;height:352px;border-radius:6px 6px 0 0;padding:0 16px 22px;grid-template-columns:1fr auto;grid-template-areas:"x x" "s s" "h p" "l l" "c c" "a a";row-gap:4px}
+.f.phone .deed .strip{margin:0 -16px 6px;padding:5px 16px}
+.f.phone .handle{display:block;position:static;grid-area:x;justify-self:center;width:44px;height:4px;background:var(--brass);border-radius:2px;margin:6px 0 4px}
+.f.phone .deed h3{font-size:21px;line-height:30px;align-self:center}.f.phone .deed .price{justify-self:end;align-items:baseline}
+.f.phone .acts button{min-height:48px}
+.f.phone .world{inset:auto;left:0;top:-90px}
+body.sz .deed,body.sz .menubtn{outline:2px dashed #FFD24A;outline-offset:3px}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute"><defs>
+<symbol id="e-sun" viewBox="0 0 24 24"><circle class="fl" cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></symbol>
+<symbol id="e-wave" viewBox="0 0 24 24"><path d="M3 9c3-3 5-3 9 0s6 3 9 0M3 15c3-3 5-3 9 0s6 3 9 0"/></symbol>
+<symbol id="e-star" viewBox="0 0 24 24"><path class="fl" d="M12 3l2.6 6.2 6.4.6-4.8 4.2 1.4 6.5L12 17l-5.6 3.5 1.4-6.5L3 9.8l6.4-.6z"/></symbol>
+<symbol id="e-anchor" viewBox="0 0 24 24"><circle cx="12" cy="4.5" r="1.8"/><path d="M12 6.5V20M8 10h8M5 14c0 4 3 6 7 6s7-2 7-6"/></symbol>
+<symbol id="brk" viewBox="0 0 34 34"><path d="M2 32V8Q2 2 8 2H32" stroke-width="2"/><path d="M8 32V13Q8 8 13 8H32" stroke-width="1" opacity=".65"/><path d="M15 12l3 3-3 3-3-3z" fill="currentColor" stroke="none"/></symbol>
+<symbol id="bld" viewBox="0 0 40 40"><path d="M6 21l14 7v11L6 32z" fill="#C9B991" stroke="#1F2A2E" stroke-width="1.6" stroke-linejoin="round"/><path d="M20 28l14-7v11l-14 7z" fill="#FBF7EE" stroke="#1F2A2E" stroke-width="1.6" stroke-linejoin="round"/><path d="M20 5l16 9-16 8L4 14z" fill="currentColor" stroke="#1F2A2E" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+<symbol id="sloop" viewBox="0 0 40 40"><path d="M5 27h30l-5 8H10z" fill="#FBF7EE" stroke="#1F2A2E" stroke-width="1.8" stroke-linejoin="round"/><path d="M20 4v23" stroke="#1F2A2E" stroke-width="1.8"/><path d="M22 6l11 19H22z" fill="currentColor" stroke="#1F2A2E" stroke-width="1.8" stroke-linejoin="round"/><path d="M18 10L8 25h10z" fill="#FBF7EE" stroke="#1F2A2E" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+<linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2d5f6b"/><stop offset="1" stop-color="#14303a"/></linearGradient>
+<radialGradient id="dusk" cx=".12" cy=".05" r=".7"><stop offset="0" stop-color="#F2B27A" stop-opacity=".55"/><stop offset="1" stop-color="#F2B27A" stop-opacity="0"/></radialGradient>
+<radialGradient id="glow"><stop offset="0" stop-color="#F9D58E"/><stop offset="1" stop-color="#F9D58E" stop-opacity="0"/></radialGradient>
+<g id="worldg"><rect width="1200" height="1000" fill="url(#sea)"/><rect width="1200" height="1000" fill="url(#dusk)"/>
+<g fill="none" stroke="#9fd0d4" stroke-opacity=".18" stroke-width="2"><path d="M80 120q30-14 60 0t60 0"/><path d="M980 180q30-14 60 0t60 0"/><path d="M120 820q30-14 60 0t60 0"/><path d="M930 760q30-14 60 0t60 0"/><path d="M1040 480q30-14 60 0t60 0"/><path d="M60 470q30-14 60 0t60 0"/></g>
+<ellipse cx="600" cy="430" rx="500" ry="300" fill="#3f7f86" opacity=".55"/>
+<ellipse cx="600" cy="420" rx="430" ry="255" fill="#E6D8BC" stroke="#1F2A2E" stroke-width="3"/>
+<ellipse cx="600" cy="420" rx="395" ry="232" fill="none" stroke="#1F2A2E" stroke-opacity=".35" stroke-width="3" stroke-dasharray="14 10"/>
+<ellipse cx="600" cy="420" rx="300" ry="165" fill="#4C8E94" stroke="#1F2A2E" stroke-width="3"/>
+<ellipse cx="600" cy="420" rx="84" ry="42" fill="#E6D8BC" stroke="#1F2A2E" stroke-width="3"/><g id="bl"></g>
+<ellipse cx="600" cy="676" rx="34" ry="12" fill="none" stroke="#C9A24A" stroke-width="3" stroke-dasharray="6 5"/>
+<use href="#sloop" x="560" y="620" width="80" height="80" style="color:#D9A21B"/></g>
+</defs></svg>
+
+<template id="t">
+<svg class="world" viewBox="0 0 1200 1000" preserveAspectRatio="xMidYMid slice"><use href="#worldg"/></svg>
+<div class="vig"></div>
+<svg class="brk tl"><use href="#brk"/></svg><svg class="brk tr"><use href="#brk"/></svg><svg class="brk bl"><use href="#brk"/></svg><svg class="brk br"><use href="#brk"/></svg>
+<div class="compass in"><b class="read"></b><div class="cbw"><svg></svg></div></div>
+<svg class="dial in"></svg>
+<div class="tele in"><span class="t1"><i>Turn </i><b>14</b></span><span class="t2"><i>Round </i><b>4</b></span><span class="t3"><svg viewBox="0 0 16 16"><path d="M2 12h12M4.5 12a3.5 3.5 0 017 0M8 3v2M3 6l1.2 1.2M13 6l-1.2 1.2"/></svg><b>Dusk</b></span><span class="t4"><i>Cash </i><b>1,240</b></span><span class="t5"><i>Facing </i><b class="rd"></b></span></div>
+<button class="menubtn in" aria-label="Open menu"><svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h12M2 12h12"/></svg>Menu</button>
+<div class="ledger"><div class="hd">Ledger</div>
+<div class="row cur" style="--c:#D9A21B;--l:#1F2A2E"><i class="em"><svg><use href="#e-sun"/></svg></i><span class="nm">You</span><b class="cash">1,240</b><span class="nw">Net worth 2,010</span></div>
+<div class="row" style="--c:#137C86;--l:#FBF7EE"><i class="em"><svg><use href="#e-wave"/></svg></i><span class="nm">PPO</span><b class="cash">980</b><span class="nw">Net worth 1,730</span></div>
+<div class="row" style="--c:#B8321A;--l:#FBF7EE"><i class="em"><svg><use href="#e-star"/></svg></i><span class="nm">DQN</span><b class="cash">1,510</b><span class="nw">Net worth 2,240</span></div>
+<div class="row" style="--c:#3A2F7A;--l:#FBF7EE"><i class="em"><svg><use href="#e-anchor"/></svg></i><span class="nm">Bot 4</span><b class="cash">640</b><span class="nw">Net worth 1,100</span></div></div>
+<div class="feed"><i class="coin"></i><span><b>PPO</b> paid you <b>80</b> rent</span></div>
+<div class="deed"><i class="handle"></i><div class="strip"><span>Amber district</span><span>Space 21</span></div><h3>Honeyglass Strand</h3>
+<div class="price"><span>Price</span><b>210</b></div>
+<div class="ladder"><span><i>Bare lot</i><b>15</b></span><span><i>1 depot</i><b>80</b></span><span><i>2 depots</i><b>220</b></span><span><i>3 depots</i><b>565</b></span><span><i>4 depots</i><b>755</b></span><span><i>Port</i><b>925</b></span></div>
+<p class="after">Cash after buying <b>1,030</b></p>
+<div class="acts"><button class="pri">Buy for 210 <kbd>Enter</kbd></button><button class="sec">Pass to auction <kbd>Esc</kbd></button></div></div>
+<div class="scrim"></div>
+<div class="menu" role="dialog" aria-label="Menu"><header><h4>Menu</h4><button class="x" aria-label="Close"><svg viewBox="0 0 18 18"><path d="M3 3l12 12M15 3L3 15"/></svg></button></header>
+<ul><li>Resume <kbd>Esc</kbd></li><li>Quality <span class="seg"><i class="on">Auto</i><i>High</i><i>Med</i><i>Low</i></span></li><li>Calm mode <span class="tg">Off</span></li><li>Sound <span class="tg">Muted</span></li><li>Replay tips <span>3 marks</span></li><li class="dg">Leave game</li></ul></div>
+</template>
+
+<main>
+<h1>Game screen HUD chrome</h1>
+<p class="n">Three options. Each is shown at phone (390×844) and desktop (1440×900), with the Menu open in a second row. Demo values only: turn 14, round 4, dusk, cash 1,240. The lot is a real board space (<b>Honeyglass Strand</b>, rents from <b>data/board.json</b>). No wind or other invented telemetry.</p>
+<p class="n"><b>Rules shown:</b> brackets and compass never overlap the decision panel or the Menu button (the badge under each frame is measured live by script). Instruments (compass, telemetry, Menu button) are night-panel signboards; documents (ledger, deed, Menu) are paper. Brass over the dark world uses a new ornament-only token <b>brass-lit #C9A24A</b>, 3.6:1 against the dusk sea. Fonts fall back to Georgia and Consolas here because nothing loads from the network; the build self-hosts Cinzel (headings) and JetBrains Mono (figures).</p>
+<div class="bar"><label>Camera yaw <input id="yaw" type="range" min="0" max="359" value="42"> <output id="yo">42°</output></label>
+<label><input id="one" type="checkbox"> True size (1:1)</label><label><input id="szc" type="checkbox"> Show protected zones (deed, Menu button)</label></div>
+<p class="n"><b>Recommendation: A.</b> It keeps the compass where players expect it (top centre), puts the ledger on the right where it never meets the deed, and spends the least screen on phone. B has the most character but its dial, left rail and right-docked deed crowd a laptop. C has the best vignette and a true 0–360 strip; borrow its vignette for A.</p>
+<div id="out"></div>
+</main>
+<script>
+const T=document.getElementById('t'),out=document.getElementById('out'),N=['N','NE','E','SE','S','SW','W','NW'];
+const OPTS=[['a','A · Chart table','Brass corner brackets. Compass bar top centre shows a window of ±56° around the camera heading. Telemetry plaque top left. Ledger rail down the right edge on desktop, a strip of four chips on phone. Deed sits bottom centre on desktop and is a bottom sheet on phone. Menu is a centred paper dialog.'],
+['b','B · Ship’s log','A round brass compass dial turns with the camera (top left) with a telemetry plaque under it. Ledger is a left rail. Deed docks bottom right on desktop, bottom sheet on phone. Menu is a drawer from the right edge. Lightest vignette with a warm dusk wash.'],
+['c','C · Bezel','A hairline brass frame and the heaviest vignette. The compass is a full 0–360 ribbon along the top with a marker at the heading. Ledger tabs on the left on desktop, a right rail on phone. Menu drops from the Menu button.']];
+let yaw=42;
+function cb(svg){const p=svg.parentNode,W=p.clientWidth,H=p.clientHeight,full=svg.closest('.f').classList.contains('c'),k=full?W/360:3.75;
+ svg.setAttribute('viewBox',`0 0 ${W} ${H}`);let s='';const lo=full?0:Math.floor((yaw-W/2/k)/5)*5,hi=full?360:yaw+W/2/k;
+ for(let d=lo;d<=hi;d+=5){const n=((d%360)+360)%360,x=full?d*k:W/2+(d-yaw)*k,m=n%45==0,t=m?H*.32:n%15==0?H*.24:H*.13;
+  s+=`<path d="M${x} 0v${t}" stroke="${m?'#C9A24A':'#BFB59E'}" stroke-width="${m?2:1}"/>`;
+  if(m)s+=`<text x="${x}" y="${H*.72}" text-anchor="middle" font-size="${n%90?11:14}" font-weight="700" fill="${n%90?'#EDE3CF':'#C9A24A'}">${N[n/45]}</text>`;
+  else if(n%15==0&&!full&&W>300)s+=`<text x="${x}" y="${H*.7}" text-anchor="middle" font-size="9" fill="#BFB59E">${n}</text>`;}
+ const mx=full?yaw*k:W/2;s+=`<path d="M${mx} 0V${H}" stroke="#FBF7EE" stroke-width="1" opacity=".5"/><path d="M${mx-5} ${H}h10l-5-7z" fill="#FBF7EE"/>`;svg.innerHTML=s;}
+function dial(svg){svg.setAttribute('viewBox','0 0 100 100');let s=`<circle cx="50" cy="50" r="48" fill="#22333C" stroke="#C9A24A"/><circle cx="50" cy="50" r="30" fill="none" stroke="#C9A24A" stroke-opacity=".4"/><g transform="rotate(${-yaw} 50 50)">`;
+ for(let a=0;a<360;a+=10){const m=a%90==0,l=m?7:a%30==0?5:3;s+=`<path d="M50 3v${l}" stroke="${m?'#C9A24A':'#BFB59E'}" stroke-width="${m?1.6:1}" transform="rotate(${a} 50 50)"/>`;
+  if(a%45==0)s+=`<text x="50" y="${a%90?24:25}" text-anchor="middle" font-size="${a%90?8:11}" font-weight="700" fill="${a==0?'#F2B27A':'#EDE3CF'}" transform="rotate(${a} 50 50)">${N[a/45]}</text>`;}
+ s+=`</g><path d="M45 0h10l-5 9z" fill="#FBF7EE"/><circle cx="50" cy="50" r="2.5" fill="#C9A24A"/>`;svg.innerHTML=s;}
+function upd(){const r=N[Math.round(yaw/45)%8],v=String(yaw).padStart(3,'0')+'° '+r;
+ document.querySelectorAll('.f').forEach(f=>{f.querySelectorAll('.cbw svg').forEach(cb);f.querySelectorAll('.dial').forEach(dial);f.querySelector('.read').textContent=v;f.querySelector('.rd').textContent=v;});}
+function mk(o,dev,mo){const w=dev=='desk'?1440:390,h=dev=='desk'?900:844,d=document.createElement('div');
+ d.innerHTML=`<p class="cap">${dev=='desk'?'Desktop 1440×900':'Phone 390×844'}${mo?' · Menu open':''}</p><div class="box" data-w="${w}" data-h="${h}"><div class="f ${o} ${dev}${mo?' mo':''}">${T.innerHTML}</div></div><p class="bd"></p>`;return d;}
+function build(){OPTS.forEach(([k,t,desc])=>{const s=document.createElement('section');s.innerHTML=`<h2>${t}</h2><p class="n">${desc}</p><div class="pair"></div><div class="pair"></div>`;
+ const [p1,p2]=s.querySelectorAll('.pair');['phone','desk'].forEach(dv=>p1.append(mk(k,dv,0)));['phone','desk'].forEach(dv=>p2.append(mk(k,dv,1)));out.append(s);});}
+function fit(){const one=document.getElementById('one').checked,vw=innerWidth-32;document.querySelectorAll('.box').forEach(b=>{const w=+b.dataset.w,h=+b.dataset.h,s=one?1:Math.min(w==1440?.62:.7,vw/w);b.style.width=w*s+'px';b.style.height=h*s+'px';b.firstElementChild.style.transform=`scale(${s})`;});}
+function hit(a,b){return a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top;}
+function check(){document.querySelectorAll('.box').forEach(b=>{const f=b.firstElementChild,bd=b.nextElementSibling;if(f.classList.contains('mo')){bd.textContent='Menu dialog is the top layer (z 600): it covers the HUD by design.';return;}
+ const vis=e=>e.getClientRects().length&&getComputedStyle(e).display!='none',prot=[...f.querySelectorAll('.deed,.menubtn')],bad=[];
+ f.querySelectorAll('.compass,.dial,.tele,.ledger,.feed,.brk').forEach(e=>{if(!vis(e))return;const r=e.getBoundingClientRect();prot.forEach(p=>{if(hit(r,p.getBoundingClientRect()))bad.push(String(e.className.baseVal||e.className).split(' ')[0]);});});
+ bd.className='bd '+(bad.length?'bad':'ok');bd.textContent=bad.length?'OVERLAP with decision panel or Menu button: '+bad.join(', '):'Checked: no HUD element overlaps the decision panel or the Menu button.';});}
+// world buildings and lantern glows (district accents from DESIGN.md)
+(()=>{const c=['#4F7A3A','#B5523B','#C2456B','#7A5A3C','#96680F','#5B4A4E','#2E7E6A','#3B4F8C'];let s='';const P=[];for(let i=0;i<24;i++){const a=i/24*Math.PI*2+.2;P.push([600+Math.cos(a)*362,420+Math.sin(a)*210,i]);}
+ P.sort((a,b)=>a[1]-b[1]).forEach(([x,y,i])=>{const z=.8+.5*(y-210)/420,sz=46*z;if(i%5==0)s+=`<circle cx="${x}" cy="${y}" r="${sz*.7}" fill="url(#glow)"/>`;s+=`<use href="#bld" x="${x-sz/2}" y="${y-sz*.8}" width="${sz}" height="${sz}" style="color:${c[Math.floor(i/3)]}"/>`;});document.getElementById('bl').innerHTML=s;})();
+build();upd();fit();check();
+document.getElementById('yaw').oninput=e=>{yaw=+e.target.value;document.getElementById('yo').textContent=yaw+'°';upd();};
+document.getElementById('one').onchange=fit;document.getElementById('szc').onchange=e=>document.body.classList.toggle('sz',e.target.checked);addEventListener('resize',fit);
+document.addEventListener('click',e=>{const f=e.target.closest('.f');if(!f)return;if(e.target.closest('.menubtn'))f.classList.add('mo');else if(e.target.closest('.scrim,.x'))f.classList.remove('mo');});
+</script></body></html>

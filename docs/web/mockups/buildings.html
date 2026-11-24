@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Saltmarket building kit mockups</title>
+<style>
+:root{--paper:#F3EAD7;--deep:#E6D8BC;--sail:#FBF7EE;--ink:#1F2A2E;--soft:#4A5558;--brass:#8A6A1F;--lit:#C9A24A;--tide:#1E5A66;--np:#22333C;--nt:#EDE3CF;--dim:#BFB59E;
+--disp:Cinzel,"Iowan Old Style",Georgia,serif;--mono:"JetBrains Mono",Consolas,"Courier New",monospace}
+*{box-sizing:border-box}body{margin:0;background:#16232B;color:var(--nt);font:15px/22px var(--mono)}
+main{max-width:1560px;margin:0 auto;padding:24px 16px 64px}
+h1{font:600 28px/34px var(--disp);margin:0 0 4px}h2{font:600 22px/28px var(--disp);margin:44px 0 4px;color:var(--lit)}
+p.n{margin:4px 0;max-width:920px;color:var(--dim)}p.n b{color:var(--nt)}
+.pair{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start;margin-top:12px}.cap{font-size:12px;color:var(--dim);margin:0 0 6px}
+.bar{margin:16px 0;padding:12px 16px;background:var(--np);border:1px solid var(--lit)}
+.box{position:relative}
+.f{position:absolute;left:0;top:0;transform-origin:0 0;overflow:hidden;font:13px/18px var(--mono);font-variant-numeric:tabular-nums}
+.f.desk{width:1440px;height:900px;padding:28px 36px}.f.phone{width:390px;height:844px;padding:16px 12px;overflow-y:auto}
+.f h3{font:600 24px/30px var(--disp);margin:0}.f .sub{margin:2px 0 14px;font-size:13px}
+.grid{display:grid;gap:14px}.desk .grid{grid-template-columns:repeat(4,1fr);gap:18px}.phone .grid{grid-template-columns:1fr 1fr;gap:10px}
+.card{border:1px solid var(--bc);background:var(--cb);padding:10px 12px 12px;border-radius:2px;display:flex;flex-direction:column}
+.card svg{width:100%;display:block}.desk .card svg{height:250px}.phone .card svg{height:162px}
+.card h4{font:600 17px/22px var(--disp);margin:2px 0 4px}.dist{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--st)}
+.dist i{width:12px;height:12px;border-radius:50%;background:var(--acc);border:1px solid var(--sr)}
+.prop{font-size:12px;line-height:17px;margin-top:6px;display:flex;gap:6px}.prop::before{content:"";flex:none;width:10px;height:10px;margin-top:4px;border-radius:50%;background:var(--lit);border:1.5px solid var(--ink)}
+.faces{font-size:12px;color:var(--st);margin-top:auto;padding-top:6px}
+/* style 1: day, flat ink (what the palette texture + hull outline renders) */
+.s1{background:var(--paper);color:var(--ink);--bc:var(--brass);--cb:var(--sail);--st:var(--soft);--sr:var(--ink);
+--o:#1F2A2E;--w:2.2;--wall:#F3EAD7;--wood:#7A5A3C;--stone:#B9B0A0;--metal:#5B6468;--glass:#1E5A66;--sand:#E6D8BC;--water:#4C8E94;--sail:#FBF7EE;--gold:#C9A24A;--dark:#5B4A4E;--rope:#C8A878;--smoke:#FBF7EE}
+/* style 2: dusk, lit windows and rim light (second palette texture, emissive cells) */
+.s2{background:#16232B;color:var(--nt);--bc:rgba(201,162,74,.6);--cb:#22333C;--st:var(--dim);--sr:var(--nt);
+--o:#0A1216;--w:2.4;--wall:#8B8678;--wood:#5A4430;--stone:#6C6A66;--metal:#3F484D;--glass:#F9D58E;--sand:#4B5348;--water:#1F4A56;--sail:#C9C2B0;--gold:#E3B650;--dark:#3A3236;--rope:#8F7A58;--smoke:#7C8890}
+svg polygon{stroke:var(--o);stroke-width:var(--w);stroke-linejoin:round}
+.wall{--c:var(--wall)}.wood{--c:var(--wood)}.stone{--c:var(--stone)}.metal{--c:var(--metal)}.glass{--c:var(--glass)}.sand{--c:var(--sand)}.water{--c:var(--water)}.sail{--c:var(--sail)}.gold{--c:var(--gold)}.dark{--c:var(--dark)}.rope{--c:var(--rope)}.acc{--c:var(--acc)}.smoke{--c:var(--smoke)}.fish{--c:var(--water)}
+.L{fill:var(--c)}.M{fill:color-mix(in srgb,var(--c) 88%,#000)}.R{fill:color-mix(in srgb,var(--c) 74%,#000)}.T{fill:color-mix(in srgb,var(--c) 86%,#fff)}.F{fill:color-mix(in srgb,var(--c) 92%,#000)}
+.P{fill:color-mix(in srgb,var(--acc) 42%,var(--sand))}.s2 .P{fill:color-mix(in srgb,var(--acc) 35%,var(--sand))}
+.s2 .glass.F{fill:var(--glass);filter:drop-shadow(0 0 3px #F9D58E)}.glass.F{fill:var(--glass)}
+.smoke{opacity:.8;stroke-width:1.6}.s2 .smoke{opacity:.55}
+.ink{fill:none;stroke:var(--o);stroke-linecap:round;stroke-linejoin:round}.rl{fill:none;stroke:var(--c);stroke-linecap:round;stroke-linejoin:round}
+.dot circle{fill:var(--lit);stroke:#1F2A2E;stroke-width:2}.pool{display:none}.s2 .pool{display:block}
+.beam{fill:#FBF7EE;fill-opacity:.35;stroke:none}.s2 .beam{fill:#F9D58E;fill-opacity:.35}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute"><defs><radialGradient id="pl"><stop offset="0" stop-color="#F9D58E" stop-opacity=".5"/><stop offset="1" stop-color="#F9D58E" stop-opacity="0"/></radialGradient></defs></svg>
+<main>
+<h1>Building kit: eight lots</h1>
+<p class="n">One procedural low-poly kit, drawn as isometric SVG with the world's ink outline. Every lot is a few boxes, prisms and frusta (the same primitives the 3D kit will merge per district), one <b>signature prop</b> marked with a brass dot, and a ground plate tinted with its district accent. Shape counts under each card (faces, plus rods and ropes counted once) are measured from the drawing.</p>
+<p class="n"><b>Two style options, same geometry.</b> <b>Style 1 · Day, flat ink</b> is what the palette texture and hull outline render at noon. <b>Style 2 · Dusk, lit</b> uses the second palette texture: cooler walls, emissive windows and a lantern pool on the ground. It previews the night work and costs no extra draws (a texture swap).</p>
+<p class="n">District accents are <b>suggested</b>, one per lot, so all eight districts appear. Final lot assignment is the build task's call; the Brig is the real space “The Brig” (index 14). Fonts fall back to Georgia and Consolas here (nothing loads from the network).</p>
+<p class="n"><b>Recommendation: Style 1 as the default look, with Style 2 as the night mood.</b> Style 1 keeps every prop readable at street zoom; Style 2 is the same models under the night texture, so adopting both costs nothing.</p>
+<div id="out"></div></main>
+<script>
+const S=13,pr=(x,y,z)=>[(x-y)*.866*S,(x+y)*.5*S-z*S],f=n=>+n.toFixed(1),pts=a=>a.map(p=>pr(...p).map(f).join(',')).join(' '),
+pg=(a,c)=>`<polygon points="${pts(a)}" class="${c}"/>`,
+box=(x,y,z,w,d,h,r)=>pg([[x,y+d,z],[x+w,y+d,z],[x+w,y+d,z+h],[x,y+d,z+h]],r+' L')+pg([[x+w,y,z],[x+w,y+d,z],[x+w,y+d,z+h],[x+w,y,z+h]],r+' R')+pg([[x,y,z+h],[x+w,y,z+h],[x+w,y+d,z+h],[x,y+d,z+h]],r+' T'),
+qy=(y,x,z,w,h,r)=>pg([[x,y,z],[x+w,y,z],[x+w,y,z+h],[x,y,z+h]],r+' F'),
+qx=(x,y,z,w,h,r)=>pg([[x,y,z],[x,y+w,z],[x,y+w,z+h],[x,y,z+h]],r+' F'),
+gab=(x,y,z,w,d,h,r,e)=>pg([[x+w,y,z],[x+w,y+d,z],[x+w,y+d/2,z+h]],e+' R')+pg([[x,y+d,z],[x+w,y+d,z],[x+w,y+d/2,z+h],[x,y+d/2,z+h]],r+' T'),
+pyr=(cx,cy,z,hw,hd,h,r)=>pg([[cx-hw,cy+hd,z],[cx+hw,cy+hd,z],[cx,cy,z+h]],r+' L')+pg([[cx+hw,cy-hd,z],[cx+hw,cy+hd,z],[cx,cy,z+h]],r+' R'),
+cyl=(cx,cy,z,r1,h,r,n=8,r2=r1)=>{let s='';for(let i=0;i<n;i++){const a=2*Math.PI*i/n,b=2*Math.PI*(i+1)/n,m=(a+b)/2,d=Math.sin(m)-Math.cos(m);if(Math.cos(m)+Math.sin(m)<.05)continue;
+ s+=pg([[cx+r1*Math.cos(a),cy+r1*Math.sin(a),z],[cx+r1*Math.cos(b),cy+r1*Math.sin(b),z],[cx+r2*Math.cos(b),cy+r2*Math.sin(b),z+h],[cx+r2*Math.cos(a),cy+r2*Math.sin(a),z+h]],r+(d>.5?' L':d<-.5?' R':' M'));}
+ if(r2>0)s+=pg(Array.from({length:n},(_,i)=>[cx+r2*Math.cos(2*Math.PI*i/n),cy+r2*Math.sin(2*Math.PI*i/n),z+h]),r+' T');return s;},
+lw=(a,r,w=2)=>`<polyline points="${pts(a)}" class="ink" stroke-width="${w+2.6}"/><polyline points="${pts(a)}" class="rl ${r}" stroke-width="${w}"/>`,
+el=(x,y,z,r,c)=>{const [X,Y]=pr(x,y,z);return `<ellipse cx="${f(X)}" cy="${f(Y)}" rx="${f(r*S*1.2247)}" ry="${f(r*S*.7071)}" class="${c}" style="stroke:var(--o);stroke-width:1.6"/>`},
+cc=(x,y,z,r,c)=>{const [X,Y]=pr(x,y,z);return `<circle cx="${f(X)}" cy="${f(Y)}" r="${r*S}" class="${c} L"/>`},
+dot=(x,y,z)=>{const [X,Y]=pr(x,y,z);return `<g class="dot"><circle cx="${f(X)}" cy="${f(Y)}" r="5.5"/></g>`},
+fish=(x,y,z,s,c)=>pg([[x,y,z],[x,y+.5*s,z+.25*s],[x,y+s,z],[x,y+.5*s,z-.25*s]],c+' F')+pg([[x,y+s,z],[x,y+1.3*s,z+.25*s],[x,y+1.3*s,z-.25*s]],c+' F'),
+ground=()=>{const [X,Y]=pr(3,3,0);return `<ellipse class="pool" cx="${f(X)}" cy="${f(Y+8)}" rx="120" ry="62" fill="url(#pl)" stroke="none"/>`+box(-.6,-.6,-.4,7.2,7.2,.4,'sand')+pg([[.1,.1,.01],[5.9,.1,.01],[5.9,5.9,.01],[.1,5.9,.01]],'P')};
+const K=[
+{n:'Tavern',d:'driftwood',a:'#7A5A3C',p:'Hanging tankard sign over the door, barrels and a smoking chimney',g:()=>box(.8,.8,0,4,3.6,3,'wall')+qy(4.4,2.4,0,.9,1.6,'wood')+qy(4.4,1.2,.8,.8,.7,'glass')+qy(4.4,3.8,.8,.8,.7,'glass')+qy(4.4,1.2,1.9,.8,.7,'glass')+qy(4.4,2.5,1.9,.8,.7,'glass')+qy(4.4,3.8,1.9,.8,.7,'glass')+qx(4.8,1.4,.8,.8,.7,'glass')+qx(4.8,2.9,.8,.8,.7,'glass')+qx(4.8,1.4,1.9,.8,.7,'glass')+qx(4.8,2.9,1.9,.8,.7,'glass')+gab(.6,.6,3,4.4,4,1.7,'acc','wall')+box(1.3,1.1,3.7,.6,.6,1.5,'stone')+cc(1.6,1.4,5.7,.35,'smoke')+cc(1.9,1.2,6.3,.45,'smoke')+cc(2.3,1,7,.5,'smoke')+cyl(5.3,4.9,0,.35,.7,'wood',6)+cyl(5.9,4.2,0,.32,.62,'wood',6)+lw([[2.9,4.4,2.7],[2.9,5.5,2.7]],'metal',1.6)+qx(2.9,4.8,1.4,.7,.9,'wood')+qx(2.9,4.95,1.65,.35,.45,'gold')+dot(2.9,5.15,2.1)},
+{n:'Shipyard',d:'reef',a:'#B5523B',p:'A-frame crane lowering a plank onto a half-built hull',g:()=>pg([[.2,4.7,.02],[5.8,4.7,.02],[5.8,5.8,.02],[.2,5.8,.02]],'water P')+box(.5,.5,0,2.2,2.6,1.8,'wood')+qy(3.1,1.0,0,.9,1.3,'metal')+gab(.3,.3,1.8,2.6,3,.9,'acc','wood')+lw([[3,2.2,.5],[5.8,2.2,.5]],'wood',2)+[0,1,2,3,4,5,6].map(i=>lw([-1,-.66,-.33,0,.33,.66,1].map(t=>[3.2+i*.4,2.2+t*.95,.5+1.7*t*t]),'wood',1.5)).join('')+lw([[3,4.4,0],[3.9,3.9,3.6]],'wood',2.2)+lw([[4.9,4.4,0],[3.9,3.9,3.6]],'wood',2.2)+lw([[3.9,3.9,3.6],[3.9,2.9,3.1]],'wood',2.2)+lw([[3.9,2.9,3.1],[3.9,2.9,2]],'rope',1)+box(3.6,2.7,1.6,.6,.5,.3,'wood')+dot(3.9,2.9,2.4)},
+{n:'Lighthouse',d:'coral',a:'#C2456B',p:'Lantern room throwing a light wedge across the water',g:()=>cyl(3,3,0,2.4,.6,'stone',7)+cyl(3,3,.6,1.3,1.7,'wall',8,1.18)+cyl(3,3,2.3,1.18,1.7,'acc',8,1.06)+cyl(3,3,4,1.06,1.5,'wall',8,.94)+cyl(3,3,5.5,.94,.5,'acc',8,.9)+cyl(3,3,6,1.3,.25,'metal',8)+`<polygon class="beam" points="${pts([[3.6,3,7],[8.5,1,8.2],[8.5,5.4,5.6]])}"/>`+cyl(3,3,6.25,.7,1.2,'glass',8)+cyl(3,3,7.45,.9,.9,'acc',8,0)+dot(3.6,3.6,6.9)},
+{n:'Fish market',d:'kelp',a:'#4F7A3A',p:'Fish signboard on a tall pole beside a drying line',g:()=>box(.6,1,0,4.8,.4,2.4,'wall')+[0,1,2,3,4,5].map(i=>pg([[.5+i*.82,1.0,3],[1.32+i*.82,1.0,3],[1.32+i*.82,3.8,2.3],[.5+i*.82,3.8,2.3]],(i%2?'sail':'acc')+' T')).join('')+box(.6,3.4,0,4.8,.9,1,'wood')+fish(.4,3.6,1.15,.8,'fish')+box(1,4.7,0,.9,.9,.5,'wood')+box(2.1,4.7,0,.9,.9,.5,'wood')+lw([[5.6,5.2,0],[5.6,5.2,4.8]],'wood',2.2)+qx(5.6,4.3,3.1,1.7,1.4,'sail')+fish(5.6,4.45,3.8,1.15,'fish')+dot(5.6,5.1,3.8)+lw([[.3,5.6,.1],[.3,5.6,2]],'wood',1.4)+lw([[.3,5.6,1.9],[3.5,5.6,1.6]],'rope',1)},
+{n:'Customs house',d:'crown',a:'#3B4F8C',p:'Brass scales on a post in front of the portico, flag overhead',g:()=>box(.6,.8,0,4.8,4.4,.4,'stone')+box(1,1,.4,4,3.2,2.6,'stone')+qy(4.2,2.5,.4,1,1.5,'wood')+gab(.8,.8,3,4.4,3.8,1.4,'acc','stone')+box(.9,4.2,3,4.2,.5,.3,'wall')+[1.2,2.5,3.8,5].map(x=>box(x,4.25,.4,.3,.3,2.6,'wall')).join('')+box(1.4,4.7,0,3.2,.8,.2,'stone')+lw([[5.4,1.2,3],[5.4,1.2,7]],'metal',1.4)+qx(5.4,1.2,5.6,1.5,1,'acc')+lw([[5.7,5.3,0],[5.7,5.3,1.9]],'gold',1.6)+lw([[5.7,4.7,1.9],[5.7,5.9,1.9]],'gold',1.4)+el(5.7,4.7,1.5,.28,'gold')+el(5.7,5.9,1.5,.28,'gold')+dot(5.7,5.3,2.3)},
+{n:'Rope walk',d:'amber',a:'#96680F',p:'Giant rope drum with coils, strands stretched between posts',g:()=>box(.3,.5,0,5.6,1.6,1.6,'wood')+gab(.1,.3,1.6,6,2,.9,'acc','wood')+[0,1,2,3,4,5].map(i=>lw([[.6+i,3.9,0],[.6+i,3.9,1.2]],'wood',1.6)).join('')+[3.6,3.9,4.2].map(y=>lw([[.6,y,1.1],[3.1,y,.85],[5.6,y,1.1]],'rope',1)).join('')+cyl(4.9,5.2,0,.9,.9,'wood',8)+el(4.9,5.2,.9,.8,'rope')+el(4.9,5.2,.9,.5,'rope')+el(4.9,5.2,.9,.2,'rope')+dot(4.9,5.2,1.3)+el(1.4,5.2,.1,.5,'rope')},
+{n:'Treasury',d:'jade',a:'#2E7E6A',p:'Iron-banded chest with spilled coins on the front step',g:()=>box(.6,.6,0,4.8,4.8,.4,'stone')+cyl(1.2,1.2,.4,.55,3.2,'stone',6)+cyl(1.2,1.2,3.6,.75,.8,'acc',6,0)+cyl(4.8,1.2,.4,.55,3.2,'stone',6)+cyl(4.8,1.2,3.6,.75,.8,'acc',6,0)+box(1,1,.4,4,4,2.2,'stone')+qy(5,2.3,.4,1.4,1.7,'metal')+qy(5,1.3,1.5,.3,.7,'glass')+qy(5,4.4,1.5,.3,.7,'glass')+cyl(3,3,2.6,1.7,.4,'stone',8,1.6)+cyl(3,3,3,1.6,.5,'acc',8,1.3)+cyl(3,3,3.5,1.3,.5,'acc',8,.8)+cyl(3,3,4,.8,.7,'acc',8,0)+el(3,3,4.7,.18,'gold')+cyl(1.2,4.8,.4,.55,3.2,'stone',6)+cyl(1.2,4.8,3.6,.75,.8,'acc',6,0)+cyl(4.8,4.8,.4,.55,3.2,'stone',6)+cyl(4.8,4.8,3.6,.75,.8,'acc',6,0)+box(2.2,5.5,0,1.4,.8,.6,'wood')+gab(2.2,5.5,.6,1.4,.8,.4,'metal','wood')+cyl(4.2,5.8,0,.3,.14,'gold',7)+cyl(4.2,5.8,.14,.3,.14,'gold',7)+cyl(4.8,5.5,0,.3,.14,'gold',7)+dot(2.9,5.9,1.3)},
+{n:'Brig',d:'cinder',a:'#5B4A4E',p:'Iron cage on a gallows arm with a ball and chain below',g:()=>box(.8,.8,0,4.4,3.6,2.4,'dark')+qy(4.4,3.4,0,1,1.6,'metal')+[1.2,1.5,1.8].map(x=>lw([[x,4.4,1],[x,4.4,1.9]],'metal',1)).join('')+qy(4.4,1.1,1,.9,.9,'glass')+[.8,2.1,3.4,4.5].map(x=>box(x,3.7,2.4,.7,.7,.5,'dark')).join('')+[.8,2.1,3.4].map(y=>box(4.5,y,2.4,.7,.7,.5,'dark')).join('')+cyl(1.4,1.4,2.4,.9,2.2,'dark',6)+cyl(1.4,1.4,4.6,1.05,.5,'metal',6)+lw([[5.6,5.3,0],[5.6,5.3,4.6]],'metal',2.2)+lw([[5.6,5.3,4.6],[5.6,4.2,4.6]],'metal',2.2)+lw([[5.6,4.2,4.6],[5.6,4.2,3.9]],'metal',1)+cyl(5.6,4.2,2.9,.4,1,'metal',6)+lw([[5.3,4.2,2.9],[5.3,4.2,3.9]],'metal',.8)+dot(5.6,4.2,3.4)+el(4.2,5.5,.3,.3,'metal')+lw([[4.2,5.5,.3],[4.9,5.3,.3]],'metal',1)}
+];
+const polys=g=>(g.match(/<polygon/g)||[]).length+(g.match(/<polyline/g)||[]).length/2;
+function frame(st,dev){const w=dev=='desk'?1440:390,h=dev=='desk'?900:844,d=document.createElement('div');
+ d.innerHTML=`<p class="cap">${dev=='desk'?'Desktop 1440×900':'Phone 390×844 (list scrolls)'}</p><div class="box" data-w="${w}" data-h="${h}"><div class="f ${st} ${dev}"><h3>Lot kit · ${st=='s1'?'Style 1, day flat ink':'Style 2, dusk lit'}</h3><p class="sub" style="color:var(--st,inherit)">Eight lots, one signature prop each (brass dot)</p><div class="grid">${K.map(k=>{const g=k.g();return `<div class="card" style="--acc:${k.a}"><svg viewBox="-90 -100 180 196"><g>${ground()}${g}</g></svg><h4>${k.n}</h4><div class="dist"><i></i>${k.d} (suggested)</div><div class="prop">${k.p}</div><div class="faces">${polys(g)} shapes</div></div>`}).join('')}</div></div></div>`;return d;}
+const out=document.getElementById('out');
+[['s1','Style 1 · Day, flat ink'],['s2','Style 2 · Dusk, lit windows']].forEach(([s,t])=>{const e=document.createElement('section');e.innerHTML=`<h2>${t}</h2><div class="pair"></div>`;const p=e.querySelector('.pair');p.append(frame(s,'phone'),frame(s,'desk'));out.append(e);});
+function fit(){const vw=innerWidth-32;document.querySelectorAll('.box').forEach(b=>{const w=+b.dataset.w,h=+b.dataset.h,s=Math.min(w==1440?.68:.8,vw/w);b.style.width=w*s+'px';b.style.height=h*s+'px';b.firstElementChild.style.transform=`scale(${s})`;});}
+fit();addEventListener('resize',fit);
+</script></body></html>

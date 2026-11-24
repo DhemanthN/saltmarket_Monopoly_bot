@@ -6,6 +6,14 @@ original Monopoly-style island-trading board game. A tested Python rules engine 
 Double DQN agents, written from scratch in PyTorch, then learn to play from their own
 experience. 14 of the 40 bots are held out: no agent ever trained against them.
 
+## Play it
+
+Play Saltmarket against the trained PPO and DQN agents at <https://saltmarket.vercel.app/>.
+
+![Starting a game: the start screen, a few turns, and a decision panel](docs/web/media/play-it.gif)
+
+The game runs entirely in your browser. The real Python rules engine runs in Pyodide inside a Web Worker, and the same PPO and DQN weights from training run through NumPy in the browser.
+
 **Headline results** at 2 players, with 95% intervals. Agents played 1,000 games against
 each bot. The bot row comes from the tournament, 2,000 games per pair:
 

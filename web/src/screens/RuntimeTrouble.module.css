@@ -5,10 +5,11 @@
   display: grid;
   place-items: center;
   padding: var(--space-4);
+  background: rgb(31 42 46 / 0.35);
 }
 
 .panel {
-  width: min(440px, 100%);
+  width: min(480px, 100%);
 }
 
 .title {
@@ -17,6 +18,7 @@
 
 .body {
   margin-block: var(--space-3);
+  text-wrap: pretty;
   color: var(--text-soft);
 }
 
@@ -30,5 +32,5 @@
 .actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-3);
+  gap: var(--space-2);
 }

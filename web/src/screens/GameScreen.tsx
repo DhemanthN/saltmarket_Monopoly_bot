@@ -53,17 +53,19 @@ function Game() {
     <main style={screenStyle}>
       {ready ? (
         <>
-          <WorldScene state={world} seatKinds={config.seats} />
-          <HudView
-            hud={hud}
-            names={names}
-            seats={config.seats}
-            decision={trouble ? null : decision}
-            gameOver={hud.winner !== null}
-            onSubmit={submit}
-            onPlayAgain={leave}
-            coach
-          />
+          <div inert={trouble !== null} style={{ display: "contents" }}>
+            <WorldScene state={world} seatKinds={config.seats} />
+            <HudView
+              hud={hud}
+              names={names}
+              seats={config.seats}
+              decision={trouble ? null : decision}
+              gameOver={hud.winner !== null}
+              onSubmit={submit}
+              onPlayAgain={leave}
+              coach
+            />
+          </div>
         </>
       ) : (
         <>

@@ -16,6 +16,8 @@ const STREET_UP = 2.4;
 const STREET_AHEAD = 1.8;
 /** Look-at height: high enough that the road fills the lower third, not the lower half. */
 const STREET_LOOK_Y = 0.7;
+/** Portrait screens look higher, so the road does not fill the lower half of a tall frame. */
+const PORTRAIT_LOOK_Y = 1.3;
 /** Portrait screens back off further so the lots beside the road stay in frame. */
 const PORTRAIT_BACK = 2.4;
 
@@ -54,7 +56,7 @@ export function CameraRig({ view, followSeat, followSpace, reducedMotion }: Prop
       goalPos.copy(p).addScaledVector(forward, -back).setY(p.y + STREET_UP + (portrait ? 0.8 : 0));
       // Pull slightly toward the lagoon so the lots on the outside stay in frame.
       goalPos.multiplyScalar(0.92);
-      goalTarget.copy(p).addScaledVector(forward, STREET_AHEAD).setY(STREET_LOOK_Y);
+      goalTarget.copy(p).addScaledVector(forward, STREET_AHEAD).setY(portrait ? PORTRAIT_LOOK_Y : STREET_LOOK_Y);
     }
     const k = reducedMotion || first.current ? 1 : 1 - Math.exp(-DAMP * dt);
     first.current = false;

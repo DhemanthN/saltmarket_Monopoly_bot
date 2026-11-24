@@ -33,13 +33,17 @@ function groundGeometry(seatCount: number): BufferGeometry {
   return merged;
 }
 
-/** Sea-chart marks drawn on the open sea: depth contours and a compass rose, as one merged mesh. */
+/** Depth contours on the open sea, merged with the sea itself. They read as thin lines in street view. */
 function seaGeometry(): BufferGeometry {
   const parts: BufferGeometry[] = [paint(flat(new CircleGeometry(160, 48), -0.15), "world.sea")];
   for (const r of [15, 19.5, 25, 32]) parts.push(paint(flat(new RingGeometry(r, r + 0.07, 96, 1), -0.11), "inkSoft"));
-  // Compass rose off the front-right shore: a ring and four long and four short points.
+  return mergeAll(parts, "Sea");
+}
+
+/** Compass rose off the front-right shore: a ring and four long and four short points. Chart view only. */
+function compassGeometry(): BufferGeometry {
   const [cx, cz] = [15.5, 11];
-  parts.push(paint(flat(new RingGeometry(1.25, 1.33, 40, 1), -0.1).translate(cx, 0, cz), "inkSoft"));
+  const parts: BufferGeometry[] = [paint(flat(new RingGeometry(1.25, 1.33, 40, 1), -0.1).translate(cx, 0, cz), "inkSoft")];
   for (let i = 0; i < 8; i += 1) {
     const long = i % 2 === 0;
     const len = long ? 2.1 : 1.1;
@@ -52,18 +56,27 @@ function seaGeometry(): BufferGeometry {
     const g = new ShapeGeometry(point).rotateZ((-i * Math.PI) / 4);
     parts.push(paint(flat(g, i === 0 ? -0.07 : -0.09 + (i % 2) * 0.01).translate(cx, 0, cz), i === 0 ? "danger" : long ? "ink" : "inkSoft"));
   }
+  return mergeAll(parts, "Compass");
+}
+
+function mergeAll(parts: BufferGeometry[], what: string): BufferGeometry {
   const merged = mergeGeometries(parts.map((g) => (g.index ? g.toNonIndexed() : g)));
-  if (!merged) throw new Error("Sea parts do not share attributes");
+  if (!merged) throw new Error(`${what} parts do not share attributes`);
   return merged;
 }
 
 /** The atoll ground and the open sea. The sea has its own colour so the horizon reads as a line. */
-export function Atoll({ texture, shadows, seatCount }: { texture: Texture; shadows: boolean; seatCount: number }) {
+export function Atoll({ texture, shadows, seatCount, chart }: { texture: Texture; shadows: boolean; seatCount: number; chart: boolean }) {
   const ground = useMemo(() => groundGeometry(seatCount), [seatCount]);
   const sea = useMemo(() => seaGeometry(), []);
+  const compass = useMemo(() => compassGeometry(), []);
   return (
     <group>
       <mesh geometry={sea}>
+        <meshLambertMaterial map={texture} />
+      </mesh>
+      {/* Flat on the sea it reads as a glitch from street level, so it shows only from above. */}
+      <mesh geometry={compass} visible={chart}>
         <meshLambertMaterial map={texture} />
       </mesh>
       <mesh geometry={ground} receiveShadow={shadows}>

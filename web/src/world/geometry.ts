@@ -145,9 +145,12 @@ export function awningGeometry(): BufferGeometry {
   return merge([part(box(0.6, 0.03, 0.26), "world.white", { at: [0, 0, 0], rot: [0.35, 0, 0] })]);
 }
 
-/** Closed shutters, shown only on mortgaged lots. */
+/** Closed shutters, shown only on mortgaged lots: paper-deep slats on an ink frame. */
 export function shutterGeometry(): BufferGeometry {
-  return merge([part(box(0.56, 0.24, 0.04), "inkSoft")]);
+  return merge([
+    part(box(0.56, 0.24, 0.03), "ink"),
+    ...[0.02, 0.1, 0.18].map((y) => part(box(0.5, 0.06, 0.02), "paperDeep", { at: [0, y, 0.02] })),
+  ]);
 }
 
 /** Port: a crane and a quay slab, added at `PORT_LEVEL`. */

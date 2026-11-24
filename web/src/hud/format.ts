@@ -25,3 +25,17 @@ export function seatNames(seats: readonly string[]): string[] {
     return `${seatOrder[i].label} (${label})`;
   });
 }
+
+/** "Wave (PPO)" becomes "Wave"; "You" stays. Used in the feed so one seat has one name. */
+export function shortName(name: string): string {
+  return name.replace(/ \(.*\)$/, "");
+}
+
+const DAY_PARTS = ["dawn", "noon", "dusk", "night"] as const;
+
+/** Caption for the ledger: the day count and part of day for a turn, with the turn number. */
+export function dayCaption(turn: number, turnsPerDay: number): string {
+  const day = Math.floor(turn / turnsPerDay) + 1;
+  const part = DAY_PARTS[Math.floor(((turn % turnsPerDay) / turnsPerDay) * 4)];
+  return `Day ${day}, ${part} · turn ${turn}`;
+}

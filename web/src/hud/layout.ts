@@ -61,3 +61,9 @@ export const DECISION_TITLE: Record<DecisionKind, string> = {
   accept: "Trade offer",
   raise_cash: "Raise cash",
 };
+
+/** Auction chips that beat the highest bid so far. With none left, every chip stays so the panel never empties. */
+export function liveBids(bids: LegalAction[], high: number): LegalAction[] {
+  const live = bids.filter((b) => (b.amount ?? 0) > high);
+  return live.length > 0 ? live : bids;
+}

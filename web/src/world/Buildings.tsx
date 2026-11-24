@@ -1,3 +1,5 @@
+import { useDispose } from "./dispose";
+import { LitMaterial } from "./LitMaterial";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useLayoutEffect, useMemo, useRef } from "react";
 import { BackSide, Color, InstancedMesh, Object3D, type BufferGeometry, type Texture } from "three";
@@ -27,6 +29,18 @@ const LOTS = Object.fromEntries(
   districtNames.map((d) => [d, spaces.filter((s) => s.district === d).map((s) => s.index)]),
 ) as Record<DistrictName, number[]>;
 const markerLots = spaces.filter((s) => s.district === null).map((s) => s.index);
+/** Pennant colour per kind of non-property space, so each reads as itself and no post is a blank white flag. */
+const KIND_TINT: Record<string, string> = {
+  start: palette.brass,
+  rest: palette.ok,
+  card: palette.tide,
+  tax: palette.danger,
+  ferry: palette.inkSoft,
+  utility: districts.amber,
+  brig: palette.ink,
+  go_to_brig: palette.ink,
+};
+const MARKER_TINTS = markerLots.map((i) => KIND_TINT[spaces[i].kind] ?? palette.brass);
 const propertyLots = spaces.filter((s) => s.district !== null).map((s) => s.index);
 /** Shutter height in lot space. Kelp shacks stand on stilts, so their facade starts above the deck. */
 const SHUTTER_Y: Partial<Record<DistrictName, number>> = { kelp: 0.4 };
@@ -57,7 +71,7 @@ function placeLot(index: number, offset: [number, number, number] = [0, 0, 0], s
 }
 
 /** A static instanced mesh with an ink hull: two draw calls for every lot of one type. */
-function Static({ geometry, lots, texture, shadows, outline }: { geometry: BufferGeometry; lots: number[]; texture: Texture; shadows: boolean; outline: boolean }) {
+function Static({ geometry, lots, texture, shadows, outline, tints }: { geometry: BufferGeometry; lots: number[]; texture: Texture; shadows: boolean; outline: boolean; tints?: readonly string[] }) {
   const body = useRef<InstancedMesh>(null);
   const hull = useRef<InstancedMesh>(null);
   useLayoutEffect(() => {
@@ -67,11 +81,16 @@ function Static({ geometry, lots, texture, shadows, outline }: { geometry: Buffe
     });
     if (body.current) body.current.instanceMatrix.needsUpdate = true;
     if (hull.current) hull.current.instanceMatrix.needsUpdate = true;
-  }, [lots, outline]);
+    if (tints && body.current) {
+      const color = new Color();
+      tints.forEach((hex, i) => body.current?.setColorAt(i, color.set(hex)));
+      if (body.current.instanceColor) body.current.instanceColor.needsUpdate = true;
+    }
+  }, [lots, outline, tints]);
   return (
     <>
       <instancedMesh ref={body} args={[geometry, undefined, lots.length]} castShadow={shadows} receiveShadow={shadows}>
-        <meshLambertMaterial map={texture} />
+        <LitMaterial texture={texture} />
       </instancedMesh>
       {outline ? (
         <instancedMesh ref={hull} args={[geometry, undefined, lots.length]}>
@@ -134,7 +153,7 @@ function Storeys({ district, geometry, state, texture, reducedMotion, shadows }:
   return (
     <>
       <instancedMesh ref={body} args={[geometry, undefined, count]} castShadow={shadows} receiveShadow={shadows}>
-        <meshLambertMaterial map={texture} />
+        <LitMaterial texture={texture} />
       </instancedMesh>
       <instancedMesh ref={hull} args={[geometry, undefined, count]}>
         <meshBasicMaterial color={palette.ink} side={BackSide} polygonOffset polygonOffsetFactor={1} polygonOffsetUnits={1} />
@@ -146,6 +165,7 @@ function Storeys({ district, geometry, state, texture, reducedMotion, shadows }:
 /** Awnings in owner colour, closed shutters on mortgaged lots, and port cranes. Hidden lots scale to zero. */
 function LotMarks({ state, texture }: { state: WorldState; texture: Texture }) {
   const geo = useMemo(() => ({ awning: awningGeometry(), shutter: shutterGeometry(), port: portGeometry() }), []);
+  useDispose(geo.awning, geo.shutter, geo.port);
   const awning = useRef<InstancedMesh>(null);
   const shutter = useRef<InstancedMesh>(null);
   const port = useRef<InstancedMesh>(null);
@@ -174,13 +194,13 @@ function LotMarks({ state, texture }: { state: WorldState; texture: Texture }) {
   return (
     <>
       <instancedMesh ref={awning} args={[geo.awning, undefined, n]}>
-        <meshLambertMaterial map={texture} />
+        <LitMaterial texture={texture} />
       </instancedMesh>
       <instancedMesh ref={shutter} args={[geo.shutter, undefined, n]}>
-        <meshLambertMaterial map={texture} />
+        <LitMaterial texture={texture} />
       </instancedMesh>
       <instancedMesh ref={port} args={[geo.port, undefined, n]}>
-        <meshLambertMaterial map={texture} />
+        <LitMaterial texture={texture} />
       </instancedMesh>
     </>
   );
@@ -190,6 +210,7 @@ function LotMarks({ state, texture }: { state: WorldState; texture: Texture }) {
 export function Buildings({ state, texture, reducedMotion, shadows, fullOutlines }: Props) {
   const geometry = useMemo(() => Object.fromEntries(districtNames.map((d) => [d, buildDistrictGeometry(d)])) as Record<DistrictName, ReturnType<typeof buildDistrictGeometry>>, []);
   const marker = useMemo(() => markerGeometry(), []);
+  useDispose(marker, ...districtNames.flatMap((d) => [geometry[d].base, geometry[d].storey]));
   return (
     <group>
       {districtNames.map((d) => (
@@ -198,7 +219,7 @@ export function Buildings({ state, texture, reducedMotion, shadows, fullOutlines
           <Storeys district={d} geometry={geometry[d].storey} state={state} texture={texture} reducedMotion={reducedMotion} shadows={shadows} />
         </group>
       ))}
-      <Static geometry={marker} lots={markerLots} texture={texture} shadows={shadows} outline={fullOutlines} />
+      <Static geometry={marker} lots={markerLots} texture={texture} shadows={shadows} outline={fullOutlines} tints={MARKER_TINTS} />
       <LotMarks state={state} texture={texture} />
     </group>
   );

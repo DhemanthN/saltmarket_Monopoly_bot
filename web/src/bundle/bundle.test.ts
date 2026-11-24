@@ -26,11 +26,17 @@ describe("runtime bundle", () => {
       "src/saltmarket/web/live.py",
       "data/board.json",
       "data/cards.json",
-      "models/main.npz",
-      "models/two_player.npz",
-      "models/dqn_two_player.npz",
     ]) {
       expect(names).toContain(needed);
+    }
+  });
+
+  it("keeps weights out of the zip and ships each as its own hashed file", () => {
+    expect(names.filter((n: string) => n.endsWith(".npz"))).toEqual([]);
+    expect(Object.keys(manifest.models).sort()).toEqual(["dqn_two_player", "main", "two_player"]);
+    for (const { file } of Object.values(manifest.models) as { file: string }[]) {
+      expect(file).toMatch(/^model\.[a-z_]+\.[0-9a-f]{12}\.npz$/);
+      expect(existsSync(resolve(runtime, file))).toBe(true);
     }
   });
 
@@ -58,6 +64,7 @@ describe("vercel.json", () => {
 
   it("caches the hashed bundle and Pyodide forever but not the manifest", () => {
     expect(rule("/runtime/app.(.*).zip")["Cache-Control"]).toContain("immutable");
+    expect(rule("/runtime/model.(.*).npz")["Cache-Control"]).toContain("immutable");
     expect(rule("/pyodide/(.*)")["Cache-Control"]).toContain("immutable");
     expect(rule("/runtime/manifest.json")["Cache-Control"]).toContain("must-revalidate");
   });

@@ -40,3 +40,9 @@
     max-width: none;
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+  }
+}

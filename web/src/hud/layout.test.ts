@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { panelModel } from "./layout";
+import { liveBids, panelModel } from "./layout";
 import { SAMPLE_DECISIONS } from "./samples";
 
 describe("panelModel", () => {
@@ -36,5 +36,17 @@ describe("panelModel", () => {
     const brig = SAMPLE_DECISIONS.find((d) => d.kind === "brig")!;
     const noRoll = { ...brig, legal: brig.legal.filter((a) => a.label !== "Roll for doubles") };
     expect(panelModel(noRoll).primary?.label).toBe("Pay the fine");
+  });
+});
+
+describe("liveBids", () => {
+  const bid = (id: number, amount: number) => ({ id, label: "Bid", amount, group: null, space: null, offer: null });
+
+  it("drops chips at or under the high bid", () => {
+    expect(liveBids([bid(1, 22), bid(2, 135), bid(3, 180)], 135).map((b) => b.id)).toEqual([3]);
+  });
+
+  it("keeps every chip when none beats the high bid", () => {
+    expect(liveBids([bid(1, 22)], 135)).toHaveLength(1);
   });
 });

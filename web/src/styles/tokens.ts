@@ -104,6 +104,8 @@ export const worldColors = {
   road: "#B9A98A",
   basalt: "#3A3436",
   white: "#FFFFFF",
+  /** Lit window and lantern glass. Dark in the day texture; the night emissive texture lights this cell. */
+  glow: "#F7C873",
 } as const;
 
 /** WCAG 2.x relative luminance of a `#RRGGBB` colour. */
@@ -173,5 +175,20 @@ export function buildPaletteTexture(mood: Mood): Uint8Array {
     const [r, g, b] = parseHex(mood === "night" ? mix(hex, sunKeyframes.night, lift) : hex);
     data.set([r, g, b, 255], i * 4);
   });
+  return data;
+}
+
+/** Palette cells that give off light at night (windows and lamps). Every other cell stays dark. */
+export const glowCells: readonly string[] = ["world.glow"];
+
+/** Build the emissive twin of the palette texture: glow cells in colour, all others black. */
+export function buildEmissiveTexture(): Uint8Array {
+  const size = PALETTE_TEXTURE_SIZE;
+  const data = new Uint8Array(size * size * 4);
+  for (let i = 0; i < size * size; i += 1) data[i * 4 + 3] = 255;
+  for (const name of glowCells) {
+    const index = cellIndex[name];
+    data.set([...parseHex(paletteCells[index]), 255], index * 4);
+  }
   return data;
 }

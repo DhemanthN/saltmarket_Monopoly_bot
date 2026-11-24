@@ -59,6 +59,13 @@ function place(mark: Mark): Placement | null {
   const r = el.getBoundingClientRect();
   const width = Math.min(CARD_WIDTH, window.innerWidth - 2 * EDGE);
   const ring = { top: r.top - 4, left: r.left - 4, width: r.width + 8, height: r.height + 8 };
+  if (window.innerWidth <= NARROW) {
+    // On a phone the top holds Menu, Chart view and the lantern chips, so the card sits low,
+    // just above the decision sheet, and only the ring points at the target.
+    const sheet = document.querySelector<HTMLElement>('[data-coach="decision"]');
+    const bottom = sheet ? window.innerHeight - sheet.getBoundingClientRect().top + GAP : EDGE;
+    return { ring, card: { bottom, left: EDGE, width } };
+  }
   const clear = mark.clear ? document.querySelector<HTMLElement>(`[data-coach="${mark.clear}"]`) : null;
   if (clear) {
     const c = clear.getBoundingClientRect();

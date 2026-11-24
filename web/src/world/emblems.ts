@@ -1,4 +1,4 @@
-import { ExtrudeGeometry, Shape, type BufferGeometry } from "three";
+import { ExtrudeGeometry, Path, Shape, type BufferGeometry } from "three";
 import type { EmblemName } from "../styles/tokens";
 import { paint } from "./palette";
 
@@ -50,7 +50,12 @@ function anchor(): Shape {
 }
 
 const shapes: Record<EmblemName, () => Shape> = {
-  sun: () => radial(10, 0.5, 0.32),
+  sun: () => {
+    const s = radial(8, 0.5, 0.3);
+    // A ring of rays around an open centre, so it reads as a sun and not a blot of ink.
+    s.holes.push(new Path().absarc(0, 0, 0.14, 0, Math.PI * 2, true));
+    return s;
+  },
   wave,
   star: () => radial(5, 0.5, 0.2, Math.PI / 2),
   anchor,

@@ -1,4 +1,3 @@
-import { PerformanceMonitor } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { type DirectionalLight } from "three";
@@ -11,9 +10,10 @@ import { Atoll } from "./Atoll";
 import { followSeatFor } from "./follow";
 import { Pieces } from "./Pieces";
 import { paletteTexture } from "./palette";
-import { DEV_PERF, prefersReducedMotion, stepTier, tierSettings, type Tier } from "./quality";
+import { DEV_PERF, isMobile, prefersReducedMotion, startingTier, tierSettings, TierGovernor, type Tier } from "./quality";
 import type { WorldState } from "./reduceEvents";
 import { sunForTurn } from "./sun";
+import "./quietUpstream";
 import styles from "./WorldScene.module.css";
 
 // Loaded only when the high tier shows chart view, so other tiers never download it.
@@ -30,13 +30,15 @@ interface Props {
   controls?: ReactNode;
   /** Pixels at the bottom of the screen covered by the HUD (the mobile decision sheet). */
   bottomInset?: number;
+  /** Stop rendering while a full-screen panel covers the world. A hidden tab always pauses. */
+  paused?: boolean;
 }
 
 /**
  * Sun and moon. The shadow map renders only when the board changes or the sun keyframe changes,
  * at most once per turn, never per frame.
  */
-function Lights({ turn, boardVersion, shadowMapSize }: { turn: number; boardVersion: number; shadowMapSize: number | null }) {
+function Lights({ turn, boardVersion, shadowMapSize, fog }: { turn: number; boardVersion: number; shadowMapSize: number | null; fog: number }) {
   const sun = useMemo(() => sunForTurn(turn), [turn]);
   const light = useRef<DirectionalLight>(null);
   const { gl, scene, invalidate } = useThree();
@@ -62,7 +64,7 @@ function Lights({ turn, boardVersion, shadowMapSize }: { turn: number; boardVers
 
   return (
     <>
-      <fogExp2 attach="fog" args={[sun.sky.getHex(), 0.014]} />
+      <fogExp2 attach="fog" args={[sun.sky.getHex(), fog]} />
       <hemisphereLight args={["#FFF0D8", "#8C7F6A", sun.hemiIntensity]} />
       <directionalLight
         ref={light}
@@ -81,7 +83,7 @@ function Lights({ turn, boardVersion, shadowMapSize }: { turn: number; boardVers
   );
 }
 
-/** Dev-only numbers for the perf-auditor at `window.__saltmarketPerf`. */
+/** Numbers for the perf-auditor at `window.__saltmarketPerf`, in dev builds and with `?perf=1`. */
 function PerfProbe({ tier, dpr }: { tier: Tier; dpr: number }) {
   const gl = useThree((s) => s.gl);
   const frames = useRef({ n: 0, t: 0, fps: 0 });
@@ -110,6 +112,8 @@ function PerfProbe({ tier, dpr }: { tier: Tier; dpr: number }) {
       fps: f.fps,
       drawCalls: gl.info.render.calls,
       triangles: gl.info.render.triangles,
+      textures: gl.info.memory.textures,
+      geometries: gl.info.memory.geometries,
       shadowUpdates: window.__saltmarketPerf?.shadowUpdates ?? 0,
     };
     // Runs before this frame renders, so the numbers above are the previous frame's totals.
@@ -118,18 +122,89 @@ function PerfProbe({ tier, dpr }: { tier: Tier; dpr: number }) {
   return null;
 }
 
+/**
+ * Measures real frame rate in one-second windows and reports each to the governor. It counts
+ * only frames that actually rendered, so a demand-mode scene never looks slow, and it drops any
+ * window with a long stall (tab switch, shader compile) instead of blaming the tier for it.
+ */
+function FrameMeter({ onWindow }: { onWindow: (fps: number) => void }) {
+  const window_ = useRef({ n: 0, t: 0, stalled: false });
+  useFrame((_, dt) => {
+    const w = window_.current;
+    w.n += 1;
+    w.t += dt;
+    if (dt > 0.4) w.stalled = true;
+    if (w.t >= 1) {
+      if (!w.stalled) onWindow(w.n / w.t);
+      w.n = 0;
+      w.t = 0;
+      w.stalled = false;
+    }
+  });
+  return null;
+}
+
+/** Fog thickness: street view fades the far shore; chart view sits further back and needs less. */
+const STREET_FOG = 0.014;
+const CHART_FOG = 0.004;
+
+/** How often a low auto tier tests the machine again, and for how long each test runs. */
+const PROBE_EVERY_MS = 20_000;
+const PROBE_FOR_MS = 7_000;
+
 /** The 3D atoll. It renders a `WorldState` and never reads events. */
-export function WorldScene({ state, seatKinds, tierOverride = null, controls, bottomInset = 0, reducedMotion: motionChoice }: Props) {
+export function WorldScene({ state, seatKinds, tierOverride = null, controls, bottomInset = 0, paused = false, reducedMotion: motionChoice }: Props) {
   const systemReduced = useMemo(() => prefersReducedMotion(), []);
   const reducedMotion = motionChoice ?? systemReduced;
-  const [autoTier, setAutoTier] = useState<Tier>(reducedMotion ? "low" : "medium");
+  const mobile = useMemo(() => isMobile(), []);
+  const [autoTier, setAutoTier] = useState<Tier>(() => startingTier(mobile));
+  const [governor] = useState(() => new TierGovernor(startingTier(mobile)));
   const tier = tierOverride ?? autoTier;
-  const settings = tierSettings(tier, typeof window === "undefined" ? 1 : window.devicePixelRatio);
+  const [hidden, setHidden] = useState(() => typeof document !== "undefined" && document.hidden);
+  const [probing, setProbing] = useState(false);
+  const settings = tierSettings(tier, typeof window === "undefined" ? 1 : window.devicePixelRatio, mobile);
+  // Low renders on demand, which starves the frame meter. While auto sits on Low, switch to
+  // continuous frames for a short probe now and then, so the scene can climb back when it can.
+  const frameloop = paused || hidden ? "never" : probing ? "always" : settings.frameloop;
   const [view, setView] = useState<CameraView>("street");
   const sun = sunForTurn(state.turn);
   const texture = paletteTexture(sun.mood);
   const followSeat = followSeatFor(state, seatKinds);
   const shadows = settings.shadowMapSize !== null;
+
+  useEffect(() => {
+    const onVisibility = () => setHidden(document.hidden);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+  }, []);
+
+  useEffect(() => {
+    if (tierOverride !== null || autoTier !== "low") return;
+    let stop: number | undefined;
+    const start = window.setInterval(() => {
+      setProbing(true);
+      stop = window.setTimeout(() => setProbing(false), PROBE_FOR_MS);
+    }, PROBE_EVERY_MS);
+    return () => {
+      window.clearInterval(start);
+      window.clearTimeout(stop);
+      setProbing(false);
+    };
+  }, [tierOverride, autoTier]);
+
+  // The sky decides the page mood, so panels and chrome darken with the night.
+  useEffect(() => {
+    document.documentElement.dataset.mood = sun.mood;
+    return () => {
+      delete document.documentElement.dataset.mood;
+    };
+  }, [sun.mood]);
+
+  const onWindow = (fps: number) => {
+    if (tierOverride !== null) return;
+    const next = governor.sample(fps, performance.now());
+    if (next) setAutoTier(next);
+  };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -144,22 +219,17 @@ export function WorldScene({ state, seatKinds, tierOverride = null, controls, bo
   return (
     <div className={styles.world}>
       <Canvas
-        frameloop={settings.frameloop}
+        frameloop={frameloop}
         dpr={settings.dpr}
-        shadows={shadows}
+        shadows={shadows ? "percentage" : false}
         camera={{ fov: 42, near: 0.3, far: 180, position: [0, 30, 21] }}
       >
-        <PerformanceMonitor
-          onIncline={() => !reducedMotion && setAutoTier((t) => stepTier(t, 1))}
-          onDecline={() => setAutoTier((t) => stepTier(t, -1))}
-          flipflops={3}
-          onFallback={() => setAutoTier("low")}
-        />
-        <Lights turn={state.turn} boardVersion={state.boardVersion} shadowMapSize={settings.shadowMapSize} />
+        <FrameMeter onWindow={onWindow} />
+        <Lights turn={state.turn} boardVersion={state.boardVersion} shadowMapSize={settings.shadowMapSize} fog={view === "chart" ? CHART_FOG : STREET_FOG} />
         <CameraRig view={view} followSeat={followSeat} followSpace={state.position[followSeat] ?? 0} reducedMotion={reducedMotion} bottomInset={bottomInset} />
-        <Sky sky={sun.sky} mood={sun.mood} texture={texture} />
+        <Sky sky={sun.sky} haze={sun.haze} texture={texture} />
         <Atoll texture={texture} shadows={shadows} seatCount={seatKinds.length} chart={view === "chart"} />
-        <Signboards state={state} fromSpace={state.position[followSeat] ?? 0} street={view === "street"} />
+        <Signboards state={state} fromSpace={state.position[followSeat] ?? 0} street={view === "street"} seatKinds={seatKinds} />
         <Buildings state={state} texture={texture} reducedMotion={reducedMotion} shadows={shadows} fullOutlines={settings.fullOutlines} />
         <Pieces state={state} seatKinds={seatKinds} texture={texture} reducedMotion={reducedMotion} outlines={settings.fullOutlines} />
         <CoinCarts rent={state.lastRent} texture={texture} reducedMotion={reducedMotion} />

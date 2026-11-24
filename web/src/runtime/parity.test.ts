@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import { loadPyodide, type PyodideAPI } from "pyodide";
 import { beforeAll, describe, expect, it } from "vitest";
 import type { GameEvent } from "../contract/types";
-import { bootEngine, runGame, type GameSummary } from "./engineCore";
+import { bootEngine, installModel, runGame, type GameSummary } from "./engineCore";
 import { PYODIDE_VERSION } from "./protocol";
 
 const root = resolve(__dirname, "../..");
@@ -48,8 +48,11 @@ suite(
         stderr: () => {},
       });
       await py.loadPackage("numpy");
-      const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as { bundle: string };
+      const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as { bundle: string; models: Record<string, { file: string }> };
       bootEngine(py, new Uint8Array(readFileSync(resolve(root, "public/runtime", manifest.bundle))));
+      for (const [name, { file }] of Object.entries(manifest.models)) {
+        installModel(py, name, new Uint8Array(readFileSync(resolve(root, "public/runtime", file))));
+      }
     }, 60_000);
 
     for (const name of ["vs_ppo_2p", "vs_dqn_2p", "table_4p"]) {

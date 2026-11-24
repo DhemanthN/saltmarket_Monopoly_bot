@@ -7,7 +7,7 @@ import { Emblem } from "../../ui/Emblem";
 import { Panel } from "../../ui/Panel";
 import { money, spaceName } from "../format";
 import { completedGroups, districtColor, districtLabel } from "../groups";
-import { DECISION_TITLE, enterSubmits, panelModel, type PanelModel } from "../layout";
+import { DECISION_TITLE, enterSubmits, liveBids, panelModel, type PanelModel } from "../layout";
 import type { HudState } from "../state";
 import { useDecisionKeys } from "../useDecisionKeys";
 import styles from "./DecisionPanel.module.css";
@@ -21,6 +21,14 @@ interface RawSpace {
 }
 
 const RAW = boardData.spaces as RawSpace[];
+/** Decisions that end in a list of rows: the main buttons come first, so the primary is not buried. */
+const LIST_KINDS: ReadonlySet<string> = new Set(["brig", "build", "liquidate", "unmortgage", "raise_cash"]);
+
+/** The engine's wording for the "do nothing" action, shown the way DESIGN.md words it. */
+function passLabel(label: string): string {
+  return label === "Decline and send it to auction" ? "Pass to auction" : label;
+}
+
 const LADDER_LABELS = ["No depots", "1 depot", "2 depots", "3 depots", "4 depots", "Port"];
 
 export interface DecisionPanelProps {
@@ -33,7 +41,9 @@ export interface DecisionPanelProps {
 
 /** One panel per decision. Only legal actions are shown, with one primary action. */
 export function DecisionPanel({ decision, hud, names, onSubmit }: DecisionPanelProps) {
-  const model = panelModel(decision, hud.cash[decision.seat]);
+  const base = panelModel(decision, hud.cash[decision.seat]);
+  const bids = liveBids(base.bids, hud.auction?.high?.amount ?? 0);
+  const model = decision.kind === "auction" ? { ...base, bids, choices: bids } : base;
   const rootRef = useRef<HTMLDivElement>(null);
   const [bidIndex, setBidIndex] = useState(0);
   const [groupIndex, setGroupIndex] = useState(0);
@@ -71,7 +81,7 @@ export function DecisionPanel({ decision, hud, names, onSubmit }: DecisionPanelP
 
   return (
     <div ref={rootRef} tabIndex={-1} className={styles.wrap} data-coach="decision">
-    <Panel floating as="section" className={styles.panel} aria-labelledby="decision-title">
+    <Panel floating as="section" className={styles.panel} aria-labelledby="decision-title" data-actions-first={LIST_KINDS.has(decision.kind) || undefined}>
       <h2 id="decision-title" className={styles.title}>
         {DECISION_TITLE[decision.kind]}
       </h2>
@@ -86,7 +96,7 @@ export function DecisionPanel({ decision, hud, names, onSubmit }: DecisionPanelP
         ) : null}
         {model.pass ? (
           <Button variant="secondary" onClick={() => onSubmit(model.pass!.id)}>
-            {model.pass.label}
+            {passLabel(model.pass.label)}
             <kbd className={styles.key}>Esc</kbd>
           </Button>
         ) : null}
@@ -179,7 +189,7 @@ function Auction({ decision, model, hud, names, bidIndex, setBidIndex }: BodyPro
       {decision.space !== null ? <Deed space={decision.space} cash={hud.cash[decision.seat]} price={null} ladder={false} /> : null}
       {decision.price !== null ? (
         <p className={styles.note}>
-          List price <span className="figures">{money(decision.price)}</span>. Bids are shares of it.
+          Listed at <span className="figures">{money(decision.price)}</span>. Pick an amount to bid.
         </p>
       ) : null}
       <ol className={styles.ladderBids} aria-live="polite" aria-label="Bids so far">
@@ -223,7 +233,7 @@ function ChoiceList({ model, hud, decision, onSubmit }: BodyProps) {
           You owe <span className="figures">{money(debt)}</span> and hold <span className="figures">{money(hud.cash[decision.seat])}</span>.
         </p>
       ) : null}
-      {model.choices.length > 1 ? <p className={styles.listCaption}>More choices</p> : null}
+      {model.choices.length > 1 ? <p className={styles.listCaption}>Other options</p> : null}
       <ul className={styles.list}>
         {model.choices.slice(1).map((action, i) => (
           <li key={action.id}>

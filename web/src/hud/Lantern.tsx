@@ -50,7 +50,7 @@ export function LanternDock({ lanterns }: LanternDockProps) {
                   <>
                     <h3 className={styles.heading}>{agent}&rsquo;s top choices</h3>
                     <p className={styles.sub}>
-                      {explanation.agent === "ppo" ? "Probability of each action" : "Q-value of each action"}, last decision
+                      {explanation.agent === "ppo" ? "How likely it found each move" : "How good it rated each move"}, last decision
                     </p>
                     <ol className={styles.bars}>
                       {lanternBars(explanation).map((bar, i) => (

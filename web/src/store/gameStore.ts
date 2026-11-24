@@ -10,7 +10,9 @@ import { applyEvent as applyHud, initialHudState, type HudState } from "../hud/s
 import { startEngine, type EngineClient, type LoadProgress } from "../runtime/engineClient";
 import { WorkerSession } from "../runtime/workerSession";
 import { applyEvent as applyWorld, initialState as initialWorld, type WorldState } from "../world/reduceEvents";
+import { isPass } from "../hud/layout";
 import { holdsBeat } from "./pace";
+import { nextOfferMemory, type OfferMemory } from "./tradeOffers";
 
 export interface GameStore {
   /** Engine load progress, shown as the atoll being built. */
@@ -27,11 +29,17 @@ export interface GameStore {
   hud: HudState;
   /** The person's decision, released once every earlier event is on screen. */
   decision: Decision | null;
+  /** True once the person chose to skip the pauses and watch the game run to its end. */
+  fast: boolean;
   /** Starts loading the engine. Safe to call more than once. */
   boot: () => void;
   startGame: (config: SessionConfig) => Promise<void>;
   submit: (actionId: number) => void;
   leave: () => void;
+  /** Starts a new game with the same seed and seats as the one on screen. */
+  replay: () => Promise<void>;
+  /** Drops the pauses before each bot move, so a game the person is out of runs to its result. */
+  fastForward: () => void;
   /** After trouble: a fresh worker, and the game (if any) carries on where it stopped. */
   retry: () => Promise<void>;
 }
@@ -40,6 +48,7 @@ let client: EngineClient | null = null;
 let session: WorkerSession | null = null;
 let beat: ReturnType<typeof setTimeout> | null = null;
 let unsubscribe: Array<() => void> = [];
+let offerMemory: OfferMemory | null = null;
 
 function readable(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
@@ -55,7 +64,7 @@ export const useGameStore = create<GameStore>()((set, get) => {
     const names = get().names;
     while (shown < log.length) {
       const event = log[shown];
-      if (holdsBeat(event, config.seats) && !waited.has(event.seq)) {
+      if (!get().fast && holdsBeat(event, config.seats) && !waited.has(event.seq)) {
         waited.add(event.seq);
         set({ shown, world, hud });
         beat = setTimeout(() => {
@@ -68,7 +77,19 @@ export const useGameStore = create<GameStore>()((set, get) => {
       hud = applyHud(hud, event, names);
       shown += 1;
     }
-    set({ shown, world, hud, decision: session?.current() ?? null });
+    const decision = session?.current() ?? null;
+    if (decision?.kind === "propose" && session) {
+      // The engine offers a trade every turn the person owns part of a group. Pass quietly unless it is news.
+      const verdict = nextOfferMemory(offerMemory, decision);
+      offerMemory = verdict.memory;
+      const pass = decision.legal.find(isPass);
+      if (!verdict.ask && pass) {
+        set({ shown, world, hud, decision: null });
+        void session.submit(pass.id).then(pump, (error) => set({ trouble: readable(error) }));
+        return;
+      }
+    }
+    set({ shown, world, hud, decision });
   };
   const waited = new Set<number>();
 
@@ -87,6 +108,7 @@ export const useGameStore = create<GameStore>()((set, get) => {
     if (beat) clearTimeout(beat);
     beat = null;
     waited.clear();
+    offerMemory = null;
     for (const off of unsubscribe) off();
     unsubscribe = [];
     session?.dispose();
@@ -103,6 +125,7 @@ export const useGameStore = create<GameStore>()((set, get) => {
     world: initialWorld(2),
     hud: initialHudState(2),
     decision: null,
+    fast: false,
 
     boot: () => {
       if (client) return;
@@ -125,6 +148,7 @@ export const useGameStore = create<GameStore>()((set, get) => {
         world: initialWorld(config.seats.length),
         hud: initialHudState(config.seats.length),
         decision: null,
+        fast: false,
       });
       if (!client) return;
       const own = new WorkerSession(client);
@@ -154,7 +178,19 @@ export const useGameStore = create<GameStore>()((set, get) => {
 
     leave: () => {
       clearGame();
-      set({ config: null, names: [], log: [], shown: 0, decision: null });
+      set({ config: null, names: [], log: [], shown: 0, decision: null, fast: false });
+    },
+
+    replay: async () => {
+      const config = get().config;
+      if (config) await get().startGame(config);
+    },
+
+    fastForward: () => {
+      if (beat) clearTimeout(beat);
+      beat = null;
+      set({ fast: true });
+      pump();
     },
 
     retry: async () => {

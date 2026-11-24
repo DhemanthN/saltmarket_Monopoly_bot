@@ -1,12 +1,14 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { seatOrder } from "../styles/tokens";
 import { Button } from "../ui/Button";
 import { Emblem } from "../ui/Emblem";
 import { LedgerRow } from "../ui/LedgerRow";
 import { Panel } from "../ui/Panel";
+import { useFocusTrap } from "../ui/useFocusTrap";
+import { useModalKeys } from "../ui/useModalKeys";
 import type { AgentName } from "../contract/types";
 import { factFor, factSentence, RESULTS_URL } from "./facts";
-import { money } from "./format";
+import { money, shortName } from "./format";
 import type { ResultsFact } from "./resultsFacts";
 import { netWorth, type HudState } from "./state";
 import styles from "./GameOver.module.css";
@@ -16,15 +18,35 @@ export interface GameOverProps {
   names: readonly string[];
   /** Agents seated at this table. */
   agents: AgentName[];
-  onPlayAgain: () => void;
+  /** Starts a new game with the same seed and seats. */
+  onReplay: () => void;
+  /** Back to the start screen. */
+  onMenu: () => void;
 }
 
-export function GameOver({ hud, names, agents, onPlayAgain }: GameOverProps) {
+/** The result over the world. Escape folds it into a small bar, so the winner's atoll can be seen. */
+export function GameOver({ hud, names, agents, onReplay, onMenu }: GameOverProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const [folded, setFolded] = useState(false);
+  useModalKeys(!folded, () => setFolded(true));
+  useFocusTrap(ref, !folded);
   useEffect(() => {
-    ref.current?.focus();
-  }, []);
+    if (!folded) ref.current?.focus();
+  }, [folded]);
   const winner = hud.winner ?? 0;
+  if (folded) {
+    return (
+      <div className={styles.bar} role="region" aria-label="Game result">
+        <span>
+          {names[winner]} won after {hud.turns ?? hud.turn} turns
+        </span>
+        <Button onClick={() => setFolded(false)}>Show result</Button>
+        <Button variant="primary" onClick={onReplay}>
+          Replay
+        </Button>
+      </div>
+    );
+  }
   const facts = [...new Set(agents)].map((a) => factFor(a, names.length)).filter((f): f is ResultsFact => f !== null);
   return (
     <div className={styles.scrim}>
@@ -40,29 +62,32 @@ export function GameOver({ hud, names, agents, onPlayAgain }: GameOverProps) {
               <LedgerRow
                 key={name + seat}
                 mark={<Emblem emblem={seatOrder[seat].emblem} seat={seatOrder[seat].name} size={22} />}
-                label={hud.bankrupt[seat] ? `${name} (bankrupt)` : name}
+                label={hud.bankrupt[seat] ? `${shortName(name)} (out)` : shortName(name)}
                 value={money(netWorth(hud, seat))}
                 active={seat === winner}
               />
             ))}
           </div>
-          <p className={styles.note}>Final net worth, from the game just played.</p>
+          <p className={styles.note}>Final net worth. The same seed gives the same dice and cards.</p>
           {facts.length > 0 ? (
             <ul className={styles.facts}>
               {facts.map((f) => (
                 <li key={f.agent}>{factSentence(f)}</li>
               ))}
             </ul>
-          ) : (
+          ) : agents.length > 0 ? (
             <p className={styles.note}>No measured win rate exists for this table size yet.</p>
-          )}
+          ) : null}
           <div className={styles.actions}>
-            <Button variant="primary" onClick={onPlayAgain}>
-              Play again
+            <Button variant="primary" onClick={onReplay}>
+              Replay, same seed
             </Button>
-            <a className={styles.link} href={RESULTS_URL} target="_blank" rel="noreferrer">
-              Read RESULTS.md
-            </a>
+            <Button onClick={onMenu}>Back to the start</Button>
+            {agents.length > 0 ? (
+              <a className={styles.link} href={RESULTS_URL} target="_blank" rel="noreferrer">
+                Read the full results
+              </a>
+            ) : null}
           </div>
         </Panel>
       </div>

@@ -16,9 +16,27 @@
 .worth {
   margin: 0;
   padding-inline-start: 34px;
-  font-size: var(--text-caption);
+  font-size: max(var(--text-caption), 12px);
   line-height: var(--leading-caption);
   color: var(--text-soft);
+}
+
+.day {
+  margin: var(--space-2) 0 0;
+  font-size: max(var(--text-caption), 12px);
+  color: var(--text-soft);
+}
+
+.toggle {
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: 500 var(--text-small) / var(--leading-small) var(--font-text);
+  color: var(--link);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
 }
 
 .feed {
@@ -150,6 +168,8 @@
   }
 
   .worth,
+  .day,
+  .toggle,
   .feed {
     display: none;
   }

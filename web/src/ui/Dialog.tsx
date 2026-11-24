@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Panel } from "./Panel";
+import { useFocusTrap } from "./useFocusTrap";
 import { useModalKeys } from "./useModalKeys";
 import styles from "./Dialog.module.css";
 
@@ -21,6 +22,7 @@ export function Dialog({ title, onClose, children, wide = false }: DialogProps) 
   const titleId = useId();
   const ref = useRef<HTMLDivElement>(null);
   useModalKeys(true, onClose);
+  useFocusTrap(ref);
 
   useEffect(() => {
     const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;

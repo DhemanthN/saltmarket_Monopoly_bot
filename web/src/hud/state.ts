@@ -1,6 +1,6 @@
 import boardData from "../../../data/board.json";
-import type { Explanation, GameEvent } from "../contract/types";
-import { money, spaceName } from "./format";
+import type { Explanation, GameEvent, TradeOfferView } from "../contract/types";
+import { money, shortName, spaceName } from "./format";
 
 /** Starting cash from `src/saltmarket/engine/config.py`. */
 export const STARTING_CASH = 1400;
@@ -33,12 +33,14 @@ export interface HudState {
   explanation: (Explanation | null)[];
   /** The auction in progress, with the highest bid so far. */
   auction: { space: number; high: { seat: number; amount: number } | null; bids: (number | null)[] } | null;
+  /** The trade offer awaiting an answer, so the feed can name who answered it. */
+  offer: TradeOfferView | null;
   winner: number | null;
   turns: number | null;
   turn: number;
 }
 
-const FEED_LIMIT = 5;
+const FEED_LIMIT = 3;
 
 export function initialHudState(seatCount: number): HudState {
   return {
@@ -51,6 +53,7 @@ export function initialHudState(seatCount: number): HudState {
     feed: [],
     explanation: Array.from({ length: seatCount }, () => null),
     auction: null,
+    offer: null,
     winner: null,
     turns: null,
     turn: 0,
@@ -105,21 +108,24 @@ export function applyEvent(prev: HudState, event: GameEvent, names: readonly str
       break;
     case "bankrupt":
       state.bankrupt[event.seat] = true;
-      pushFeed(state, event.seq, `${names[event.seat]} went bankrupt`);
+      pushFeed(state, event.seq, `${shortName(names[event.seat])} went bankrupt`);
       break;
     case "rent":
       pushFeed(
         state,
         event.seq,
-        `${names[event.payer]} paid ${money(event.amount)} rent to ${names[event.payee]} at ${spaceName(event.space)}`,
+        `${shortName(names[event.payer])} paid ${money(event.amount)} rent to ${shortName(names[event.payee])} at ${spaceName(event.space)}`,
         true,
       );
       break;
     case "buy":
-      pushFeed(state, event.seq, `${names[event.seat]} bought ${spaceName(event.space)} for ${money(event.price)}`);
+      pushFeed(state, event.seq, `${shortName(names[event.seat])} bought ${spaceName(event.space)} for ${money(event.price)}`);
       break;
     case "decision":
       if (event.explanation) state.explanation[event.seat] = event.explanation;
+      break;
+    case "trade_offer":
+      state.offer = event.offer;
       break;
     case "auction_start":
       state.auction = { space: event.space, high: null, bids: prev.cash.map(() => null) };
@@ -138,11 +144,12 @@ export function applyEvent(prev: HudState, event: GameEvent, names: readonly str
         event.seq,
         event.seat === null
           ? `No bids for ${spaceName(event.space)}`
-          : `${names[event.seat]} won ${spaceName(event.space)} at auction for ${money(event.amount)}`,
+          : `${shortName(names[event.seat])} won ${spaceName(event.space)} at auction for ${money(event.amount)}`,
       );
       break;
     case "trade_result":
-      pushFeed(state, event.seq, event.accepted ? "A trade was accepted" : "A trade was declined");
+      pushFeed(state, event.seq, tradeLine(prev.offer, event.accepted, names));
+      state.offer = null;
       break;
     case "game_over":
       state.winner = event.winner;
@@ -152,6 +159,14 @@ export function applyEvent(prev: HudState, event: GameEvent, names: readonly str
       break;
   }
   return state;
+}
+
+function tradeLine(offer: TradeOfferView | null, accepted: boolean, names: readonly string[]): string {
+  const verb = accepted ? "accepted" : "declined";
+  if (!offer) return `A trade was ${verb}`;
+  const responder = shortName(names[offer.responder]);
+  const proposer = names[offer.proposer] === "You" ? "your" : `${shortName(names[offer.proposer])}'s`;
+  return `${responder} ${verb} ${proposer} offer`;
 }
 
 export function reduceHud(events: readonly GameEvent[], names: readonly string[]): HudState {

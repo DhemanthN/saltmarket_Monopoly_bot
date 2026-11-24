@@ -22,9 +22,14 @@ export function RuntimeTrouble({ detail, inGame, onRetry, onLeave }: RuntimeTrou
         <p id="trouble-body" className={styles.body}>
           {inGame
             ? "The game engine stopped. Retry restarts it and replays your moves, so the game carries on where it was."
-            : "The game engine did not finish loading. Retry loads it again."}
+            : "The game engine did not finish loading. Check your connection, then retry."}
         </p>
-        {detail ? <p className={styles.detail}>{detail}</p> : null}
+        {detail ? (
+          <details className={styles.detail}>
+            <summary>Technical details</summary>
+            {detail}
+          </details>
+        ) : null}
         <div className={styles.actions}>
           <Button variant="primary" onClick={onRetry} autoFocus>
             Retry

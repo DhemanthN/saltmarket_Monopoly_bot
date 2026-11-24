@@ -1,0 +1,20 @@
+.out {
+  position: absolute;
+  inset-inline: var(--space-4);
+  inset-block-end: var(--space-4);
+  z-index: var(--z-decision);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: 520px;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--brass);
+  border-radius: var(--radius-panel);
+  background: var(--paper);
+}
+
+.out span {
+  flex: 1 1 18ch;
+  font-weight: 600;
+}

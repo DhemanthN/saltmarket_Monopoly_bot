@@ -79,6 +79,8 @@ function Game() {
   const decision = useGameStore((s) => s.decision);
   const submit = useGameStore((s) => s.submit);
   const leave = useGameStore((s) => s.leave);
+  const replay = useGameStore((s) => s.replay);
+  const fastForward = useGameStore((s) => s.fastForward);
   const retry = useGameStore((s) => s.retry);
   const ready = load.phase === "ready";
   const shownDecision = trouble ? null : decision;
@@ -114,7 +116,9 @@ function Game() {
               decision={shownDecision}
               gameOver={hud.winner !== null}
               onSubmit={submit}
-              onPlayAgain={leave}
+              onReplay={() => void replay()}
+              onMenu={leave}
+              onFastForward={fastForward}
               coach
             />
           </div>

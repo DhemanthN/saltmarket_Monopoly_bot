@@ -7,13 +7,15 @@ import { Emblem } from "../ui/Emblem";
 import { Panel } from "../ui/Panel";
 import { AtollSilhouette } from "../world/AtollSilhouette";
 import { HOW_TO_PLAY } from "./rules";
-import { buildConfig, opponentAllowed, TABLE_SIZES, type Opponent, type TableSize } from "./startConfig";
+import { buildConfig, OPPONENT_LABEL, opponentAllowed, TABLE_SIZES, type Opponent, type TableSize } from "./startConfig";
 import styles from "./StartScreen.module.css";
 
-const OPPONENT_LABEL: Record<Opponent, string> = {
+const SEAT_KIND: Record<Opponent, string> = {
   ppo: "PPO agent",
-  dqn: "DQN agent (2 players only)",
-  bot: "Scripted bot",
+  dqn: "DQN agent",
+  expert: "Expert bot",
+  balanced: "Balanced bot",
+  always_buy: "Always-buy bot",
 };
 
 interface StartScreenProps {
@@ -29,9 +31,16 @@ export function StartScreen({ onStart, progress, caption }: StartScreenProps) {
   const [opponent, setOpponent] = useState<Opponent>("ppo");
   const [size, setSize] = useState<TableSize>(2);
 
+  const [notice, setNotice] = useState<string | null>(null);
+
   const pickSize = (next: TableSize) => {
     setSize(next);
-    if (!opponentAllowed(opponent, next)) setOpponent("ppo");
+    if (!opponentAllowed(opponent, next)) {
+      setOpponent("ppo");
+      setNotice("The DQN agent plays 2-player tables only, so the opponent is now the PPO agent.");
+    } else {
+      setNotice(null);
+    }
   };
 
   const config = buildConfig(opponent, size, 0);
@@ -59,7 +68,10 @@ export function StartScreen({ onStart, progress, caption }: StartScreenProps) {
             id="opponent"
             className={styles.select}
             value={opponent}
-            onChange={(e) => setOpponent(e.target.value as Opponent)}
+            onChange={(e) => {
+              setOpponent(e.target.value as Opponent);
+              setNotice(null);
+            }}
           >
             {(Object.keys(OPPONENT_LABEL) as Opponent[]).map((o) => (
               <option key={o} value={o} disabled={!opponentAllowed(o, size)}>
@@ -68,6 +80,12 @@ export function StartScreen({ onStart, progress, caption }: StartScreenProps) {
             ))}
           </select>
         </div>
+
+        {notice ? (
+          <p className={styles.notice} role="status">
+            {notice}
+          </p>
+        ) : null}
 
         <fieldset className={styles.field}>
           <legend className={styles.legend}>Table size</legend>
@@ -95,7 +113,7 @@ export function StartScreen({ onStart, progress, caption }: StartScreenProps) {
                 {kind === "human" ? "You" : `${seatOrder[i].label} seat`}
               </span>
               <span className={styles.seatKind}>
-                {kind === "human" ? "" : kind === "ppo" ? "PPO agent" : kind === "dqn" ? "DQN agent" : "Scripted bot"}
+                {kind === "human" ? "" : (SEAT_KIND[kind as Opponent] ?? kind.replace(/_/g, " "))}
               </span>
             </div>
           ))}

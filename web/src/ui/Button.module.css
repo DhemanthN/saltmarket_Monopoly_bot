@@ -18,8 +18,10 @@
   border-bottom: 3px solid var(--primary-edge);
 }
 
-.primary:hover {
-  background: var(--ink-soft);
+@media (hover: hover) {
+  .primary:hover {
+    background: var(--ink-soft);
+  }
 }
 
 .primary:active {

@@ -5,7 +5,7 @@
   display: grid;
   place-items: center;
   padding: var(--space-4);
-  background: color-mix(in srgb, var(--page) 55%, transparent);
+  background: color-mix(in srgb, var(--page) 25%, transparent);
 }
 
 .focus {
@@ -69,4 +69,24 @@
 
 [data-mood="night"] .link:focus-visible {
   outline-color: var(--night-text);
+}
+
+.bar {
+  position: absolute;
+  inset-inline: var(--space-4);
+  inset-block-end: var(--space-4);
+  z-index: var(--z-modal);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--brass);
+  border-radius: var(--radius-panel);
+  background: var(--paper);
+}
+
+.bar span {
+  flex: 1 1 12ch;
+  font-weight: 600;
 }

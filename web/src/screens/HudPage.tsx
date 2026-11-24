@@ -53,7 +53,8 @@ export default function HudPage() {
           decision={gameOver ? null : decision}
           gameOver={gameOver}
           onSubmit={setLastAnswer}
-          onPlayAgain={() => setUpTo(0)}
+          onReplay={() => setUpTo(0)}
+          onMenu={() => setUpTo(0)}
           coach
         />
       ) : null}

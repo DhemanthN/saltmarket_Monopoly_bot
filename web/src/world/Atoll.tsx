@@ -1,9 +1,10 @@
+import { useDispose } from "./dispose";
 import { useMemo } from "react";
 import { CircleGeometry, CylinderGeometry, DodecahedronGeometry, RingGeometry, Shape, ShapeGeometry, type BufferGeometry, type Texture } from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { RING_RADIUS } from "./board";
 import { BRIG_ROCK, HARBOUR_RADIUS, LAGOON_RADIUS, MARKET_RADIUS, ROAD_WIDTH, harbourSpot } from "./layout";
-import { paint } from "./palette";
+import { nonIndexed, paint } from "./palette";
 import { seatOrder } from "../styles/tokens";
 
 const flat = (g: BufferGeometry, y: number) => g.rotateX(-Math.PI / 2).translate(0, y, 0);
@@ -28,7 +29,7 @@ function groundGeometry(seatCount: number): BufferGeometry {
     parts.push(paint(new CylinderGeometry(0.5, 0.55, 0.12, 6).translate(h.x, 0.0, h.z), "paperDeep"));
     parts.push(paint(new CylinderGeometry(0.3, 0.3, 0.04, 6).translate(h.x, 0.08, h.z), `seat.${seatOrder[seat].name}`));
   }
-  const merged = mergeGeometries(parts.map((g) => (g.index ? g.toNonIndexed() : g)));
+  const merged = mergeGeometries(parts.map(nonIndexed));
   if (!merged) throw new Error("Ground parts do not share attributes");
   return merged;
 }
@@ -60,7 +61,7 @@ function compassGeometry(): BufferGeometry {
 }
 
 function mergeAll(parts: BufferGeometry[], what: string): BufferGeometry {
-  const merged = mergeGeometries(parts.map((g) => (g.index ? g.toNonIndexed() : g)));
+  const merged = mergeGeometries(parts.map(nonIndexed));
   if (!merged) throw new Error(`${what} parts do not share attributes`);
   return merged;
 }
@@ -70,6 +71,7 @@ export function Atoll({ texture, shadows, seatCount, chart }: { texture: Texture
   const ground = useMemo(() => groundGeometry(seatCount), [seatCount]);
   const sea = useMemo(() => seaGeometry(), []);
   const compass = useMemo(() => compassGeometry(), []);
+  useDispose(ground, sea, compass);
   return (
     <group>
       <mesh geometry={sea}>

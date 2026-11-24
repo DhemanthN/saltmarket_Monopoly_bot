@@ -1,3 +1,4 @@
+import { useDispose } from "./dispose";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import { BackSide, InstancedMesh, Object3D, Vector3, type Texture } from "three";
@@ -5,7 +6,7 @@ import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js
 import { BoxGeometry, CylinderGeometry } from "three";
 import { motion, palette } from "../styles/tokens";
 import { harbourSpot, lotTransform } from "./layout";
-import { paint } from "./palette";
+import { nonIndexed, paint } from "./palette";
 import type { RentTrace } from "./reduceEvents";
 
 const POOL = 4;
@@ -25,7 +26,7 @@ function cartGeometry() {
     paint(new CylinderGeometry(0.11, 0.11, 0.06, 10).rotateZ(Math.PI / 2).translate(0, 0.06, -0.16), "ink"),
     paint(new CylinderGeometry(0.1, 0.1, 0.16, 10).translate(0, 0.27, 0), "brass"),
   ];
-  const merged = mergeGeometries(parts.map((g) => g.toNonIndexed()));
+  const merged = mergeGeometries(parts.map(nonIndexed));
   if (!merged) throw new Error("Cart parts do not share attributes");
   return merged;
 }
@@ -33,6 +34,7 @@ function cartGeometry() {
 /** Rent sends a coin cart from the lot to the owner's harbour. Up to four at once, pooled. */
 export function CoinCarts({ rent, texture, reducedMotion }: { rent: RentTrace | null; texture: Texture; reducedMotion: boolean }) {
   const geometry = useMemo(() => cartGeometry(), []);
+  useDispose(geometry);
   const body = useRef<InstancedMesh>(null);
   const hull = useRef<InstancedMesh>(null);
   const trips = useRef<(Trip | null)[]>(Array(POOL).fill(null));

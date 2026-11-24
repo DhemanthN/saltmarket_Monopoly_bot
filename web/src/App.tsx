@@ -1,5 +1,4 @@
 import { lazy, Suspense, useEffect } from "react";
-import { GameScreen } from "./screens/GameScreen";
 import { LOAD_CAPTION } from "./screens/loadCaption";
 import { StartScreen } from "./screens/StartScreen";
 import { useGameStore } from "./store/gameStore";
@@ -10,6 +9,8 @@ const DEV_PAGES = import.meta.env.DEV || import.meta.env.MODE === "devpages";
 // Created only when dev pages are on, so a production build drops the chunks.
 const TokensPage = DEV_PAGES ? lazy(() => import("./screens/TokensPage")) : null;
 const ReplayPage = DEV_PAGES ? lazy(() => import("./world/dev/ReplayPage")) : null;
+// The game screen pulls in Three.js, so it loads only after Start. The start screen stays light.
+const GameScreen = lazy(() => import("./screens/GameScreen").then((m) => ({ default: m.GameScreen })));
 const HudPage = DEV_PAGES ? lazy(() => import("./screens/HudPage")) : null;
 
 export function App() {
@@ -17,6 +18,7 @@ export function App() {
   const load = useGameStore((s) => s.load);
   const boot = useGameStore((s) => s.boot);
   const startGame = useGameStore((s) => s.startGame);
+  const gameOver = useGameStore((s) => s.hud.winner !== null);
   const devPage = window.location.pathname;
   const devPageShown = Boolean(DEV_PAGES) && ["/tokens", "/world", "/hud"].includes(devPage);
 
@@ -24,6 +26,14 @@ export function App() {
   useEffect(() => {
     if (!devPageShown) boot();
   }, [boot, devPageShown]);
+
+  // A game lives only in this tab, so a reload or Back would lose it. Ask first, until it ends.
+  useEffect(() => {
+    if (!playing || gameOver) return;
+    const warn = (event: BeforeUnloadEvent) => event.preventDefault();
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [playing, gameOver]);
 
   if (TokensPage && devPage === "/tokens") {
     return (
@@ -47,7 +57,13 @@ export function App() {
     );
   }
 
-  if (playing) return <GameScreen />;
+  if (playing) {
+    return (
+      <Suspense fallback={null}>
+        <GameScreen />
+      </Suspense>
+    );
+  }
   return (
     <StartScreen
       onStart={(config) => void startGame(config)}

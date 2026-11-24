@@ -14,6 +14,17 @@ const ISOLATION_HEADERS = {
 
 export default defineConfig({
   plugins: [react()],
+  build: {
+    rollupOptions: {
+      output: {
+        // Three.js and its React bindings are the bulk of the code, and the start screen needs none of it.
+        manualChunks: (id: string) => {
+          if (id.includes("node_modules/three/") || id.includes("@react-three/fiber") || id.includes("@react-three/drei")) return "three";
+          return undefined;
+        },
+      },
+    },
+  },
   // data/board.json lives one level above web/.
   server: { headers: ISOLATION_HEADERS, fs: { allow: [".."] } },
   preview: { headers: ISOLATION_HEADERS },

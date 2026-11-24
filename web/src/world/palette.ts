@@ -1,5 +1,5 @@
-import { BufferGeometry, DataTexture, NearestFilter, RGBAFormat, SRGBColorSpace } from "three";
-import { PALETTE_TEXTURE_SIZE, buildPaletteTexture, cellIndex, type Mood } from "../styles/tokens";
+import { BufferGeometry, DataTexture, type Texture, NearestFilter, RGBAFormat, SRGBColorSpace } from "three";
+import { PALETTE_TEXTURE_SIZE, buildEmissiveTexture, buildPaletteTexture, cellIndex, type Mood } from "../styles/tokens";
 
 /** Names of palette cells, e.g. "ink", "district.reef", "world.sea". */
 export type CellName = keyof typeof cellIndex & string;
@@ -20,6 +20,27 @@ export function paletteTexture(mood: Mood): DataTexture {
   return texture;
 }
 
+const nightGlow = new WeakMap<Texture, DataTexture>();
+
+/**
+ * The emissive map that goes with a palette texture: lit windows at night, none by day.
+ * The two textures share one cell map, so a mesh needs no extra UVs.
+ */
+export function emissiveTexture(texture: Texture): Texture | null {
+  if (texture !== cache.get("night")) return null;
+  let glow = nightGlow.get(texture);
+  if (!glow) {
+    const size = PALETTE_TEXTURE_SIZE;
+    glow = new DataTexture(buildEmissiveTexture(), size, size, RGBAFormat);
+    glow.magFilter = NearestFilter;
+    glow.minFilter = NearestFilter;
+    glow.colorSpace = SRGBColorSpace;
+    glow.needsUpdate = true;
+    nightGlow.set(texture, glow);
+  }
+  return glow;
+}
+
 /** UV at the centre of a palette cell. */
 export function cellUV(name: string): [number, number] {
   const index = cellIndex[name];
@@ -35,4 +56,9 @@ export function paint<G extends BufferGeometry>(geometry: G, name: string): G {
   for (let i = 0; i < uv.count; i += 1) uv.setXY(i, u, v);
   uv.needsUpdate = true;
   return geometry;
+}
+
+/** Non-indexed copy for merging, or the geometry itself when it already is (Three warns on a repeat). */
+export function nonIndexed(geometry: BufferGeometry): BufferGeometry {
+  return geometry.index ? geometry.toNonIndexed() : geometry;
 }

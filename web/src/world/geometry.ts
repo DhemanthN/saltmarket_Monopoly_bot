@@ -5,6 +5,7 @@ import {
   CylinderGeometry,
   ExtrudeGeometry,
   Matrix4,
+  OctahedronGeometry,
   Euler,
   Quaternion,
   Shape,
@@ -12,8 +13,8 @@ import {
   Vector3,
 } from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
-import type { DistrictName } from "../styles/tokens";
-import { paint } from "./palette";
+import type { DistrictName, EmblemName } from "../styles/tokens";
+import { nonIndexed, paint } from "./palette";
 
 /*
  * Procedural lot geometry. Every building is built in lot space: origin at ground centre,
@@ -27,7 +28,7 @@ interface Placement {
 }
 
 function part(geometry: BufferGeometry, cell: string, { at = [0, 0, 0], rot = [0, 0, 0] }: Placement = {}): BufferGeometry {
-  const g = geometry.index ? geometry.toNonIndexed() : geometry;
+  const g = nonIndexed(geometry);
   paint(g, cell);
   const m = new Matrix4().compose(new Vector3(...at), new Quaternion().setFromEuler(new Euler(...rot)), new Vector3(1, 1, 1));
   g.applyMatrix4(m);
@@ -135,9 +136,21 @@ function districtStorey(name: DistrictName): BufferGeometry {
   ]);
 }
 
+/** Window positions in lot space (front faces point +z toward the road). They glow at night. */
+const WINDOWS: Partial<Record<DistrictName, [number, number, number][]>> = {
+  kelp: [[-0.28, 0.42, 0.16], [0.08, 0.42, 0.16]],
+  reef: [[-0.28, 0.5, 0.18], [0.3, 0.38, 0.1]],
+  coral: [[-0.25, 0.15, 0.46], [0.25, 0.15, 0.46], [0, 0.42, 0.25]],
+  amber: [[-0.25, 0.27, 0.36], [0.1, 0.27, 0.36]],
+  cinder: [[-0.2, 0.5, 0.37], [0.2, 0.5, 0.37]],
+  jade: [[-0.25, 0.45, 0.32], [0.25, 0.45, 0.32]],
+  crown: [[-0.18, 0.5, 0.12], [-0.18, 0.95, 0.12], [-0.18, 1.3, 0.12], [0.3, 0.15, 0.36]],
+};
+
 /** Merged base geometry per district, built once. */
 export function buildDistrictGeometry(name: DistrictName): { base: BufferGeometry; storey: BufferGeometry } {
-  return { base: districtBase(name), storey: districtStorey(name) };
+  const windows = (WINDOWS[name] ?? []).map((at) => part(box(0.13, 0.1, 0.03), "world.glow", { at }));
+  return { base: merge([districtBase(name), ...windows]), storey: districtStorey(name) };
 }
 
 /** Owner awning: samples the white cell so the instance colour shows the owner. */
@@ -164,14 +177,39 @@ export function portGeometry(): BufferGeometry {
 
 /** Marker for non-property spaces (start, cards, tax, ferry, utility, rest). */
 export function markerGeometry(): BufferGeometry {
-  return merge([part(box(0.5, 0.08, 0.5), "paperDeep"), part(post(0.035, 0.55), "brass", { at: [0, 0.08, 0] }), part(box(0.34, 0.2, 0.03), "sailcloth", { at: [0, 0.4, 0] })]);
+  return merge([part(box(0.5, 0.08, 0.5), "paperDeep"), part(post(0.035, 0.55), "brass", { at: [0, 0.08, 0] }), part(box(0.34, 0.2, 0.03), "world.white", { at: [0, 0.4, 0] }), part(box(0.08, 0.1, 0.08), "world.glow", { at: [0.12, 0.6, 0] })]);
 }
 
-/** One piece: a pawn body sampling the white cell (instance colour = seat) with an ink collar. */
-export function pieceGeometry(): BufferGeometry {
-  return merge([
-    part(new CylinderGeometry(0.22, 0.26, 0.1, 10).translate(0, 0.05, 0), "world.white"),
-    part(new CylinderGeometry(0.09, 0.18, 0.42, 10).translate(0, 0.31, 0), "world.white"),
-    part(new SphereGeometry(0.13, 10, 8).translate(0, 0.6, 0), "world.white"),
-  ]);
+const pieceBase = () => part(new CylinderGeometry(0.22, 0.26, 0.1, 10).translate(0, 0.05, 0), "world.white");
+
+/**
+ * One seat piece, sampling the white cell so the material colour shows the seat. Each seat has
+ * its own silhouette (pawn, tower, gem, anchor post), so no two pieces share a shape.
+ */
+export function pieceGeometry(emblem: EmblemName): BufferGeometry {
+  switch (emblem) {
+    case "sun":
+      return merge([
+        pieceBase(),
+        part(new CylinderGeometry(0.09, 0.18, 0.42, 10).translate(0, 0.31, 0), "world.white"),
+        part(new SphereGeometry(0.13, 10, 8).translate(0, 0.6, 0), "world.white"),
+      ]);
+    case "wave":
+      return merge([
+        pieceBase(),
+        part(new CylinderGeometry(0.13, 0.15, 0.4, 10).translate(0, 0.3, 0), "world.white"),
+        part(new ConeGeometry(0.19, 0.24, 10).translate(0, 0.62, 0), "world.white"),
+      ]);
+    case "star":
+      return merge([
+        pieceBase(),
+        part(new OctahedronGeometry(0.2, 0).scale(1, 1.5, 1).translate(0, 0.5, 0), "world.white"),
+      ]);
+    case "anchor":
+      return merge([
+        pieceBase(),
+        part(box(0.12, 0.5, 0.12, 0.1), "world.white"),
+        part(box(0.4, 0.09, 0.12, 0.46), "world.white"),
+      ]);
+  }
 }

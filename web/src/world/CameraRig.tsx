@@ -2,14 +2,13 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import { type PerspectiveCamera, Vector3 } from "three";
 import { piecePositions } from "./piecePositions";
+import { CHART_DIR, CHART_TARGET, chartDistance } from "./chartFit";
 import { roadForward } from "./layout";
 
 export type CameraView = "street" | "chart";
 
 /** Damping rate so a camera toggle settles in about one `travel` (480 ms). */
 const DAMP = 9;
-const CHART_POSITION = new Vector3(0, 30, 21);
-const CHART_TARGET = new Vector3(0, 0, 0.5);
 const STREET_BACK = 4.0;
 const STREET_UP = 2.4;
 /** Kept short so the followed piece sits in the lower third of the frame, not below it. */
@@ -25,6 +24,8 @@ const PORTRAIT_BACK = 2.4;
  * open area; the followed piece sits below centre, so it needs more to clear the sheet.
  */
 const INSET_SHIFT = 0.75;
+/** Chart view centres the ring in the open area, which is half the inset. */
+const CHART_INSET_SHIFT = 0.5;
 
 interface Props {
   view: CameraView;
@@ -48,24 +49,28 @@ export function CameraRig({ view, followSeat, followSpace, reducedMotion, bottom
   const goalTarget = useMemo(() => new Vector3(), []);
   const forward = useMemo(() => new Vector3(), []);
   const first = useRef(true);
+  const fov = (camera as PerspectiveCamera).fov;
+  const chartAt = useMemo(() => chartDistance(size.width, size.height, bottomInset, fov), [size.width, size.height, bottomInset, fov]);
 
-  useEffect(() => invalidate(), [view, followSpace, followSeat, size, invalidate]);
+  useEffect(() => invalidate(), [view, followSpace, followSeat, size, chartAt, invalidate]);
 
   // Centre the picture in the part of the screen the HUD leaves open, so a bottom sheet
   // never hides the followed piece. The frustum moves; the camera pose does not.
   useEffect(() => {
     const perspective = camera as PerspectiveCamera;
     if (bottomInset > 0) {
-      perspective.setViewOffset(size.width, size.height, 0, bottomInset * INSET_SHIFT, size.width, size.height);
+      // Chart view centres the whole ring in the open area; street view lifts the piece clear of it.
+      const shift = view === "chart" ? CHART_INSET_SHIFT : INSET_SHIFT;
+      perspective.setViewOffset(size.width, size.height, 0, bottomInset * shift, size.width, size.height);
     } else {
       perspective.clearViewOffset();
     }
     invalidate();
-  }, [camera, bottomInset, size, invalidate]);
+  }, [camera, bottomInset, size, view, invalidate]);
 
   useFrame((_, dt) => {
     if (view === "chart") {
-      goalPos.copy(CHART_POSITION);
+      goalPos.copy(CHART_TARGET).addScaledVector(CHART_DIR, chartAt);
       goalTarget.copy(CHART_TARGET);
     } else {
       const p = piecePositions[followSeat];

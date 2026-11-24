@@ -1,12 +1,14 @@
+import { useDispose } from "./dispose";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
-import { BackSide, Color, Group, InstancedMesh, Object3D, Vector3, type Texture } from "three";
+import { BackSide, Group, InstancedMesh, Mesh, Object3D, Vector3, type Texture } from "three";
 import { piecePositions } from "./piecePositions";
 import { motion, palette, seatOrder, seats } from "../styles/tokens";
 import { publishLanternAnchors, type LanternAnchor } from "./anchors";
 import { spaces } from "./board";
 import { emblemGeometry } from "./emblems";
 import { pieceGeometry } from "./geometry";
+import { LitMaterial } from "./LitMaterial";
 import { BRIG_ROCK, pieceSpot } from "./layout";
 import type { WorldState } from "./reduceEvents";
 
@@ -24,8 +26,10 @@ interface Walker {
   lastSeq: number;
 }
 
+const BRIG_SPREAD = 0.35;
+
 function spotFor(target: number, seat: number, seatCount: number, out: Vector3): Vector3 {
-  if (target === -1) return out.copy(BRIG_ROCK).add(new Vector3((seat - 1.5) * 0.35, 0, 0));
+  if (target === -1) return out.copy(BRIG_ROCK).setX(BRIG_ROCK.x + (seat - 1.5) * BRIG_SPREAD);
   return pieceSpot(target, seat, seatCount, out);
 }
 
@@ -46,12 +50,13 @@ interface Props {
  */
 export function Pieces({ state, seatKinds, texture, reducedMotion, outlines }: Props) {
   const count = seatKinds.length;
-  const body = useRef<InstancedMesh>(null);
-  const hull = useRef<InstancedMesh>(null);
+  const body = useRef<(Mesh | null)[]>([]);
+  const hull = useRef<(Mesh | null)[]>([]);
   const blobs = useRef<InstancedMesh>(null);
   const flags = useRef<(Group | null)[]>([]);
-  const geometry = useMemo(() => pieceGeometry(), []);
+  const geometry = useMemo(() => seatOrder.map((s) => pieceGeometry(s.emblem)), []);
   const emblems = useMemo(() => seatOrder.map((s) => emblemGeometry(s.emblem)), []);
+  useDispose(...geometry, ...emblems);
   const walkers = useRef<Walker[]>([]);
   const { camera, size, invalidate } = useThree();
   const dummy = useMemo(() => new Object3D(), []);
@@ -67,12 +72,6 @@ export function Pieces({ state, seatKinds, texture, reducedMotion, outlines }: P
     }));
     // Only a new table size resets the walkers; later state flows through the move effect.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [count]);
-
-  useEffect(() => {
-    const color = new Color();
-    for (let seat = 0; seat < count; seat += 1) body.current?.setColorAt(seat, color.set(seats[seatOrder[seat].name]));
-    if (body.current?.instanceColor) body.current.instanceColor.needsUpdate = true;
   }, [count]);
 
   // Turn the latest move into hops, or snap when the replay jumped.
@@ -126,10 +125,10 @@ export function Pieces({ state, seatKinds, texture, reducedMotion, outlines }: P
       dummy.rotation.set(0, 0, 0);
       dummy.scale.setScalar(s);
       dummy.updateMatrix();
-      body.current?.setMatrixAt(seat, dummy.matrix);
-      dummy.scale.setScalar(s * OUTLINE);
-      dummy.updateMatrix();
-      hull.current?.setMatrixAt(seat, dummy.matrix);
+      for (const [mesh, scale] of [[body.current[seat], s], [hull.current[seat], s * OUTLINE]] as const) {
+        mesh?.position.copy(p);
+        mesh?.scale.setScalar(scale);
+      }
       dummy.position.set(p.x, 0.03, p.z);
       dummy.rotation.set(-Math.PI / 2, 0, 0);
       dummy.scale.setScalar(s);
@@ -152,22 +151,25 @@ export function Pieces({ state, seatKinds, texture, reducedMotion, outlines }: P
         });
       }
     });
-    for (const mesh of [body.current, hull.current, blobs.current]) if (mesh) mesh.instanceMatrix.needsUpdate = true;
+    if (blobs.current) blobs.current.instanceMatrix.needsUpdate = true;
     publishLanternAnchors(anchors);
     if (moving) invalidate();
   });
 
   return (
     <group>
-      {/* Instances move every frame, so a bounding sphere from the first frame would cull them. */}
-      <instancedMesh ref={body} args={[geometry, undefined, count]} castShadow frustumCulled={false}>
-        <meshLambertMaterial map={texture} />
-      </instancedMesh>
-      {outlines ? (
-        <instancedMesh ref={hull} args={[geometry, undefined, count]} frustumCulled={false}>
-          <meshBasicMaterial color={palette.ink} side={BackSide} polygonOffset polygonOffsetFactor={1} polygonOffsetUnits={1} />
-        </instancedMesh>
-      ) : null}
+      {seatOrder.slice(0, count).map((seat, i) => (
+        <group key={seat.name}>
+          <mesh ref={(m) => { body.current[i] = m; }} geometry={geometry[i]} castShadow frustumCulled={false}>
+            <LitMaterial texture={texture} color={seats[seat.name]} />
+          </mesh>
+          {outlines ? (
+            <mesh ref={(m) => { hull.current[i] = m; }} geometry={geometry[i]} frustumCulled={false}>
+              <meshBasicMaterial color={palette.ink} side={BackSide} polygonOffset polygonOffsetFactor={1} polygonOffsetUnits={1} />
+            </mesh>
+          ) : null}
+        </group>
+      ))}
       <instancedMesh ref={blobs} args={[undefined, undefined, count]} frustumCulled={false}>
         <circleGeometry args={[0.32, 12]} />
         <meshBasicMaterial color={palette.ink} transparent opacity={0.22} depthWrite={false} />

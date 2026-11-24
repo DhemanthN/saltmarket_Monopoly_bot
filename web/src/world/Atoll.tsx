@@ -5,6 +5,7 @@ import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js
 import { RING_RADIUS } from "./board";
 import { BRIG_ROCK, HARBOUR_RADIUS, LAGOON_RADIUS, MARKET_RADIUS, ROAD_WIDTH, harbourSpot } from "./layout";
 import { nonIndexed, paint } from "./palette";
+import { waterMaterial } from "./shaders";
 import { seatOrder } from "../styles/tokens";
 
 const flat = (g: BufferGeometry, y: number) => g.rotateX(-Math.PI / 2).translate(0, y, 0);
@@ -66,17 +67,23 @@ function mergeAll(parts: BufferGeometry[], what: string): BufferGeometry {
   return merged;
 }
 
-/** The atoll ground and the open sea. The sea has its own colour so the horizon reads as a line. */
-export function Atoll({ texture, shadows, seatCount, chart }: { texture: Texture; shadows: boolean; seatCount: number; chart: boolean }) {
+/** The atoll ground and the open sea (shader water on Medium and High). The sea has its own colour so the horizon reads as a line. */
+export function Atoll({ texture, shadows, seatCount, chart, water }: { texture: Texture; shadows: boolean; seatCount: number; chart: boolean; water: boolean }) {
   const ground = useMemo(() => groundGeometry(seatCount), [seatCount]);
   const sea = useMemo(() => seaGeometry(), []);
   const compass = useMemo(() => compassGeometry(), []);
-  useDispose(ground, sea, compass);
+  const waterShader = useMemo(() => (water ? waterMaterial(texture) : null), [water, texture]);
+  useDispose(ground, sea, compass, waterShader);
   return (
     <group>
-      <mesh geometry={sea}>
-        <meshLambertMaterial map={texture} />
-      </mesh>
+      {/* Medium and High draw drifting swell bands on the sea; Low keeps flat colour. */}
+      {waterShader ? (
+        <mesh geometry={sea} material={waterShader} />
+      ) : (
+        <mesh geometry={sea}>
+          <meshLambertMaterial map={texture} />
+        </mesh>
+      )}
       {/* Flat on the sea it reads as a glitch from street level, so it shows only from above. */}
       <mesh geometry={compass} visible={chart}>
         <meshLambertMaterial map={texture} />

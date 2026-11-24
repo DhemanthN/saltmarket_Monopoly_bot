@@ -20,6 +20,12 @@ export function paletteTexture(mood: Mood): DataTexture {
   return texture;
 }
 
+/**
+ * Night glass shines above 1.0 so the High tier's bloom (threshold 1.0) picks out windows and
+ * lanterns and nothing else. Without bloom ACES rolls it off to a warm near-white.
+ */
+export const GLOW_INTENSITY = 1.6;
+
 const nightGlow = new WeakMap<Texture, DataTexture>();
 
 /**

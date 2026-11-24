@@ -7,7 +7,7 @@ import { motion, palette, seatOrder, seats } from "../styles/tokens";
 import { publishLanternAnchors, type LanternAnchor } from "./anchors";
 import { spaces } from "./board";
 import { emblemGeometry } from "./emblems";
-import { pieceGeometry } from "./geometry";
+import { pieceModel } from "./pieceModels";
 import { LitMaterial } from "./LitMaterial";
 import { BRIG_ROCK, pieceSpot } from "./layout";
 import type { WorldState } from "./reduceEvents";
@@ -51,12 +51,13 @@ interface Props {
 export function Pieces({ state, seatKinds, texture, reducedMotion, outlines }: Props) {
   const count = seatKinds.length;
   const body = useRef<(Mesh | null)[]>([]);
+  const cloth = useRef<(Mesh | null)[]>([]);
   const hull = useRef<(Mesh | null)[]>([]);
   const blobs = useRef<InstancedMesh>(null);
   const flags = useRef<(Group | null)[]>([]);
-  const geometry = useMemo(() => seatOrder.map((s) => pieceGeometry(s.emblem)), []);
+  const models = useMemo(() => seatOrder.map((s) => pieceModel(s.emblem)), []);
   const emblems = useMemo(() => seatOrder.map((s) => emblemGeometry(s.emblem)), []);
-  useDispose(...geometry, ...emblems);
+  useDispose(...models.flatMap((m) => [m.body, m.cloth]), ...emblems);
   const walkers = useRef<Walker[]>([]);
   const { camera, size, invalidate } = useThree();
   const dummy = useMemo(() => new Object3D(), []);
@@ -125,7 +126,7 @@ export function Pieces({ state, seatKinds, texture, reducedMotion, outlines }: P
       dummy.rotation.set(0, 0, 0);
       dummy.scale.setScalar(s);
       dummy.updateMatrix();
-      for (const [mesh, scale] of [[body.current[seat], s], [hull.current[seat], s * OUTLINE]] as const) {
+      for (const [mesh, scale] of [[body.current[seat], s], [cloth.current[seat], s], [hull.current[seat], s * OUTLINE]] as const) {
         mesh?.position.copy(p);
         mesh?.scale.setScalar(scale);
       }
@@ -160,11 +161,14 @@ export function Pieces({ state, seatKinds, texture, reducedMotion, outlines }: P
     <group>
       {seatOrder.slice(0, count).map((seat, i) => (
         <group key={seat.name}>
-          <mesh ref={(m) => { body.current[i] = m; }} geometry={geometry[i]} castShadow frustumCulled={false}>
+          <mesh ref={(m) => { body.current[i] = m; }} geometry={models[i].body} castShadow frustumCulled={false}>
+            <LitMaterial texture={texture} />
+          </mesh>
+          <mesh ref={(m) => { cloth.current[i] = m; }} geometry={models[i].cloth} castShadow frustumCulled={false}>
             <LitMaterial texture={texture} color={seats[seat.name]} />
           </mesh>
           {outlines ? (
-            <mesh ref={(m) => { hull.current[i] = m; }} geometry={geometry[i]} frustumCulled={false}>
+            <mesh ref={(m) => { hull.current[i] = m; }} geometry={models[i].body} frustumCulled={false}>
               <meshBasicMaterial color={palette.ink} side={BackSide} polygonOffset polygonOffsetFactor={1} polygonOffsetUnits={1} />
             </mesh>
           ) : null}

@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { modalOpened } from "../world/cameraBus";
 import { Panel } from "./Panel";
 import { useFocusTrap } from "./useFocusTrap";
 import { useModalKeys } from "./useModalKeys";
@@ -23,6 +24,9 @@ export function Dialog({ title, onClose, children, wide = false }: DialogProps) 
   const ref = useRef<HTMLDivElement>(null);
   useModalKeys(true, onClose);
   useFocusTrap(ref);
+
+  // The world stops rendering behind a modal and starts again when the last one closes.
+  useEffect(() => modalOpened(), []);
 
   useEffect(() => {
     const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;

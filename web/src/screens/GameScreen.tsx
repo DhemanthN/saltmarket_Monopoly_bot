@@ -1,12 +1,14 @@
-import { Component, useEffect, useState, type ReactNode } from "react";
+import { Component, useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
 import { GameMenu } from "../hud/GameMenu";
 import { HudView } from "../hud/HudView";
 import { useGameStore } from "../store/gameStore";
 import { Button } from "../ui/Button";
 import { AtollSilhouette } from "../world/AtollSilhouette";
+import { anyModalOpen, subscribeModal } from "../world/cameraBus";
 import { prefersReducedMotion, useQualityChoice } from "../world/quality";
 import { WorldScene } from "../world/WorldScene";
 import { LOAD_CAPTION } from "./loadCaption";
+import { LoadingChart } from "./LoadingChart";
 import { RuntimeTrouble } from "./RuntimeTrouble";
 import styles from "./GameScreen.module.css";
 
@@ -86,6 +88,8 @@ function Game() {
   const shownDecision = trouble ? null : decision;
   const sheetInset = useSheetInset(shownDecision !== null);
   const [quality, setQuality] = useQualityChoice();
+  const modalOpen = useSyncExternalStore(subscribeModal, anyModalOpen);
+  const [loadingDone, setLoadingDone] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(prefersReducedMotion);
 
   return (
@@ -98,7 +102,7 @@ function Game() {
               seatKinds={config.seats}
               bottomInset={sheetInset}
               tierOverride={quality}
-              paused={trouble !== null}
+              paused={trouble !== null || modalOpen}
               reducedMotion={reducedMotion}
               controls={
                 <GameMenu
@@ -124,13 +128,14 @@ function Game() {
             />
           </div>
         </>
-      ) : (
+      ) : null}
+      {ready && loadingDone ? null : (
         <>
-          <AtollSilhouette progress={load.fraction} caption={LOAD_CAPTION[load.phase]} />
+          <LoadingChart phase={load.phase} ready={ready} onDone={() => setLoadingDone(true)} />
           <p className="visually-hidden" role="status">
             {LOAD_CAPTION[load.phase]}
           </p>
-          {trouble ? null : (
+          {trouble || ready ? null : (
             <Button variant="quiet" className={styles.back} onClick={leave}>
               Back to the start
             </Button>

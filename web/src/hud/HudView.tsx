@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { AgentName, Decision } from "../contract/types";
 import { Button } from "../ui/Button";
+import { setDecisionOpen } from "../world/cameraBus";
+import { Chrome } from "./Chrome";
 import { CoachMarks } from "./CoachMarks";
 import { DecisionPanel } from "./decisions/DecisionPanel";
 import { GameOver } from "./GameOver";
@@ -33,8 +35,15 @@ export function HudView({ hud, names, seats, decision, gameOver, onSubmit, onRep
   const human = seats.indexOf("human");
   const out = human >= 0 && hud.bankrupt[human] && !gameOver;
   const [coachStep, setCoachStep] = useState(0);
+  const decisionOpen = decision !== null && !gameOver;
+  // The camera holds parallax still while a decision panel is open.
+  useEffect(() => {
+    setDecisionOpen(decisionOpen);
+    return () => setDecisionOpen(false);
+  }, [decisionOpen]);
   return (
     <>
+      <Chrome turn={hud.turn} seatCount={seats.length} cash={human >= 0 ? hud.cash[human] : null} />
       <LedgerRail hud={hud} names={names} active={decision?.seat ?? null} human={human} />
       <LanternDock lanterns={lanterns} />
       {decision && !gameOver ? (

@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { Button } from "../ui/Button";
 import { Dialog } from "../ui/Dialog";
+import { getCalmChoice, setCalmChoice, subscribeCalm } from "../world/cameraBus";
 import type { Tier } from "../world/quality";
 import styles from "./GameMenu.module.css";
 
@@ -28,6 +29,7 @@ interface GameMenuProps {
  */
 export function GameMenu({ quality, onQuality, reducedMotion, onReducedMotion, onLeave }: GameMenuProps) {
   const [open, setOpen] = useState(false);
+  const calm = useSyncExternalStore(subscribeCalm, getCalmChoice);
   const [confirmLeave, setConfirmLeave] = useState(false);
   const close = () => {
     setOpen(false);
@@ -56,6 +58,10 @@ export function GameMenu({ quality, onQuality, reducedMotion, onReducedMotion, o
           <label className={styles.check}>
             <input type="checkbox" checked={reducedMotion} onChange={(e) => onReducedMotion(e.target.checked)} />
             <span>Reduce motion in the world (camera cuts, pieces jump)</span>
+          </label>
+          <label className={styles.check}>
+            <input type="checkbox" checked={calm} onChange={(e) => setCalmChoice(e.target.checked)} />
+            <span>Calm (no camera sway, parallax, shake, trail or cannon effects)</span>
           </label>
           <div className={styles.actions}>
             {confirmLeave ? (

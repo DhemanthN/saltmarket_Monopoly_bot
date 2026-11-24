@@ -1,16 +1,18 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { Dialog } from "../ui/Dialog";
 import type { SessionConfig } from "../contract/types";
 import { seatOrder } from "../styles/tokens";
 import { Button } from "../ui/Button";
 import { Emblem } from "../ui/Emblem";
 import { Panel } from "../ui/Panel";
-import { AtollSilhouette } from "../world/AtollSilhouette";
 import { HOW_TO_PLAY } from "./rules";
-import { buildConfig, OPPONENT_LABEL, opponentAllowed, TABLE_SIZES, type Opponent, type TableSize } from "./startConfig";
+import { buildModeConfig, MODE_LABEL, MODES, modeAllowed, modeSize, TABLE_SIZES, type Mode, type TableSize } from "./startConfig";
 import styles from "./StartScreen.module.css";
 
-const SEAT_KIND: Record<Opponent, string> = {
+// The ship loads on its own after the first paint, so the start screen stays light.
+const StartShip = lazy(() => import("./ship/StartShip"));
+
+const SEAT_KIND: Record<string, string> = {
   ppo: "PPO agent",
   dqn: "DQN agent",
   expert: "Expert bot",
@@ -28,29 +30,44 @@ interface StartScreenProps {
 
 export function StartScreen({ onStart, progress, caption }: StartScreenProps) {
   const [rulesOpen, setRulesOpen] = useState(false);
-  const [opponent, setOpponent] = useState<Opponent>("ppo");
+  const [mode, setMode] = useState<Mode>("ppo");
   const [size, setSize] = useState<TableSize>(2);
 
   const [notice, setNotice] = useState<string | null>(null);
 
   const pickSize = (next: TableSize) => {
     setSize(next);
-    if (!opponentAllowed(opponent, next)) {
-      setOpponent("ppo");
+    const fixedSize = mode === "quick" || mode === "table4" || mode === "watch";
+    if (!modeAllowed(mode, next)) {
+      setMode("ppo");
       setNotice("The DQN agent plays 2-player tables only, so the opponent is now the PPO agent.");
     } else {
+      if (fixedSize) setMode("ppo");
       setNotice(null);
     }
   };
 
-  const config = buildConfig(opponent, size, 0);
+  const pickMode = (next: Mode) => {
+    setMode(next);
+    setSize(modeSize(next, size));
+    setNotice(null);
+  };
+
+  const config = buildModeConfig(mode, size, 0);
   const start = () => {
-    onStart(buildConfig(opponent, size, Math.floor(Math.random() * 1_000_000)));
+    onStart(buildModeConfig(mode, size, Math.floor(Math.random() * 1_000_000)));
   };
 
   return (
     <main className={styles.screen}>
-      <AtollSilhouette progress={progress} caption={caption} />
+      <div className={styles.sea} aria-hidden="true">
+        <div className={styles.sun} />
+        <div className={styles.ship}>
+          <Suspense fallback={null}>
+            <StartShip />
+          </Suspense>
+        </div>
+      </div>
       <Panel floating className={styles.panel} aria-labelledby="start-title">
         <h1 id="start-title" className={styles.title}>
           Saltmarket
@@ -60,26 +77,32 @@ export function StartScreen({ onStart, progress, caption }: StartScreenProps) {
           trained agents.
         </p>
 
-        <div className={styles.field}>
-          <label htmlFor="opponent" className={styles.legend}>
-            Opponent
-          </label>
-          <select
-            id="opponent"
-            className={styles.select}
-            value={opponent}
-            onChange={(e) => {
-              setOpponent(e.target.value as Opponent);
-              setNotice(null);
-            }}
-          >
-            {(Object.keys(OPPONENT_LABEL) as Opponent[]).map((o) => (
-              <option key={o} value={o} disabled={!opponentAllowed(o, size)}>
-                {OPPONENT_LABEL[o]}
-              </option>
-            ))}
-          </select>
-        </div>
+        <fieldset className={styles.field}>
+          <legend className={styles.legend}>How to play</legend>
+          <div className={styles.modes}>
+            {MODES.map((m) => {
+              const allowed = modeAllowed(m, size);
+              return (
+                <label key={m} className={styles.mode} data-disabled={allowed ? undefined : "true"}>
+                  <input
+                    type="radio"
+                    name="mode"
+                    value={m}
+                    checked={mode === m}
+                    disabled={!allowed}
+                    onChange={() => pickMode(m)}
+                  />
+                  <span className={styles.modeBody}>
+                    <span className={styles.modeTitle}>{MODE_LABEL[m].title}</span>
+                    <span className={styles.modeNote}>
+                      {allowed ? MODE_LABEL[m].note : "Needs a 2-player table. Pick 2 players to use it."}
+                    </span>
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        </fieldset>
 
         {notice ? (
           <p className={styles.notice} role="status">
@@ -113,7 +136,7 @@ export function StartScreen({ onStart, progress, caption }: StartScreenProps) {
                 {kind === "human" ? "You" : `${seatOrder[i].label} seat`}
               </span>
               <span className={styles.seatKind}>
-                {kind === "human" ? "" : (SEAT_KIND[kind as Opponent] ?? kind.replace(/_/g, " "))}
+                {kind === "human" ? "" : (SEAT_KIND[kind] ?? kind.replace(/_/g, " "))}
               </span>
             </div>
           ))}
@@ -127,6 +150,11 @@ export function StartScreen({ onStart, progress, caption }: StartScreenProps) {
             How to play
           </Button>
         </div>
+        {progress !== undefined && progress < 1 ? (
+          <p className={styles.load} role="status">
+            {caption ?? "Loading the engine"} {Math.round(progress * 100)}%
+          </p>
+        ) : null}
       </Panel>
       {rulesOpen ? (
         <Dialog title="How to play" wide onClose={() => setRulesOpen(false)}>

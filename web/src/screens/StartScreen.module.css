@@ -27,6 +27,9 @@
   inset-block: 6% 4%;
   inset-inline-start: 0;
   width: calc(100% - 520px);
+  /* Fade the canvas edges into the page sea so the box never shows. */
+  mask-image: linear-gradient(to right, #000 88%, transparent), linear-gradient(to bottom, #000 80%, transparent);
+  mask-composite: intersect;
 }
 
 .panel {
@@ -61,7 +64,8 @@
   display: grid;
   gap: 2px;
   min-height: 44px;
-  padding: var(--space-2) var(--space-3);
+  align-content: center;
+  padding: var(--space-1) var(--space-3);
   border: 1px solid var(--brass);
   border-radius: var(--radius-button);
 }
@@ -71,6 +75,7 @@
 }
 
 .modeNote {
+  display: none;
   font-size: var(--text-small);
   line-height: var(--leading-small);
   color: var(--text-soft);
@@ -79,6 +84,11 @@
 .mode input:checked + .modeBody {
   background: var(--ink);
   color: var(--sailcloth);
+}
+
+.mode input:checked + .modeBody .modeNote,
+.mode[data-disabled="true"] .modeNote {
+  display: block;
 }
 
 .mode input:checked + .modeBody .modeNote {

@@ -161,14 +161,14 @@ export const PALETTE_TEXTURE_SIZE = 16;
 
 /**
  * Build the 16x16 RGBA palette texture. Day uses the token colours. Night pulls each
- * colour 45% toward the night background, so a mood change is one texture swap and
+ * colour 20% toward the night background, so a mood change is one texture swap and
  * both moods share one cell map.
  */
 export function buildPaletteTexture(mood: Mood): Uint8Array {
   const size = PALETTE_TEXTURE_SIZE;
   const data = new Uint8Array(size * size * 4);
   paletteCells.forEach((hex, i) => {
-    const [r, g, b] = parseHex(mood === "night" ? mix(hex, palette.night, 0.45) : hex);
+    const [r, g, b] = parseHex(mood === "night" ? mix(hex, palette.night, 0.2) : hex);
     data.set([r, g, b, 255], i * 4);
   });
   return data;

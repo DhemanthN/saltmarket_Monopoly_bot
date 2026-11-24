@@ -40,7 +40,7 @@ function Lights({ turn, boardVersion, shadowMapSize }: { turn: number; boardVers
   useEffect(() => {
     gl.shadowMap.autoUpdate = false;
     gl.shadowMap.needsUpdate = true;
-    shadowUpdates.current += 1;
+    if (shadowMapSize !== null) shadowUpdates.current += 1;
     if (DEV_PERF && window.__saltmarketPerf) window.__saltmarketPerf.shadowUpdates = shadowUpdates.current;
     invalidate();
   }, [gl, boardVersion, sun.keyframe, shadowMapSize, invalidate]);
@@ -76,6 +76,16 @@ function Lights({ turn, boardVersion, shadowMapSize }: { turn: number; boardVers
 function PerfProbe({ tier, dpr }: { tier: Tier; dpr: number }) {
   const gl = useThree((s) => s.gl);
   const frames = useRef({ n: 0, t: 0, fps: 0 });
+  // The high tier's composer renders several passes per frame, and each pass would reset the
+  // counters. Keep them for the whole frame and reset once here instead.
+  /* eslint-disable react-hooks/immutability */
+  useEffect(() => {
+    gl.info.autoReset = false;
+    return () => {
+      gl.info.autoReset = true;
+    };
+  }, [gl]);
+  /* eslint-enable react-hooks/immutability */
   useFrame((_, dt) => {
     const f = frames.current;
     f.n += 1;
@@ -93,6 +103,8 @@ function PerfProbe({ tier, dpr }: { tier: Tier; dpr: number }) {
       triangles: gl.info.render.triangles,
       shadowUpdates: window.__saltmarketPerf?.shadowUpdates ?? 0,
     };
+    // Runs before this frame renders, so the numbers above are the previous frame's totals.
+    gl.info.reset();
   });
   return null;
 }

@@ -40,8 +40,8 @@ export function sunForTurn(turn: number): SunState {
     mood: night ? "night" : "day",
     direction,
     color,
-    intensity: night ? 1.2 : 1.6 + Math.sin(arc) * 1.2,
-    hemiIntensity: night ? 1.6 : 1.8,
+    intensity: night ? 1.8 : 1.6 + Math.sin(arc) * 1.2,
+    hemiIntensity: night ? 2.2 : 1.8,
     sky,
   };
 }

@@ -1,6 +1,6 @@
 # Handoff: hud
 
-Branch: `hud` · Date: 2026-11-23 · Status: done (design-critic review pending, see below)
+Branch: `hud` · Date: 2026-11-23 · Status: done, design-critic verdict FIX (open items below)
 
 ## What changed
 - `web/src/hud/`: reducer (`state.ts`), panel layout model (`layout.ts`), facts and results text (`facts.ts`, `resultsFacts.ts`), decision panels (`decisions/DecisionPanel.tsx`), thought lanterns (`Lantern.tsx`), ledger rail (`LedgerRail.tsx`), coach marks (`CoachMarks.tsx`), game-over screen (`GameOver.tsx`), keyboard handling (`useDecisionKeys.ts`).
@@ -22,7 +22,16 @@ Branch: `hud` · Date: 2026-11-23 · Status: done (design-critic review pending,
 - Results: 72 passed (Vitest). Python suite not run: no Python files changed.
 
 ## Left for later / known issues
-- `design-critic` was launched on the HUD screens but its report had not arrived when this was written. Apply its findings before calling the UI final.
+- `design-critic` verdict: FIX. ANTI_SLOP checklist passes; DESIGN.md violations remain (screenshots in `.pane/scratch/critic/`):
+  1. Mobile (390x844): decision panel (y 360-828) covers the ledger (y 674). Needs a bottom sheet of about 50vh and a one-line cash strip pinned at the top.
+  2. Coach marks are not anchored to their targets (piece, panel edge, lantern button). Tip 3 refers to a lantern that does not exist in `bots_3p`, and on mobile the tip covers the lantern.
+  3. Auction: 5 chips wrapped 4+1 instead of 7 in a row, no live bid ladder with seat emblems, and chips above the player's cash are still offered (may be a sample-decision mismatch, check the real flow).
+  4. Trade panels: no "completes a group" badge or district swatch, lowercase group chip ("kelp"), "Offer 60 For ..." capital F.
+  5. No motion: no 240 ms panel enter, no travelling rent coin.
+  6. Desktop decision panel covers the ring centre and the signboard of the space being decided. Dock bottom-left, width 400.
+  7. Primary buttons for build, raise cash and liquidate show no amount. Buy with negative cash after should show danger colour and "(raise N first)". Number list rows from 1.
+  8. Night: dark panels over a daylit world, lantern bar track dark on dark, lantern heading in Plex not Fraunces, "Star (always buy)" and "You (bankrupt)" wrap in the 340 px ledger.
+- Keep: the Buy deed card, one clear primary per panel, the game-over honesty line.
 - `perf-auditor` not run: no `web/src/world` changes.
 - Build warns about a chunk over 500 kB; code-splitting belongs to the deploy task.
 

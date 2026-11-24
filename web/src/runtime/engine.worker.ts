@@ -5,7 +5,7 @@
  * writes the answer into the shared cell, so the Python game runs once from start to finish.
  */
 import type { PyodideAPI } from "pyodide";
-import { bootEngine, runGame } from "./engineCore";
+import { bootEngine, installModel, modelsFor, runGame } from "./engineCore";
 import {
   ABORTED,
   CELL_ABORT,
@@ -23,6 +23,13 @@ declare const self: DedicatedWorkerGlobalScope;
 const PYODIDE_URL = `/pyodide/v${PYODIDE_VERSION}/`;
 const CACHE_NAME = "saltmarket-runtime";
 
+interface Manifest {
+  bundle: string;
+  models: Record<string, { file: string }>;
+}
+
+let manifest: Manifest | null = null;
+const installed = new Set<string>();
 let cell: Int32Array | null = null;
 let engine: PyodideAPI | null = null;
 
@@ -58,8 +65,10 @@ async function cachedBytes(url: string): Promise<Uint8Array> {
   const response = await fetchBytes(url);
   if (cache) {
     await cache.put(url, response.clone());
+    // Drop older builds of this same file (same name, different hash), never other files.
+    const family = (u: string) => u.replace(/\.[0-9a-f]{12}\./, ".");
     for (const key of await cache.keys()) {
-      if (!key.url.endsWith(url)) await cache.delete(key);
+      if (!key.url.endsWith(url) && family(key.url).endsWith(family(url))) await cache.delete(key);
     }
   }
   return new Uint8Array(await response.arrayBuffer());
@@ -72,12 +81,23 @@ async function load(): Promise<void> {
   phase("numpy");
   await py.loadPackage("numpy", { messageCallback: () => {} });
   phase("bundle");
-  const manifest = (await (await fetch("/runtime/manifest.json", { cache: "no-cache" })).json()) as { bundle: string };
+  manifest = (await (await fetch("/runtime/manifest.json", { cache: "no-cache" })).json()) as Manifest;
   const bundle = await cachedBytes(`/runtime/${manifest.bundle}`);
   phase("engine");
   bootEngine(py, bundle);
   engine = py;
   phase("ready");
+}
+
+/** Fetches only the weights this game's seats use, once per worker. */
+async function ensureModels(seats: readonly string[]): Promise<void> {
+  for (const name of modelsFor(seats)) {
+    if (installed.has(name)) continue;
+    const entry = manifest?.models[name];
+    if (!entry) throw new Error(`No weights file named ${name} in the runtime manifest`);
+    installModel(engine!, name, await cachedBytes(`/runtime/${entry.file}`));
+    installed.add(name);
+  }
 }
 
 function ask(decisionJson: string): number {
@@ -112,6 +132,12 @@ self.onmessage = async ({ data }: MessageEvent<ToWorker>) => {
       post({ type: "error", message: String(error) });
     }
   } else if (data.type === "play") {
+    try {
+      await ensureModels(data.config.seats);
+    } catch (error) {
+      post({ type: "error", message: String(error) });
+      return;
+    }
     play(data);
   }
 };

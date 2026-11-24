@@ -1,5 +1,19 @@
 {
-  "bundle": "app.b27d625793fb.zip",
-  "sha256": "b27d625793fb4f8793f9d06102924e26428aea05a36455c412c6d24ef24a7a93",
-  "bytes": 3418149
+  "bundle": "app.7ad75ca8298e.zip",
+  "sha256": "7ad75ca8298e694ae51b9c1f30a724acd2bd1d6ec37de4ecf5c6779c9e50efef",
+  "bytes": 111252,
+  "models": {
+    "two_player": {
+      "file": "model.two_player.b4a7c6e5faf5.npz",
+      "bytes": 1102402
+    },
+    "main": {
+      "file": "model.main.3d2cec12a874.npz",
+      "bytes": 1102462
+    },
+    "dqn_two_player": {
+      "file": "model.dqn_two_player.8ce03625b0f6.npz",
+      "bytes": 1102359
+    }
+  }
 }

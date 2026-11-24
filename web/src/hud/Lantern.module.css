@@ -1,0 +1,112 @@
+.dock {
+  position: absolute;
+  inset-inline-start: var(--space-4);
+  inset-block-start: var(--space-4);
+  z-index: var(--z-hud-rail);
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+}
+
+.lantern {
+  position: relative;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-button);
+  background: var(--surface);
+  color: var(--text);
+  font: 600 var(--text-small) / var(--leading-small) var(--font-text);
+  cursor: pointer;
+}
+
+.button:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+[data-mood="night"] .button:focus-visible {
+  outline-color: var(--night-text);
+}
+
+.hint {
+  font-weight: 400;
+  color: var(--text-soft);
+}
+
+.card {
+  position: absolute;
+  inset-block-start: calc(100% + var(--space-1));
+  inset-inline-start: 0;
+  z-index: var(--z-decision);
+  width: min(340px, calc(100vw - var(--space-8)));
+  padding: var(--space-4);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+  box-shadow: var(--shadow-paper-lift);
+}
+
+.heading {
+  font-family: var(--font-display);
+  font-weight: 600;
+  margin: 0;
+  font-size: var(--text-h4);
+  line-height: var(--leading-h4);
+}
+
+.sub {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-small);
+  line-height: var(--leading-small);
+  color: var(--text-soft);
+}
+
+.bars {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bars li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-1) var(--space-3);
+  font-size: var(--text-small);
+}
+
+.track {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  height: 8px;
+  background: var(--surface-inset);
+  outline: 1px solid var(--rule);
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  background: var(--tide);
+}
+
+[data-mood="night"] .fill {
+  background: var(--night-text);
+}
+
+.figure {
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .dock {
+    inset-block-start: 56px;
+  }
+}

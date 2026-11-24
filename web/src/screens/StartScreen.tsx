@@ -1,28 +1,43 @@
 import { useState } from "react";
+import type { SessionConfig } from "../contract/types";
 import { seatOrder } from "../styles/tokens";
 import { Button } from "../ui/Button";
 import { Emblem } from "../ui/Emblem";
 import { Panel } from "../ui/Panel";
 import { useToast } from "../ui/Toast";
 import { AtollSilhouette } from "../world/AtollSilhouette";
+import { buildConfig, opponentAllowed, TABLE_SIZES, type Opponent, type TableSize } from "./startConfig";
 import styles from "./StartScreen.module.css";
-
-type Opponent = "ppo" | "dqn" | "bot";
 
 const OPPONENT_LABEL: Record<Opponent, string> = {
   ppo: "PPO agent",
-  dqn: "DQN agent",
+  dqn: "DQN agent (2 players only)",
   bot: "Scripted bot",
 };
 
-const MAX_SEATS = 4;
+interface StartScreenProps {
+  /** Called with the chosen table. Absent until the game engine is connected. */
+  onStart?: (config: SessionConfig) => void;
+}
 
-export function StartScreen() {
+export function StartScreen({ onStart }: StartScreenProps) {
   const toast = useToast();
-  const [opponents, setOpponents] = useState<Opponent[]>(["ppo"]);
+  const [opponent, setOpponent] = useState<Opponent>("ppo");
+  const [size, setSize] = useState<TableSize>(2);
 
-  const setOpponent = (i: number, kind: Opponent) =>
-    setOpponents((prev) => prev.map((o, j) => (j === i ? kind : o)));
+  const pickSize = (next: TableSize) => {
+    setSize(next);
+    if (!opponentAllowed(opponent, next)) setOpponent("ppo");
+  };
+
+  const config = buildConfig(opponent, size, 0);
+  const start = () => {
+    if (!onStart) {
+      toast("The game engine is not connected yet.");
+      return;
+    }
+    onStart(buildConfig(opponent, size, Math.floor(Math.random() * 1_000_000)));
+  };
 
   return (
     <main className={styles.screen}>
@@ -36,51 +51,58 @@ export function StartScreen() {
           trained agents.
         </p>
 
-        <div className={styles.table} role="group" aria-labelledby="seats-title">
-          <p id="seats-title" className={styles.legend}>
-            Seats at the table
-          </p>
-          <div className={styles.seat}>
-            <Emblem emblem={seatOrder[0].emblem} seat={seatOrder[0].name} />
-            <span className={styles.seatName}>You</span>
+        <div className={styles.field}>
+          <label htmlFor="opponent" className={styles.legend}>
+            Opponent
+          </label>
+          <select
+            id="opponent"
+            className={styles.select}
+            value={opponent}
+            onChange={(e) => setOpponent(e.target.value as Opponent)}
+          >
+            {(Object.keys(OPPONENT_LABEL) as Opponent[]).map((o) => (
+              <option key={o} value={o} disabled={!opponentAllowed(o, size)}>
+                {OPPONENT_LABEL[o]}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <fieldset className={styles.field}>
+          <legend className={styles.legend}>Table size</legend>
+          <div className={styles.sizes}>
+            {TABLE_SIZES.map((n) => (
+              <label key={n} className={styles.size}>
+                <input
+                  type="radio"
+                  name="table-size"
+                  value={n}
+                  checked={size === n}
+                  onChange={() => pickSize(n)}
+                />
+                <span>{n} players</span>
+              </label>
+            ))}
           </div>
-          {opponents.map((kind, i) => {
-            const seat = seatOrder[i + 1];
-            return (
-              <div className={styles.seat} key={seat.name}>
-                <Emblem emblem={seat.emblem} seat={seat.name} />
-                <label className={styles.seatName} htmlFor={`seat-${i + 1}`}>
-                  {seat.label} seat
-                </label>
-                <select
-                  id={`seat-${i + 1}`}
-                  className={styles.select}
-                  value={kind}
-                  onChange={(e) => setOpponent(i, e.target.value as Opponent)}
-                >
-                  {(Object.keys(OPPONENT_LABEL) as Opponent[]).map((o) => (
-                    <option key={o} value={o}>
-                      {OPPONENT_LABEL[o]}
-                    </option>
-                  ))}
-                </select>
-                {i > 0 ? (
-                  <Button variant="quiet" onClick={() => setOpponents((prev) => prev.slice(0, -1))}>
-                    Remove
-                  </Button>
-                ) : null}
-              </div>
-            );
-          })}
-          {opponents.length + 1 < MAX_SEATS ? (
-            <Button variant="quiet" className={styles.add} onClick={() => setOpponents((prev) => [...prev, "bot"])}>
-              Add a seat
-            </Button>
-          ) : null}
+        </fieldset>
+
+        <div className={styles.table} role="group" aria-label="Seats at the table">
+          {config.seats.map((kind, i) => (
+            <div className={styles.seat} key={seatOrder[i].name}>
+              <Emblem emblem={seatOrder[i].emblem} seat={seatOrder[i].name} />
+              <span className={styles.seatName}>
+                {kind === "human" ? "You" : `${seatOrder[i].label} seat`}
+              </span>
+              <span className={styles.seatKind}>
+                {kind === "human" ? "" : kind === "ppo" ? "PPO agent" : kind === "dqn" ? "DQN agent" : "Scripted bot"}
+              </span>
+            </div>
+          ))}
         </div>
 
         <div className={styles.actions}>
-          <Button variant="primary" onClick={() => toast("The game engine is not connected yet.")}>
+          <Button variant="primary" onClick={start}>
             Start game
           </Button>
           <Button variant="quiet" onClick={() => toast("The rules summary arrives with the game screen.")}>

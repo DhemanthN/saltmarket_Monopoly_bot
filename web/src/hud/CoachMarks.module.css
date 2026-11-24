@@ -1,0 +1,52 @@
+.wrap {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-coach);
+  pointer-events: none;
+}
+
+.ring {
+  position: fixed;
+  border: 2px solid var(--focus);
+  border-radius: var(--radius-panel);
+  box-shadow: 0 0 0 2px var(--surface-raised);
+}
+
+[data-mood="night"] .ring {
+  border-color: var(--night-text);
+  box-shadow: none;
+}
+
+.card {
+  position: fixed;
+  display: grid;
+  gap: var(--space-2);
+  max-width: calc(100vw - var(--space-8));
+  pointer-events: auto;
+}
+
+.count {
+  margin: 0;
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  color: var(--text-soft);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--text-h4);
+  line-height: var(--leading-h4);
+}
+
+.body {
+  margin: 0;
+  font-size: var(--text-small);
+  line-height: var(--leading-small);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}

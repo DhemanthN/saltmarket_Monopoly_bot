@@ -1,0 +1,133 @@
+.rail {
+  position: absolute;
+  inset-inline-end: var(--space-4);
+  inset-block-start: var(--space-4);
+  z-index: var(--z-hud-rail);
+  width: min(340px, calc(100% - var(--space-8)));
+  max-height: calc(100% - var(--space-8));
+  overflow-y: auto;
+  padding: var(--space-4);
+}
+
+.seat {
+  margin-bottom: var(--space-2);
+}
+
+.worth {
+  margin: 0;
+  padding-inline-start: 34px;
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  color: var(--text-soft);
+}
+
+.feed {
+  display: grid;
+  gap: var(--space-1);
+  margin: var(--space-3) 0 0;
+  padding: var(--space-3) 0 0;
+  border-top: 1px solid var(--rule);
+  list-style: none;
+  font-size: var(--text-small);
+  line-height: var(--leading-small);
+}
+
+.feed:empty {
+  display: none;
+}
+
+.feed li {
+  animation: feed-in var(--motion-standard) var(--ease-standard);
+}
+
+.rent {
+  position: relative;
+}
+
+.rent::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 4px;
+  inset-inline-start: 0;
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+  background: var(--brass);
+  animation: coin-travel var(--motion-travel) var(--ease-travel) both;
+}
+
+.rent {
+  padding-inline-start: 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feed li,
+  .rent::before {
+    animation-name: fade-in;
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+}
+
+@keyframes feed-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes coin-travel {
+  from {
+    transform: translate(-120px, 40px) scale(1.4);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 600px) {
+  .rail {
+    inset-block-start: 0;
+    inset-inline: 0;
+    inset-block-end: auto;
+    width: auto;
+    max-height: none;
+    display: flex;
+    gap: var(--space-3);
+    padding: var(--space-1) var(--space-3);
+    overflow-x: auto;
+    border-radius: 0;
+  }
+
+  .seat {
+    flex: 1 1 0;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .seat > div {
+    grid-template-columns: 24px auto;
+    column-gap: var(--space-2);
+    padding-inline: var(--space-1);
+  }
+
+  .seat > div > span:nth-child(2),
+  .seat > div > span:nth-child(3) {
+    display: none;
+  }
+
+  .rail {
+    overflow: hidden;
+  }
+
+  .worth,
+  .feed {
+    display: none;
+  }
+}

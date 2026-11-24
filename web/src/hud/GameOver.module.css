@@ -1,0 +1,72 @@
+.scrim {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: color-mix(in srgb, var(--page) 55%, transparent);
+}
+
+.focus {
+  outline: none;
+  width: min(460px, 100%);
+}
+
+.panel {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.kicker {
+  margin: 0;
+  font-size: var(--text-small);
+  color: var(--text-soft);
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  font-size: var(--text-h2);
+  line-height: var(--leading-h2);
+}
+
+.note {
+  margin: 0;
+  font-size: var(--text-small);
+  line-height: var(--leading-small);
+  color: var(--text-soft);
+}
+
+.facts {
+  margin: 0;
+  padding: var(--space-3) 0 0;
+  border-top: 1px solid var(--rule);
+  list-style: none;
+  font-size: var(--text-small);
+  line-height: var(--leading-small);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+}
+
+.link {
+  color: var(--link);
+  text-underline-offset: 3px;
+}
+
+.link:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+[data-mood="night"] .link:focus-visible {
+  outline-color: var(--night-text);
+}

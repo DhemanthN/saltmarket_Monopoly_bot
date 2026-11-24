@@ -1,6 +1,7 @@
 import { useLayoutEffect, useState } from "react";
 import { Button } from "../ui/Button";
 import { Panel } from "../ui/Panel";
+import { useModalKeys } from "../ui/useModalKeys";
 import styles from "./CoachMarks.module.css";
 
 const STORAGE_KEY = "saltmarket.coach.done";
@@ -91,10 +92,22 @@ function markSeen(): void {
   }
 }
 
-/** Up to three skippable marks, each pointing at its target, shown on the first game only. */
-export function CoachMarks({ onDone }: { onDone?: () => void }) {
+interface CoachMarksProps {
+  /**
+   * Current tip. The parent owns it because the marks unmount between decisions, and the tour
+   * must carry on where it stopped rather than start again at tip 1.
+   */
+  step: number;
+  onStep: (step: number) => void;
+  onDone?: () => void;
+}
+
+/**
+ * Up to three skippable marks, each pointing at its target, shown on the first game only.
+ * While a tip is open, game keys do not reach the decision panel under it; Escape skips the tips.
+ */
+export function CoachMarks({ step, onStep, onDone }: CoachMarksProps) {
   const [marks, setMarks] = useState<readonly Mark[] | null>(null);
-  const [step, setStep] = useState(0);
   const [visible, setVisible] = useState(() => !coachSeen());
   const [placement, setPlacement] = useState<Placement | null>(null);
 
@@ -105,6 +118,12 @@ export function CoachMarks({ onDone }: { onDone?: () => void }) {
   }, [visible, step]);
 
   const mark = marks?.[step];
+  const finish = () => {
+    markSeen();
+    setVisible(false);
+    onDone?.();
+  };
+  useModalKeys(visible && mark !== undefined, finish);
   useLayoutEffect(() => {
     if (!mark) return;
     const update = () => setPlacement(place(mark));
@@ -119,11 +138,6 @@ export function CoachMarks({ onDone }: { onDone?: () => void }) {
   }, [mark]);
 
   if (!visible || !marks || !mark || !placement) return null;
-  const finish = () => {
-    markSeen();
-    setVisible(false);
-    onDone?.();
-  };
   const last = step + 1 >= marks.length;
   return (
     <div className={styles.wrap}>
@@ -141,7 +155,7 @@ export function CoachMarks({ onDone }: { onDone?: () => void }) {
         <h2 className={styles.title}>{mark.title}</h2>
         <p className={styles.body}>{mark.body}</p>
         <div className={styles.actions}>
-          <Button variant="primary" autoFocus onClick={() => (last ? finish() : setStep(step + 1))}>
+          <Button variant="primary" autoFocus onClick={() => (last ? finish() : onStep(step + 1))}>
             {last ? "Got it" : "Next"}
           </Button>
           <Button variant="quiet" onClick={finish}>

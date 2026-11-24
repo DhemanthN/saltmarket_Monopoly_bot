@@ -40,6 +40,20 @@ function fakeClient() {
 }
 
 describe("WorkerSession", () => {
+  it("never starts a game that was left while the engine was still loading", async () => {
+    // Leaving during load used to let the abandoned game start once the engine was ready. It
+    // then blocked the worker on its first decision, so the next game never got a turn.
+    const { client, mock } = fakeClient();
+    let ready!: () => void;
+    (mock as { ready: Promise<void> }).ready = new Promise<void>((r) => (ready = r));
+    const session = new WorkerSession(client);
+    const started = session.start(config);
+    session.dispose();
+    ready();
+    await started;
+    expect(mock.play).not.toHaveBeenCalled();
+  });
+
   it("rejects illegal ids without waking the worker", async () => {
     const { client, mock, emit } = fakeClient();
     const session = new WorkerSession(client);

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { AgentName, Decision } from "../contract/types";
 import { CoachMarks } from "./CoachMarks";
 import { DecisionPanel } from "./decisions/DecisionPanel";
@@ -25,6 +26,7 @@ export function HudView({ hud, names, seats, decision, gameOver, onSubmit, onPla
   );
   const agents = seats.filter((k): k is AgentName => k === "ppo" || k === "dqn");
   const human = seats.indexOf("human");
+  const [coachStep, setCoachStep] = useState(0);
   return (
     <>
       <LedgerRail hud={hud} names={names} active={decision?.seat ?? null} human={human} />
@@ -32,7 +34,7 @@ export function HudView({ hud, names, seats, decision, gameOver, onSubmit, onPla
       {decision && !gameOver ? (
         <DecisionPanel key={`${decision.turn}-${decision.kind}-${decision.legal.map((a) => a.id).join(",")}`} decision={decision} hud={hud} names={names} onSubmit={onSubmit} />
       ) : null}
-      {coach && decision && decision.seat === human ? <CoachMarks /> : null}
+      {coach && decision && decision.seat === human ? <CoachMarks step={coachStep} onStep={setCoachStep} /> : null}
       {gameOver ? <GameOver hud={hud} names={names} agents={agents} onPlayAgain={onPlayAgain} /> : null}
     </>
   );

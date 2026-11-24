@@ -1,0 +1,108 @@
+/* Matches the camera view button it sits beside (WorldScene.module.css). */
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--outline);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--text);
+  font: 500 14px / 20px var(--font-text);
+  cursor: pointer;
+  transition: transform var(--motion-quick);
+}
+
+.trigger:active {
+  transform: translateY(1px);
+}
+
+.trigger:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.field {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.legend {
+  margin-bottom: var(--space-2);
+  padding: 0;
+  font: 600 var(--text-small) / var(--leading-small) var(--font-text);
+  color: var(--text-soft);
+}
+
+.options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-1);
+}
+
+.option {
+  position: relative;
+}
+
+.option input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.option span {
+  display: grid;
+  place-items: center;
+  min-height: 44px;
+  border: 1px solid var(--brass);
+  border-radius: var(--radius-button);
+  font-size: var(--text-small);
+  font-weight: 500;
+}
+
+.option input:checked + span {
+  background: var(--ink);
+  color: var(--sailcloth);
+}
+
+.option input:focus-visible + span {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.hint,
+.warn {
+  margin: 0;
+  font-size: var(--text-small);
+  line-height: var(--leading-small);
+  color: var(--text-soft);
+}
+
+.warn {
+  color: var(--text);
+}
+
+.actions {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.check {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  min-height: 44px;
+  font-size: var(--text-small);
+  line-height: var(--leading-small);
+  cursor: pointer;
+}
+
+.check input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--ink);
+}

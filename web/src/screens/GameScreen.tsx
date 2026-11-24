@@ -1,10 +1,14 @@
 import { Component, useEffect, useState, type ReactNode } from "react";
+import { GameMenu, type QualityChoice } from "../hud/GameMenu";
 import { HudView } from "../hud/HudView";
 import { useGameStore } from "../store/gameStore";
+import { Button } from "../ui/Button";
 import { AtollSilhouette } from "../world/AtollSilhouette";
+import { prefersReducedMotion } from "../world/quality";
 import { WorldScene } from "../world/WorldScene";
 import { LOAD_CAPTION } from "./loadCaption";
 import { RuntimeTrouble } from "./RuntimeTrouble";
+import styles from "./GameScreen.module.css";
 
 const screenStyle = { position: "relative", height: "100%", overflow: "hidden" } as const;
 
@@ -79,13 +83,30 @@ function Game() {
   const ready = load.phase === "ready";
   const shownDecision = trouble ? null : decision;
   const sheetInset = useSheetInset(shownDecision !== null);
+  const [quality, setQuality] = useState<QualityChoice>(null);
+  const [reducedMotion, setReducedMotion] = useState(prefersReducedMotion);
 
   return (
     <main style={screenStyle}>
       {ready ? (
         <>
           <div inert={trouble !== null} style={{ display: "contents" }}>
-            <WorldScene state={world} seatKinds={config.seats} bottomInset={sheetInset} />
+            <WorldScene
+              state={world}
+              seatKinds={config.seats}
+              bottomInset={sheetInset}
+              tierOverride={quality}
+              reducedMotion={reducedMotion}
+              controls={
+                <GameMenu
+                  quality={quality}
+                  onQuality={setQuality}
+                  reducedMotion={reducedMotion}
+                  onReducedMotion={setReducedMotion}
+                  onLeave={leave}
+                />
+              }
+            />
             <HudView
               hud={hud}
               names={names}
@@ -104,6 +125,11 @@ function Game() {
           <p className="visually-hidden" role="status">
             {LOAD_CAPTION[load.phase]}
           </p>
+          {trouble ? null : (
+            <Button variant="quiet" className={styles.back} onClick={leave}>
+              Back to the start
+            </Button>
+          )}
         </>
       )}
       {trouble ? <RuntimeTrouble detail={trouble} inGame={ready} onRetry={() => void retry()} onLeave={leave} /> : null}

@@ -42,6 +42,14 @@ export function panelModel(decision: Decision, cash: number = Infinity): PanelMo
   return { primary, choices, pass, bids: [] };
 }
 
+/**
+ * Decisions whose first action sells or mortgages something. Enter does not take it blindly
+ * there; the player clicks the row or presses its number.
+ */
+export function enterSubmits(kind: DecisionKind): boolean {
+  return kind !== "liquidate" && kind !== "raise_cash";
+}
+
 export const DECISION_TITLE: Record<DecisionKind, string> = {
   buy: "Buy or pass",
   auction: "Auction",

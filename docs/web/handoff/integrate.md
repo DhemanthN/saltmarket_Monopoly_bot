@@ -75,16 +75,54 @@ Branch: `integrate` · Date: 2026-11-23 · Status: done, waiting for the owner's
 
 ## Left for later / known issues
 - design-critic findings not fixed here (they belong to world and HUD):
-  - At 390x844 the decision sheet hides the player's piece. The camera should shift up by the
-    sheet height (`world/CameraRig.tsx`, for example `camera.setViewOffset`).
   - Signboards can overlap (seen: Staghorn Key over Brain Coral Atoll). Known from task 4a.
-  - Coach tip 1 covers the ledger row it describes. Anchor it below the rail.
   - Start screen at 390 px: small foggy atoll, panel touches the bottom edge.
+  - (Fixed in the follow-up below: the piece hidden by the phone sheet, and tip 1 over the ledger.)
 - Switching from the loading atoll to the world remounts a canvas. The container now paints
   the sky colour, so the gap shows sky, not paper.
 - Vercel builds need `python3` for `build_web_runtime.py` (task 6), or a committed bundle.
 - The first switch to chart view stalled one frame for 5 s in headless Chrome (perf notes).
   Check it on real hardware.
+
+- Not fixed from the code audit: the game-over dialog has no Escape handler or focus trap
+  (`hud/GameOver.tsx`); an illegal submit flickers with no message (`store/gameStore.ts`,
+  unreachable from the UI).
+
+## Follow-up: hud-qa and audit fixes (2026-11-24)
+- **Layout (commit 6efb17a):** the phone sheet shifts the camera view up so the player's piece
+  stays visible; tip 1 sits beside the ledger on wide screens and below it on phones; signboards
+  slide back inside the screen edge; auction chips stay on one row; the phone ledger strip shows
+  seat names.
+- **In-game menu** (`hud/GameMenu.tsx`): a Menu button beside Chart view opens graphics quality
+  (Auto, Low, Medium, High), a reduce-motion switch, and Leave game with a confirm step. On phones
+  the corner buttons stack under the ledger strip.
+- **Shared dialog** (`ui/Dialog.tsx`, `ui/useModalKeys.ts`): modal, rendered into `document.body`,
+  Escape or a scrim click closes it, focus returns to the opener. While a tip card or dialog is
+  open, game keys (Enter, Escape, digits, arrows, C) do not reach the decision panel or camera.
+  Only the newest open layer answers Escape, so closing the menu over a tip leaves the tip.
+- **Coach marks:** the step lives in `HudView`, so the tour continues between decisions instead of
+  restarting at tip 1. Escape on a tip skips the tips; it no longer submits Pass.
+- **How to play** on the start screen opens a rules summary (`screens/rules.ts`). Its numbers are
+  checked against `GameConfig` in `rules.test.ts`.
+- **Keys:** Enter on a focused bid or offer chip submits; Up and Down switch the trade group;
+  Enter does not take the first sell or mortgage on `liquidate` and `raise_cash`.
+- **Loading:** a "Back to the start" button sits under the rising atoll. `WorkerSession` no longer
+  starts a game that was left while the engine was still loading (test added).
+- Removed dead code: the `!onStart` branch on the start screen and `WorldScene.onViewChange`.
+
+### Verified
+- `npx tsc --noEmit` clean, `npm run lint` clean, `npx vitest run` 118 passed in 16 files,
+  `pytest -m smoke` 426 passed in 23.9 s.
+- Live click-through (Pane browser, dev server, an iframe sized 390x844 then 1440x900, game vs
+  PPO at 2 players): How to play opens and Escape closes it; tip 1 shows; Enter and digits under a
+  tip do nothing; Menu over a tip, Escape closes only the menu; Escape on tip 2 skips the tips and
+  leaves the auction open; digit 3 and ArrowRight move the bid chip; Enter on a focused chip bids;
+  Menu quality radio sets; Leave game asks to confirm and returns to the start screen; a second
+  game starts after that mid-game leave. At 1440x900 about 40 decisions played through buy,
+  auction, trade offer, raise cash (mortgage rows) and liquidate with no stall; ArrowDown switched
+  the offer from Driftwood to Cinder.
+- Not checked live: leaving during the engine load (covered by the unit test), the game-over
+  screen, night mood.
 
 ## What the next task needs to know
 - `useGameStore` is the only game state. The world reads `world` and the HUD reads `hud`; both are

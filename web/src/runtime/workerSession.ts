@@ -26,6 +26,8 @@ export class WorkerSession implements GameSession {
   private summary: GameSummary | null = null;
   private failure: string | null = null;
   private waiter: Waiter | null = null;
+  /** Set by `dispose`, so a start or resume still waiting for the engine never plays. */
+  private disposed = false;
   private unsubscribeClient: () => void = () => {};
   private readonly eventListeners = new Set<(event: GameEvent) => void>();
   private readonly decisionListeners = new Set<(decision: Decision) => void>();
@@ -38,6 +40,7 @@ export class WorkerSession implements GameSession {
   async start(config: SessionConfig): Promise<void> {
     this.config = config;
     await this.client.ready;
+    if (this.disposed) return;
     await this.run();
   }
 
@@ -105,10 +108,12 @@ export class WorkerSession implements GameSession {
     this.client = client;
     this.failure = null;
     await client.ready;
+    if (this.disposed) return;
     await this.run();
   }
 
   dispose(): void {
+    this.disposed = true;
     this.unsubscribeClient();
     if (!this.summary && !this.failure) this.client.abort();
     this.eventListeners.clear();

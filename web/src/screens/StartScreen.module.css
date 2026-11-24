@@ -134,3 +134,20 @@
     line-height: var(--leading-h1);
   }
 }
+
+.rule {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.ruleTitle {
+  margin: 0;
+  font: 600 var(--text-body) / var(--leading-body) var(--font-text);
+}
+
+.ruleBody {
+  margin: 0;
+  font-size: var(--text-small);
+  line-height: var(--leading-small);
+  color: var(--text-soft);
+}

@@ -1,0 +1,7 @@
+/* While the engine loads, a way out sits under the rising atoll. */
+.back {
+  position: absolute;
+  bottom: var(--space-6);
+  left: 50%;
+  translate: -50% 0;
+}

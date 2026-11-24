@@ -1,6 +1,6 @@
 import { PerformanceMonitor } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { type DirectionalLight } from "three";
 import { Buildings } from "./Buildings";
 import { CameraRig, type CameraView } from "./CameraRig";
@@ -24,8 +24,10 @@ interface Props {
   seatKinds: readonly string[];
   /** Tier the player picked; null lets the performance monitor decide. */
   tierOverride?: Tier | null;
-  /** Called when the camera view changes, so a HUD can mirror it. */
-  onViewChange?: (view: CameraView) => void;
+  /** Cut camera moves and piece animation. Defaults to the system's reduced-motion setting. */
+  reducedMotion?: boolean;
+  /** HUD controls drawn in the corner beside the camera view button (the game menu). */
+  controls?: ReactNode;
   /** Pixels at the bottom of the screen covered by the HUD (the mobile decision sheet). */
   bottomInset?: number;
 }
@@ -117,8 +119,9 @@ function PerfProbe({ tier, dpr }: { tier: Tier; dpr: number }) {
 }
 
 /** The 3D atoll. It renders a `WorldState` and never reads events. */
-export function WorldScene({ state, seatKinds, tierOverride = null, onViewChange, bottomInset = 0 }: Props) {
-  const reducedMotion = useMemo(() => prefersReducedMotion(), []);
+export function WorldScene({ state, seatKinds, tierOverride = null, controls, bottomInset = 0, reducedMotion: motionChoice }: Props) {
+  const systemReduced = useMemo(() => prefersReducedMotion(), []);
+  const reducedMotion = motionChoice ?? systemReduced;
   const [autoTier, setAutoTier] = useState<Tier>(reducedMotion ? "low" : "medium");
   const tier = tierOverride ?? autoTier;
   const settings = tierSettings(tier, typeof window === "undefined" ? 1 : window.devicePixelRatio);
@@ -137,8 +140,6 @@ export function WorldScene({ state, seatKinds, tierOverride = null, onViewChange
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
-
-  useEffect(() => onViewChange?.(view), [view, onViewChange]);
 
   return (
     <div className={styles.world}>
@@ -169,15 +170,18 @@ export function WorldScene({ state, seatKinds, tierOverride = null, onViewChange
         ) : null}
         {DEV_PERF ? <PerfProbe tier={tier} dpr={settings.dpr} /> : null}
       </Canvas>
-      <button
-        type="button"
-        className={styles.viewToggle}
-        onClick={() => setView((v) => (v === "street" ? "chart" : "street"))}
-        aria-label={view === "street" ? "Switch to chart view (C)" : "Switch to street view (C)"}
-      >
-        {view === "street" ? "Chart view" : "Street view"}
-        <kbd className={styles.key}>C</kbd>
-      </button>
+      <div className={styles.corner}>
+        {controls}
+        <button
+          type="button"
+          className={styles.viewToggle}
+          onClick={() => setView((v) => (v === "street" ? "chart" : "street"))}
+          aria-label={view === "street" ? "Switch to chart view (C)" : "Switch to street view (C)"}
+        >
+          {view === "street" ? "Chart view" : "Street view"}
+          <kbd className={styles.key}>C</kbd>
+        </button>
+      </div>
     </div>
   );
 }

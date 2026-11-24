@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Start screen mockups</title>
+<style>
+/* Shared mockup CSS: DESIGN.md tokens. Fonts are named but not embedded (no network);
+   the build self-hosts Cinzel and JetBrains Mono as woff2. */
+:root{--paper:#F3EAD7;--paper-deep:#E6D8BC;--sail:#FBF7EE;--ink:#1F2A2E;--ink-soft:#4A5558;
+--brass:#8A6A1F;--tide:#1E5A66;--focus:#0B5CAD;--night:#16232B;--night-panel:#22333C;--night-text:#EDE3CF;
+--sea1:#1E5A66;--sea2:#2E7E8A;--shallow:#6FB3AE;--sand:#E8D6A8;--sky1:#F2B27A;--sky2:#FFF4E0;
+--display:Cinzel,Fraunces,"Iowan Old Style",Georgia,serif;--text:"IBM Plex Sans","Segoe UI",Arial,sans-serif;
+--mono:"JetBrains Mono",Consolas,monospace}
+*{box-sizing:border-box}
+body{margin:0;background:#CFC3A8;color:var(--ink);font:14px/20px var(--text)}
+.doc{max-width:1900px;margin:0 auto;padding:24px 16px 64px}
+.doc>h1{font:600 31px/36px var(--display);margin:0 0 4px}
+.doc>p{max-width:72ch;margin:0 0 24px;color:var(--ink-soft)}
+.opt{margin:0 0 48px}
+.opt h2{font:600 22px/28px var(--display);margin:0 0 4px}
+.opt .why{margin:0 0 12px;max-width:90ch}
+.row{display:flex;gap:24px;align-items:flex-start;overflow-x:auto;padding-bottom:8px}
+.frame{flex:none;position:relative;overflow:hidden;border:6px solid var(--ink);border-radius:10px;background:var(--sea1)}
+.phone{width:390px;height:844px;border-radius:28px}
+.desk{width:1440px;height:900px}
+.label{font:600 12px/16px var(--mono);color:var(--ink-soft);margin:0 0 6px;letter-spacing:.04em}
+/* scene */
+.scene{position:absolute;inset:0;width:100%;height:100%}
+/* panel */
+.panel{position:absolute;background:var(--paper);border:1px solid var(--brass);border-radius:6px;
+box-shadow:0 0 0 4px var(--paper),0 0 0 5px var(--brass),0 12px 28px rgba(22,35,43,.35);padding:20px}
+.panel h1{font:700 39px/44px var(--display);letter-spacing:.06em;margin:0;color:var(--ink)}
+.panel .sub{font:500 12px/16px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--brass);margin:4px 0 14px}
+.rule{height:1px;background:var(--brass);margin:12px 0;position:relative}
+.rule:after{content:"";position:absolute;left:50%;top:-4px;width:8px;height:8px;margin-left:-4px;background:var(--paper);border:1px solid var(--brass);transform:rotate(45deg)}
+.modes{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.modes li{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;padding:10px 12px;
+background:var(--sail);border:1px solid var(--paper-deep);border-radius:4px;min-height:48px}
+.modes li b{font:600 16px/22px var(--text);display:block}
+.modes li span{font-size:12px;line-height:16px;color:var(--ink-soft)}
+.modes li kbd{font:500 12px/16px var(--mono);border:1px solid var(--brass);border-radius:3px;padding:1px 6px;color:var(--brass)}
+.modes li.on{border-color:var(--ink);box-shadow:inset 4px 0 0 var(--brass)}
+.modes svg{width:28px;height:28px}
+.cta{margin-top:14px;display:block;width:100%;padding:12px;font:600 16px/24px var(--text);color:var(--sail);
+background:var(--tide);border:0;border-radius:4px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.25)}
+.foot{margin-top:10px;font:12px/16px var(--mono);color:var(--ink-soft);display:flex;justify-content:space-between}
+.compact .modes li{min-height:44px;padding:8px 10px}
+.compact h1{font-size:31px;line-height:36px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+ <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E9875A"/><stop offset=".55" stop-color="#F2B27A"/><stop offset="1" stop-color="#FFF4E0"/></linearGradient>
+ <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2E7E8A"/><stop offset="1" stop-color="#16424C"/></linearGradient>
+ <radialGradient id="lagoon" cx=".5" cy=".4" r=".6"><stop offset="0" stop-color="#8CC7BD"/><stop offset="1" stop-color="#2E7E8A"/></radialGradient>
+ <!-- Low-poly ship, faceted hull, ink outlines. viewBox 0 0 400 320 -->
+ <symbol id="ship" viewBox="0 0 400 320">
+  <g stroke="#1F2A2E" stroke-width="2" stroke-linejoin="round">
+   <!-- rigging -->
+   <g fill="none" stroke-width="1" opacity=".8">
+    <path d="M118 40 L20 226 M200 12 L20 226 M200 12 L382 222 M282 50 L382 222 M118 40 L200 12 L282 50"/>
+    <path d="M118 70 L60 230 M118 70 L176 230 M200 46 L150 230 M200 46 L250 230 M282 80 L232 230 M282 80 L330 228" stroke-dasharray="2 3"/>
+   </g>
+   <!-- masts -->
+   <path d="M116 36h4v198h-4zM198 8h4v226h-4zM280 46h4v188h-4z" fill="#7A5A3C"/>
+   <path d="M302 226 L392 214 L394 220 L304 232z" fill="#7A5A3C"/>
+   <!-- sails: three tiers, faceted, saffron trim -->
+   <g fill="#FBF7EE">
+    <path d="M88 64 L148 64 L156 118 L80 118z"/><path d="M80 124 L156 124 L166 186 L70 186z"/>
+    <path d="M172 30 L228 30 L236 84 L164 84z"/><path d="M162 90 L238 90 L250 158 L150 158z"/><path d="M150 164 L250 164 L258 214 L142 214z"/>
+    <path d="M256 70 L308 70 L316 120 L248 120z"/><path d="M246 126 L318 126 L328 190 L236 190z"/>
+   </g>
+   <g fill="#E6D8BC" stroke="none">
+    <path d="M118 64 L148 64 L156 118 L118 118z"/><path d="M118 124 L156 124 L166 186 L118 186z"/>
+    <path d="M200 30 L228 30 L236 84 L200 84z"/><path d="M200 90 L238 90 L250 158 L200 158z"/><path d="M200 164 L250 164 L258 214 L200 214z"/>
+    <path d="M282 70 L308 70 L316 120 L282 120z"/><path d="M282 126 L318 126 L328 190 L282 190z"/>
+   </g>
+   <path d="M88 64h60M80 124h76M172 30h56M162 90h76M150 164h100M256 70h52M246 126h72" stroke="#7A5A3C" stroke-width="3"/>
+   <!-- jib -->
+   <path d="M286 52 L374 216 L292 210z" fill="#FBF7EE"/>
+   <!-- flags -->
+   <path d="M202 8 L230 14 L202 20z" fill="#B8321A"/><path d="M120 36 L140 41 L120 46z" fill="#D9A21B"/><path d="M284 46 L304 51 L284 56z" fill="#137C86"/>
+   <!-- hull facets -->
+   <path d="M30 226 L360 222 L332 280 L70 284z" fill="#7A5A3C"/>
+   <path d="M30 226 L360 222 L354 236 L38 240z" fill="#96680F"/>
+   <path d="M70 284 L332 280 L340 262 L56 266z" fill="#5B4A4E"/>
+   <path d="M30 226 L14 206 L60 214 L64 226z" fill="#7A5A3C"/>
+   <path d="M330 222 L376 200 L372 212 L352 238z" fill="#5B4A4E"/>
+   <path d="M44 240 L354 236" stroke="#D9A21B" stroke-width="2"/>
+   <!-- gunports -->
+   <g fill="#1F2A2E" stroke="none"><rect x="90" y="246" width="12" height="9"/><rect x="130" y="246" width="12" height="9"/><rect x="170" y="245" width="12" height="9"/><rect x="210" y="245" width="12" height="9"/><rect x="250" y="244" width="12" height="9"/><rect x="290" y="244" width="12" height="9"/></g>
+   <!-- stern lantern + figurehead -->
+   <path d="M18 196h10v12H18z" fill="#D9A21B"/><path d="M366 196 L384 190 L378 204z" fill="#D9A21B"/>
+  </g>
+  <!-- waterline foam -->
+  <path d="M60 282 q20 -6 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0" fill="none" stroke="#FBF7EE" stroke-width="3" stroke-linecap="round"/>
+ </symbol>
+ <!-- reflection: flipped faded ship -->
+ <symbol id="shipRef" viewBox="0 0 400 320"><g transform="matrix(1 0 0 -1 0 568)" opacity=".22"><use href="#ship"/></g></symbol>
+ <symbol id="islet" viewBox="0 0 200 60"><path d="M0 50 Q40 20 80 30 Q120 10 200 48z" fill="#E8D6A8" stroke="#1F2A2E" stroke-width="1.5"/><path d="M60 30 l6 -26 l4 26M66 4 l-14 6 M66 4 l14 4" stroke="#4F7A3A" stroke-width="3" fill="none"/></symbol>
+ <symbol id="gull" viewBox="0 0 20 8"><path d="M0 6 Q5 0 10 6 Q15 0 20 6" fill="none" stroke="#1F2A2E" stroke-width="1.5"/></symbol>
+ <!-- mode icons -->
+ <symbol id="i-quick" viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" fill="none" stroke="#8A6A1F" stroke-width="2"/><path d="M14 6 L17 14 L14 22 L11 14z" fill="#1F2A2E"/></symbol>
+ <symbol id="i-ppo" viewBox="0 0 28 28"><path d="M4 22 L14 4 L24 22z" fill="none" stroke="#8A6A1F" stroke-width="2"/><circle cx="14" cy="16" r="3" fill="#1E5A66"/></symbol>
+ <symbol id="i-dqn" viewBox="0 0 28 28"><rect x="5" y="5" width="18" height="18" fill="none" stroke="#8A6A1F" stroke-width="2" transform="rotate(45 14 14)"/><circle cx="14" cy="14" r="3" fill="#1E5A66"/></symbol>
+ <symbol id="i-four" viewBox="0 0 28 28"><circle cx="8" cy="8" r="4" fill="#D9A21B"/><circle cx="20" cy="8" r="4" fill="#137C86"/><circle cx="8" cy="20" r="4" fill="#B8321A"/><circle cx="20" cy="20" r="4" fill="#3A2F7A"/></symbol>
+ <symbol id="i-watch" viewBox="0 0 28 28"><path d="M3 14 Q14 3 25 14 Q14 25 3 14z" fill="none" stroke="#8A6A1F" stroke-width="2"/><circle cx="14" cy="14" r="4" fill="#1F2A2E"/></symbol>
+</defs>
+</svg>
+
+<template id="modes"><ul class="modes">
+ <li class="on"><svg><use href="#i-quick"/></svg><div><b>Quick match</b><span>You against one trained agent, picked for you</span></div><kbd>1</kbd></li>
+ <li><svg><use href="#i-ppo"/></svg><div><b>vs PPO</b><span>2 players only</span></div><kbd>2</kbd></li>
+ <li><svg><use href="#i-dqn"/></svg><div><b>vs DQN</b><span>2 players only</span></div><kbd>3</kbd></li>
+ <li><svg><use href="#i-four"/></svg><div><b>Table of 4</b><span>You and three seats</span></div><kbd>4</kbd></li>
+ <li><svg><use href="#i-watch"/></svg><div><b>Watch bots</b><span>Agents play, you spectate</span></div><kbd>5</kbd></li>
+</ul><button class="cta">Set sail</button><div class="foot"><span>Enter to start</span><span>Menu: Esc</span></div></template>
+
+<main class="doc">
+<h1>Start screen: three compositions</h1>
+<p>A low-poly ship hero in the lagoon at dusk, behind the game-mode panel. Mode copy carries no numbers; win rates appear only on the game-over screen with their table size. The hero is a still SVG here; in the build it is procedural geometry (about 3 draw calls). Desktop-only pointer parallax moves the ship layer a few pixels.</p>
+
+<section class="opt"><h2>A. Ship broadside, panel on the right</h2>
+<p class="why">Ship takes the left two thirds at full length, panel docks right like a chart table. Phone: ship fills the top half, panel is a bottom sheet. Clearest split, nothing overlaps the ship's sails.</p>
+<div class="row">
+ <div><p class="label">PHONE 390x844</p><div class="frame phone">
+  <svg class="scene" viewBox="0 0 390 844" preserveAspectRatio="none"><rect width="390" height="300" fill="url(#sky)"/><rect y="300" width="390" height="544" fill="url(#sea)"/><circle cx="300" cy="250" r="34" fill="#FFF4E0" opacity=".8"/><use href="#islet" x="250" y="270" width="150" height="45"/><use href="#ship" x="5" y="96" width="380" height="304"/><use href="#shipRef" x="5" y="96" width="380" height="304"/><use href="#gull" x="60" y="80" width="20" height="8"/><use href="#gull" x="90" y="60" width="14" height="6"/></svg>
+  <div class="panel compact" style="left:12px;right:12px;bottom:12px;padding:16px"><h1>Saltmarket</h1><div class="sub">An island trading game</div><div class="slot"></div></div>
+ </div></div>
+ <div><p class="label">DESKTOP 1440x900</p><div class="frame desk">
+  <svg class="scene" viewBox="0 0 1440 900" preserveAspectRatio="none"><rect width="1440" height="470" fill="url(#sky)"/><rect y="470" width="1440" height="430" fill="url(#sea)"/><circle cx="820" cy="400" r="70" fill="#FFF4E0" opacity=".8"/><use href="#islet" x="40" y="420" width="260" height="78"/><use href="#islet" x="760" y="440" width="180" height="54"/><use href="#ship" x="70" y="150" width="840" height="672"/><use href="#shipRef" x="70" y="150" width="840" height="672"/><use href="#gull" x="200" y="120" width="26" height="10"/><use href="#gull" x="250" y="90" width="18" height="7"/></svg>
+  <div class="panel" style="right:64px;top:110px;width:400px"><h1>Saltmarket</h1><div class="sub">An island trading game</div><div class="rule"></div><div class="slot"></div></div>
+ </div></div>
+</div></section>
+
+<section class="opt"><h2>B. Ship bow-on, centred, panel below</h2>
+<p class="why">Ship sails straight at the viewer through the lagoon mouth between two islets; title sits on the sky, panel is a wide card under the hull. Most cinematic; on desktop the mode list becomes a row of five cards.</p>
+<div class="row">
+ <div><p class="label">PHONE 390x844</p><div class="frame phone">
+  <svg class="scene" viewBox="0 0 390 844" preserveAspectRatio="none"><rect width="390" height="330" fill="url(#sky)"/><rect y="330" width="390" height="514" fill="url(#lagoon)"/><use href="#islet" x="-30" y="300" width="160" height="48"/><use href="#islet" x="270" y="300" width="160" height="48" transform="translate(660 0) scale(-1 1)"/><use href="#ship" x="95" y="150" width="200" height="200"/><use href="#shipRef" x="95" y="150" width="200" height="200"/></svg>
+  <div style="position:absolute;top:40px;left:0;right:0;text-align:center;font:700 39px/44px var(--display);letter-spacing:.08em;color:var(--ink)">Saltmarket</div>
+  <div class="panel compact" style="left:12px;right:12px;bottom:12px;padding:16px"><div class="slot"></div></div>
+ </div></div>
+ <div><p class="label">DESKTOP 1440x900</p><div class="frame desk">
+  <svg class="scene" viewBox="0 0 1440 900" preserveAspectRatio="none"><rect width="1440" height="440" fill="url(#sky)"/><rect y="440" width="1440" height="460" fill="url(#lagoon)"/><use href="#islet" x="120" y="390" width="360" height="108"/><use href="#islet" x="960" y="390" width="360" height="108"/><use href="#ship" x="520" y="80" width="400" height="400"/><use href="#shipRef" x="520" y="80" width="400" height="400"/><use href="#gull" x="420" y="140" width="26" height="10"/></svg>
+  <div style="position:absolute;top:36px;left:0;right:0;text-align:center;font:700 49px/52px var(--display);letter-spacing:.1em">Saltmarket</div>
+  <div class="panel wide" style="left:120px;right:120px;bottom:48px"><div class="slot"></div></div>
+ </div></div>
+</div></section>
+
+<section class="opt"><h2>C. Night harbour, ship at anchor, ledger panel left</h2>
+<p class="why">Night palette: ship at anchor with lit stern lantern, moon and stars, panel styled as a bound ledger page on the left. Most atmospheric and previews wow gap 1 (night). Risk: dark scene behind paper panel feels heavier.</p>
+<div class="row">
+ <div><p class="label">PHONE 390x844</p><div class="frame phone" style="background:var(--night)">
+  <svg class="scene" viewBox="0 0 390 844" preserveAspectRatio="none"><rect width="390" height="844" fill="#16232B"/><rect y="330" width="390" height="514" fill="#1B3A44"/><circle cx="310" cy="90" r="26" fill="#8FA8C8"/><g fill="#EDE3CF"><circle cx="40" cy="60" r="1.5"/><circle cx="120" cy="30" r="1"/><circle cx="200" cy="80" r="1.5"/><circle cx="250" cy="40" r="1"/><circle cx="80" cy="140" r="1"/></g><use href="#ship" x="40" y="120" width="310" height="248" opacity=".9"/><use href="#shipRef" x="40" y="120" width="310" height="248"/><circle cx="58" cy="282" r="14" fill="#D9A21B" opacity=".3"/></svg>
+  <div class="panel compact" style="left:12px;right:12px;bottom:12px;padding:16px"><h1>Saltmarket</h1><div class="sub">An island trading game</div><div class="slot"></div></div>
+ </div></div>
+ <div><p class="label">DESKTOP 1440x900</p><div class="frame desk" style="background:var(--night)">
+  <svg class="scene" viewBox="0 0 1440 900" preserveAspectRatio="none"><rect width="1440" height="900" fill="#16232B"/><rect y="500" width="1440" height="400" fill="#1B3A44"/><circle cx="1240" cy="140" r="50" fill="#8FA8C8"/><g fill="#EDE3CF"><circle cx="700" cy="60" r="1.5"/><circle cx="800" cy="120" r="1"/><circle cx="960" cy="40" r="1.5"/><circle cx="1100" cy="250" r="1"/><circle cx="1350" cy="300" r="1.5"/><circle cx="620" cy="200" r="1"/></g><use href="#islet" x="1120" y="470" width="300" height="90"/><use href="#ship" x="560" y="180" width="700" height="560"/><use href="#shipRef" x="560" y="180" width="700" height="560"/><circle cx="600" cy="420" r="40" fill="#D9A21B" opacity=".25"/></svg>
+  <div class="panel" style="left:64px;top:90px;bottom:90px;width:420px;border-left:10px solid var(--driftwood,#7A5A3C)"><h1>Saltmarket</h1><div class="sub">An island trading game</div><div class="rule"></div><div class="slot"></div></div>
+ </div></div>
+</div></section>
+</main>
+<script>
+// Fill each panel slot with the shared mode list; option B desktop shows five cards in a row.
+const t=document.getElementById('modes');
+document.querySelectorAll('.slot').forEach(s=>{s.appendChild(t.content.cloneNode(true));
+ if(s.parentElement.classList.contains('wide')){const u=s.querySelector('.modes');u.style.gridTemplateColumns='repeat(5,1fr)';
+  u.querySelectorAll('li').forEach(li=>{li.style.gridTemplateColumns='1fr';li.style.textAlign='center';li.style.justifyItems='center'});}});
+</script>
+</body>
+</html>

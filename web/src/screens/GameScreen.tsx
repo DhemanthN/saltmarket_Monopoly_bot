@@ -8,6 +8,7 @@ import { anyModalOpen, subscribeModal } from "../world/cameraBus";
 import { prefersReducedMotion, useQualityChoice } from "../world/quality";
 import { WorldScene } from "../world/WorldScene";
 import { LOAD_CAPTION } from "./loadCaption";
+import { LoadingChart } from "./LoadingChart";
 import { RuntimeTrouble } from "./RuntimeTrouble";
 import styles from "./GameScreen.module.css";
 
@@ -88,6 +89,7 @@ function Game() {
   const sheetInset = useSheetInset(shownDecision !== null);
   const [quality, setQuality] = useQualityChoice();
   const modalOpen = useSyncExternalStore(subscribeModal, anyModalOpen);
+  const [loadingDone, setLoadingDone] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(prefersReducedMotion);
 
   return (
@@ -126,13 +128,14 @@ function Game() {
             />
           </div>
         </>
-      ) : (
+      ) : null}
+      {ready && loadingDone ? null : (
         <>
-          <AtollSilhouette progress={load.fraction} caption={LOAD_CAPTION[load.phase]} />
+          <LoadingChart phase={load.phase} ready={ready} onDone={() => setLoadingDone(true)} />
           <p className="visually-hidden" role="status">
             {LOAD_CAPTION[load.phase]}
           </p>
-          {trouble ? null : (
+          {trouble || ready ? null : (
             <Button variant="quiet" className={styles.back} onClick={leave}>
               Back to the start
             </Button>

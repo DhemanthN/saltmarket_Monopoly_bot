@@ -8,6 +8,7 @@ import { CoinCarts } from "./CoinCarts";
 import { Sky } from "./Sky";
 import { Signboards } from "./Signboards";
 import { Atoll } from "./Atoll";
+import { followSeatFor } from "./follow";
 import { Pieces } from "./Pieces";
 import { paletteTexture } from "./palette";
 import { DEV_PERF, prefersReducedMotion, stepTier, tierSettings, type Tier } from "./quality";
@@ -122,11 +123,7 @@ export function WorldScene({ state, seatKinds, tierOverride = null, onViewChange
   const [view, setView] = useState<CameraView>("street");
   const sun = sunForTurn(state.turn);
   const texture = paletteTexture(sun.mood);
-  const human = seatKinds.indexOf("human");
-  // Follow the winner once there is one, else the human while still playing, else the first
-  // seat still playing, so the camera never ends on a bankrupt seat's empty street.
-  const firstActive = Math.max(0, state.bankrupt.findIndex((b) => !b));
-  const followSeat = state.winner ?? (human !== -1 && !state.bankrupt[human] ? human : firstActive);
+  const followSeat = followSeatFor(state, seatKinds);
   const shadows = settings.shadowMapSize !== null;
 
   useEffect(() => {

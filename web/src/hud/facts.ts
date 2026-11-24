@@ -1,7 +1,7 @@
 import type { AgentName } from "../contract/types";
 import { RESULTS_FACTS, type ResultsFact } from "./resultsFacts";
 
-export const RESULTS_URL = "https://github.com/DhemanthN/saltmarket-ai/blob/main/RESULTS.md";
+export const RESULTS_URL = "https://github.com/DhemanthN/saltmarket_Monopoly_bot/blob/main/RESULTS.md";
 
 /** The measured win rate for this agent at this table size, or null when `results/` has none. */
 export function factFor(agent: AgentName, players: number): ResultsFact | null {

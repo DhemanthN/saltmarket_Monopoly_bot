@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "runtime:assets": "node scripts/fetch-pyodide.mjs && python ../scripts/build_web_runtime.py",
+    "runtime:assets": "node scripts/fetch-pyodide.mjs && node scripts/build-runtime.mjs",
     "predev": "npm run runtime:assets",
     "dev": "vite",
     "prebuild": "npm run runtime:assets",

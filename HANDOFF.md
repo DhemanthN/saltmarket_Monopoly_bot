@@ -300,7 +300,7 @@ Nothing. Version 2.0 is finished. See "Session 4" at the top.
   specific existing game, so the owner approved an original game with the same kinds
   of mechanics. See the originality rule in `CLAUDE.md`.
 - **Name and theme:** Saltmarket, an island-trading game. Package `saltmarket`, repo
-  `saltmarket-ai`. The local folder stays `monopoly-ai` unless the owner renames it.
+  `saltmarket_Monopoly_bot`. The local folder stays `monopoly-ai` unless the owner renames it.
 - **Terms:** Brig is the jail, Press Gang sends you there, Calm Waters is the rest
   space, depots are houses, ports are hotels, Tide and Ledger are the card decks.
 - **Sanity check:** an exact Markov chain landing distribution replaces the comparison

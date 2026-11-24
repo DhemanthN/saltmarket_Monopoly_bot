@@ -26,6 +26,8 @@ interface Props {
   tierOverride?: Tier | null;
   /** Called when the camera view changes, so a HUD can mirror it. */
   onViewChange?: (view: CameraView) => void;
+  /** Pixels at the bottom of the screen covered by the HUD (the mobile decision sheet). */
+  bottomInset?: number;
 }
 
 /**
@@ -115,7 +117,7 @@ function PerfProbe({ tier, dpr }: { tier: Tier; dpr: number }) {
 }
 
 /** The 3D atoll. It renders a `WorldState` and never reads events. */
-export function WorldScene({ state, seatKinds, tierOverride = null, onViewChange }: Props) {
+export function WorldScene({ state, seatKinds, tierOverride = null, onViewChange, bottomInset = 0 }: Props) {
   const reducedMotion = useMemo(() => prefersReducedMotion(), []);
   const [autoTier, setAutoTier] = useState<Tier>(reducedMotion ? "low" : "medium");
   const tier = tierOverride ?? autoTier;
@@ -153,7 +155,7 @@ export function WorldScene({ state, seatKinds, tierOverride = null, onViewChange
           onFallback={() => setAutoTier("low")}
         />
         <Lights turn={state.turn} boardVersion={state.boardVersion} shadowMapSize={settings.shadowMapSize} />
-        <CameraRig view={view} followSeat={followSeat} followSpace={state.position[followSeat] ?? 0} reducedMotion={reducedMotion} />
+        <CameraRig view={view} followSeat={followSeat} followSpace={state.position[followSeat] ?? 0} reducedMotion={reducedMotion} bottomInset={bottomInset} />
         <Sky sky={sun.sky} mood={sun.mood} texture={texture} />
         <Atoll texture={texture} shadows={shadows} seatCount={seatKinds.length} chart={view === "chart"} />
         <Signboards state={state} fromSpace={state.position[followSeat] ?? 0} street={view === "street"} />

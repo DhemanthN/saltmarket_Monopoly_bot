@@ -29,6 +29,8 @@ function signText(state: WorldState, index: number): string | undefined {
 /** A sign is shown only while its anchor sits inside this share of the frame on each side. */
 const SAFE_X = 0.8;
 const SAFE_Y = 0.8;
+/** Smallest gap between a signboard and the side of the screen. */
+const EDGE_PX = 8;
 
 /**
  * World-anchored signboards (DESIGN.md): in street view, the spaces just ahead of the followed
@@ -39,6 +41,7 @@ const SAFE_Y = 0.8;
 export function Signboards({ state, fromSpace, street }: { state: WorldState; fromSpace: number; street: boolean }) {
   const portrait = useThree((s) => s.size.width < s.size.height);
   const camera = useThree((s) => s.camera);
+  const width = useThree((s) => s.size.width);
   const count = portrait ? AHEAD_PORTRAIT : AHEAD;
   const ahead = useMemo(
     () => (street ? Array.from({ length: count }, (_, k) => (fromSpace + 1 + k) % spaces.length) : []),
@@ -64,6 +67,13 @@ export function Signboards({ state, fromSpace, street }: { state: WorldState; fr
       ndc.copy(a).project(camera);
       const inside = ndc.z < 1 && Math.abs(ndc.x) <= SAFE_X && Math.abs(ndc.y) <= SAFE_Y;
       el.classList.toggle(styles.hidden, !inside);
+      // Slide the board (not its leader) back inside the frame when it would cross the edge.
+      const board = el.firstElementChild as HTMLElement | null;
+      if (!board) return;
+      const x = ((ndc.x + 1) / 2) * width;
+      const half = board.offsetWidth / 2;
+      const shift = Math.min(0, width - EDGE_PX - (x + half)) + Math.max(0, EDGE_PX - (x - half));
+      board.style.translate = shift ? `${Math.round(shift)}px 0` : "";
     });
   });
 

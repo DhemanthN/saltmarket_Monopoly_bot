@@ -50,3 +50,20 @@
   gap: var(--space-3);
   margin-top: var(--space-2);
 }
+
+/* Phones: the decision sheet already takes the bottom half, so the tip stays short. */
+@media (max-width: 600px) {
+  .card {
+    gap: var(--space-1);
+    padding: var(--space-3);
+  }
+
+  .body {
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
+  }
+
+  .actions {
+    margin-top: var(--space-1);
+  }
+}

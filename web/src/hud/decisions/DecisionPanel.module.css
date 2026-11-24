@@ -252,7 +252,8 @@
 
 .bidChips {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
+  /* One row for every bid, as DESIGN.md asks; --n is the number of bids. */
+  grid-template-columns: repeat(var(--n, 7), minmax(0, 1fr));
   gap: var(--space-1);
 }
 
@@ -332,7 +333,6 @@ li.badge {
   }
 
   .bidChips {
-    grid-template-columns: repeat(var(--n, 5), 1fr);
     gap: var(--space-1);
   }
 

@@ -1,4 +1,4 @@
-import { Component, type ReactNode } from "react";
+import { Component, useEffect, useState, type ReactNode } from "react";
 import { HudView } from "../hud/HudView";
 import { useGameStore } from "../store/gameStore";
 import { AtollSilhouette } from "../world/AtollSilhouette";
@@ -35,6 +35,35 @@ class TroubleBoundary extends Component<{ children: ReactNode; onLeave: () => vo
   }
 }
 
+/** Width at which the decision panel becomes a full-width bottom sheet (DecisionPanel.module.css). */
+const SHEET_QUERY = "(max-width: 600px)";
+
+/**
+ * How many pixels the mobile decision sheet covers at the bottom of the screen, so the camera
+ * can keep the player's piece above it. Zero on wide screens or with no decision open.
+ */
+function useSheetInset(open: boolean): number {
+  const [inset, setInset] = useState(0);
+  useEffect(() => {
+    const el = open ? document.querySelector<HTMLElement>('[data-coach="decision"]') : null;
+    if (!el) return;
+    const measure = () =>
+      setInset(window.matchMedia(SHEET_QUERY).matches ? Math.max(0, window.innerHeight - el.getBoundingClientRect().top) : 0);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    // The sheet slides in, so measure again once it has settled.
+    const settle = window.setTimeout(measure, 350);
+    window.addEventListener("resize", measure);
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(settle);
+      window.removeEventListener("resize", measure);
+    };
+  }, [open]);
+  return open ? inset : 0;
+}
+
 /** A game in progress: the atoll being built while the engine loads, then the world and the HUD. */
 function Game() {
   const config = useGameStore((s) => s.config)!;
@@ -48,18 +77,20 @@ function Game() {
   const leave = useGameStore((s) => s.leave);
   const retry = useGameStore((s) => s.retry);
   const ready = load.phase === "ready";
+  const shownDecision = trouble ? null : decision;
+  const sheetInset = useSheetInset(shownDecision !== null);
 
   return (
     <main style={screenStyle}>
       {ready ? (
         <>
           <div inert={trouble !== null} style={{ display: "contents" }}>
-            <WorldScene state={world} seatKinds={config.seats} />
+            <WorldScene state={world} seatKinds={config.seats} bottomInset={sheetInset} />
             <HudView
               hud={hud}
               names={names}
               seats={config.seats}
-              decision={trouble ? null : decision}
+              decision={shownDecision}
               gameOver={hud.winner !== null}
               onSubmit={submit}
               onPlayAgain={leave}

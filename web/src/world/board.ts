@@ -46,3 +46,6 @@ export function ringPosition(index: number, count = spaces.length): { x: number;
   const angle = Math.PI / 2 - (index / count) * Math.PI * 2;
   return { x: Math.cos(angle) * RING_RADIUS, z: Math.sin(angle) * RING_RADIUS, angle };
 }
+
+/** Index of The Brig, where `brig_in` sends a piece. */
+export const BRIG_SPACE = spaces.findIndex((s) => s.kind === "brig");

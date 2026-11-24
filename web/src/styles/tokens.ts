@@ -91,6 +91,21 @@ export const sunKeyframes = {
 
 export type Mood = "day" | "night";
 
+/**
+ * World-only colours (not UI tokens, so not in tokens.css). Sea and lagoon differ from the
+ * sky so the horizon reads as a line, not a gradient. `white` is the tint cell: instanced
+ * sails sample it and take the owner colour from their instance colour.
+ */
+export const worldColors = {
+  sky: "#EBC9A0",
+  sea: "#2C6E7A",
+  lagoon: "#6FA3A8",
+  sand: "#E2CFA6",
+  road: "#B9A98A",
+  basalt: "#3A3436",
+  white: "#FFFFFF",
+} as const;
+
 /** WCAG 2.x relative luminance of a `#RRGGBB` colour. */
 export function relativeLuminance(hex: string): number {
   const [r, g, b] = parseHex(hex).map((c) => {
@@ -131,6 +146,7 @@ const cellEntries: readonly (readonly [string, string])[] = [
   ["ok", palette.ok],
   ...Object.entries(districts).map(([k, v]) => [`district.${k}`, v] as const),
   ...Object.entries(seats).map(([k, v]) => [`seat.${k}`, v] as const),
+  ...Object.entries(worldColors).map(([k, v]) => [`world.${k}`, v] as const),
 ];
 
 /** Every colour a world mesh may use, in cell order. A mesh maps its UVs into one cell. */

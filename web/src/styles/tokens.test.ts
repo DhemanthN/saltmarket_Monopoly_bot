@@ -7,6 +7,7 @@ import {
   contrastRatio,
   districts,
   motion,
+  ornament,
   palette,
   paletteCells,
   seats,
@@ -63,6 +64,18 @@ describe("tokens.ts matches tokens.css", () => {
       expect(cssVar(`leading-${step.name}`)).toBe(`${step.line}px`);
     }
   });
+});
+
+describe("lit brass ornament", () => {
+  it("matches tokens.css", () => {
+    expect(cssVar("brass-lit").toUpperCase()).toBe(ornament.brassLit);
+  });
+
+  it("is for ornament on dark chrome only: fine on night-panel, too faint on paper", () => {
+    expect(contrastRatio(ornament.brassLit, palette.nightPanel)).toBeGreaterThanOrEqual(3);
+    expect(contrastRatio(ornament.brassLit, palette.paper)).toBeLessThan(3);
+  });
+});
 });
 
 describe("contrast", () => {

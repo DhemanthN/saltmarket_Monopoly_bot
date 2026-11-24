@@ -19,6 +19,9 @@ export const palette = {
   nightText: "#EDE3CF",
 } as const;
 
+/** Ornament on dark chrome only (brackets, rules). Ornament only, never text (owner rule); too faint on paper. */
+export const ornament = { brassLit: "#C9A24A" } as const;
+
 export const districts = {
   kelp: "#4F7A3A",
   reef: "#B5523B",

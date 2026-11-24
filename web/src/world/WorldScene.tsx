@@ -8,7 +8,9 @@ import { Sky } from "./Sky";
 import { Signboards } from "./Signboards";
 import { Atoll } from "./Atoll";
 import { followSeatFor } from "./follow";
+import { CursorFx } from "./CursorFx";
 import { Pieces } from "./Pieces";
+import { SpyglassCursor } from "./SpyglassCursor";
 import { paletteTexture } from "./palette";
 import { DEV_PERF, isMobile, prefersReducedMotion, startingTier, tierSettings, TierGovernor, type Tier } from "./quality";
 import type { WorldState } from "./reduceEvents";
@@ -232,6 +234,7 @@ export function WorldScene({ state, seatKinds, tierOverride = null, controls, bo
         <Signboards state={state} fromSpace={state.position[followSeat] ?? 0} street={view === "street"} seatKinds={seatKinds} />
         <Buildings state={state} texture={texture} reducedMotion={reducedMotion} shadows={shadows} fullOutlines={settings.fullOutlines} />
         <Pieces state={state} seatKinds={seatKinds} texture={texture} reducedMotion={reducedMotion} outlines={settings.fullOutlines} />
+        <CursorFx />
         <CoinCarts rent={state.lastRent} texture={texture} reducedMotion={reducedMotion} />
         {settings.effects && view === "chart" ? (
           <Suspense fallback={null}>
@@ -240,6 +243,7 @@ export function WorldScene({ state, seatKinds, tierOverride = null, controls, bo
         ) : null}
         {DEV_PERF ? <PerfProbe tier={tier} dpr={settings.dpr} /> : null}
       </Canvas>
+      <SpyglassCursor />
       <div className={styles.corner}>
         {controls}
         <button

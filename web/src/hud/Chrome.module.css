@@ -1,0 +1,154 @@
+/* Chart-table frame (mockup option A). Dark chrome in both moods; lit brass is ornament only. */
+.chrome {
+  position: absolute;
+  inset: 0;
+  z-index: 150;
+  pointer-events: none;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgb(10 20 26 / 0.5));
+}
+
+.corner {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  color: var(--brass-lit);
+}
+
+.bracket {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+}
+
+.tl { left: 8px; top: 8px; }
+.tr { right: 8px; top: 8px; transform: scaleX(-1); }
+.bl { left: 8px; bottom: 8px; transform: scaleY(-1); }
+.br { right: 8px; bottom: 8px; transform: scale(-1); }
+
+.compass,
+.tele {
+  position: absolute;
+  background: var(--night-panel);
+  color: var(--night-text);
+  border: 1px solid var(--brass-lit);
+  box-shadow: inset 0 0 0 2px var(--night-panel), inset 0 0 0 3px rgb(201 162 74 / 0.45);
+}
+
+.compass {
+  display: flex;
+  left: 50%;
+  top: 12px;
+  width: min(420px, 34vw);
+  height: 44px;
+  transform: translateX(-50%);
+}
+
+.reading {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 84px;
+  font-weight: 700;
+  border-right: 1px solid rgb(201 162 74 / 0.5);
+}
+
+.bar {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.bar svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.major { stroke: var(--brass-lit); stroke-width: 2; }
+.minor { stroke: #BFB59E; stroke-width: 1; }
+.needle { stroke: var(--sailcloth); stroke-width: 1; opacity: 0.5; }
+.pointer { fill: var(--sailcloth); }
+.cardinal { font: 700 14px var(--font-mono); fill: var(--brass-lit); }
+.point { font: 700 11px var(--font-mono); fill: var(--night-text); }
+.degree { font: 400 9px var(--font-mono); fill: #BFB59E; }
+
+.tele {
+  left: 44px;
+  top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 34px;
+  margin: 0;
+  padding: 0 14px;
+  white-space: nowrap;
+}
+
+.tele i {
+  font-style: normal;
+  color: #BFB59E;
+}
+
+.tele b {
+  color: #fff;
+  font-weight: 700;
+}
+
+/* Phones: the ledger strip owns the top edge, so the bar and readout sit below it and the
+   bottom brackets give way to the decision sheet. */
+@media (max-width: 600px) {
+  .compass {
+    left: 12px;
+    right: 132px;
+    top: 58px;
+    width: auto;
+    height: 40px;
+    transform: none;
+  }
+
+  .reading {
+    width: 70px;
+    font-size: 12px;
+  }
+
+  .tele {
+    left: 12px;
+    top: 104px;
+    height: 28px;
+    gap: 8px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  .cash {
+    display: none;
+  }
+
+  .bl,
+  .br,
+  .tl,
+  .tr {
+    display: none;
+  }
+}
+
+@media (max-width: 1100px) and (min-width: 601px) {
+  .tele {
+    left: 24px;
+  }
+}

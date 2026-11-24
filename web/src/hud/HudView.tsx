@@ -1,12 +1,10 @@
-import { useEffect, useState } from "react";
-import type { AgentName, Decision, GameEvent, GameSession, SessionConfig } from "../contract/types";
+import type { AgentName, Decision } from "../contract/types";
 import { CoachMarks } from "./CoachMarks";
-import { seatNames } from "./format";
 import { DecisionPanel } from "./decisions/DecisionPanel";
 import { GameOver } from "./GameOver";
 import { LanternDock } from "./Lantern";
 import { LedgerRail } from "./LedgerRail";
-import { applyEvent, initialHudState, type HudState } from "./state";
+import type { HudState } from "./state";
 
 export interface HudViewProps {
   hud: HudState;
@@ -37,49 +35,5 @@ export function HudView({ hud, names, seats, decision, gameOver, onSubmit, onPla
       {coach && decision && decision.seat === human ? <CoachMarks /> : null}
       {gameOver ? <GameOver hud={hud} names={names} agents={agents} onPlayAgain={onPlayAgain} /> : null}
     </>
-  );
-}
-
-export interface SessionHudProps {
-  session: GameSession;
-  config: SessionConfig;
-  onPlayAgain: () => void;
-}
-
-/** Binds `HudView` to a running `GameSession`: replays its log, then follows new events and decisions. */
-export function SessionHud({ session, config, onPlayAgain }: SessionHudProps) {
-  const names = seatNames(config.seats);
-  const [hud, setHud] = useState<HudState>(() =>
-    session.events().reduce((s, e) => applyEvent(s, e, names), initialHudState(names.length)),
-  );
-  const [decision, setDecision] = useState<Decision | null>(() => session.current());
-
-  useEffect(() => {
-    const offEvent = session.onEvent((e: GameEvent) => setHud((s) => applyEvent(s, e, names)));
-    const offDecision = session.onDecision(setDecision);
-    return () => {
-      offEvent();
-      offDecision();
-    };
-    // `names` is derived from `config`, which is fixed for the life of a session.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session]);
-
-  const submit = (id: number) => {
-    setDecision(null);
-    void session.submit(id);
-  };
-
-  return (
-    <HudView
-      hud={hud}
-      names={names}
-      seats={config.seats}
-      decision={decision}
-      gameOver={hud.winner !== null}
-      onSubmit={submit}
-      onPlayAgain={onPlayAgain}
-      coach
-    />
   );
 }

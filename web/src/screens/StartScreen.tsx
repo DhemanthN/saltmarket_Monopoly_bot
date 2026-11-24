@@ -18,9 +18,12 @@ const OPPONENT_LABEL: Record<Opponent, string> = {
 interface StartScreenProps {
   /** Called with the chosen table. Absent until the game engine is connected. */
   onStart?: (config: SessionConfig) => void;
+  /** Engine load progress, drawn as the atoll rising behind the panel. */
+  progress?: number;
+  caption?: string;
 }
 
-export function StartScreen({ onStart }: StartScreenProps) {
+export function StartScreen({ onStart, progress, caption }: StartScreenProps) {
   const toast = useToast();
   const [opponent, setOpponent] = useState<Opponent>("ppo");
   const [size, setSize] = useState<TableSize>(2);
@@ -41,7 +44,7 @@ export function StartScreen({ onStart }: StartScreenProps) {
 
   return (
     <main className={styles.screen}>
-      <AtollSilhouette />
+      <AtollSilhouette progress={progress} caption={caption} />
       <Panel floating className={styles.panel} aria-labelledby="start-title">
         <h1 id="start-title" className={styles.title}>
           Saltmarket
